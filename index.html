@@ -366,6 +366,7 @@
       .s-num{font-size:1.6rem}
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -633,6 +634,43 @@
 </div>
 
 <script>
+/* ── ESTRELLAS ANIMADAS ── */
+const starsContainer = document.createElement('div');
+starsContainer.style.position = 'fixed';
+starsContainer.style.inset = '0';
+starsContainer.style.zIndex = '0';
+starsContainer.style.pointerEvents = 'none';
+starsContainer.style.overflow = 'hidden';
+document.body.prepend(starsContainer);
+for (let i = 0; i < 80; i++) {
+  const star = document.createElement('div');
+  const size = Math.random() * 2 + 1;
+  star.style.position = 'absolute';
+  star.style.left = Math.random() * 100 + 'vw';
+  star.style.top = Math.random() * 100 + 'vh';
+  star.style.width = size + 'px';
+  star.style.height = size + 'px';
+  star.style.backgroundColor = '#fff';
+  star.style.borderRadius = '50%';
+  star.style.boxShadow = '0 0 ' + (size*2) + 'px rgba(139, 92, 246, 0.8)';
+  star.style.opacity = Math.random();
+  star.animate([
+    { opacity: 0.1, transform: 'scale(0.8)' },
+    { opacity: 1, transform: 'scale(1.2)' }
+  ], {
+    duration: Math.random() * 3000 + 2000,
+    direction: 'alternate',
+    iterations: Infinity
+  });
+  starsContainer.appendChild(star);
+}
+
+// Asegurar que el contenido principal se muestre encima de las estrellas
+document.getElementById('loginScreen').style.position = 'relative';
+document.getElementById('loginScreen').style.zIndex = '1';
+document.getElementById('app').style.position = 'relative';
+document.getElementById('app').style.zIndex = '1';
+
 /* ══════════════════════════════════════
    CONTRASEÑA — cámbiala aquí ↓
 ══════════════════════════════════════ */
@@ -714,7 +752,7 @@ function showPage(id, btn) {
   });
   document.getElementById('topNav').classList.remove('open');
   window.scrollTo({top:0,behavior:'smooth'});
-  if (id==='descargas') { renderDocs(); document.getElementById('searchInput').value=''; }
+  if (id==='descargas') { renderDocs(true); document.getElementById('searchInput').value=''; }
   if (id==='home') updateHeroStats();
 }
 function toggleNav() { document.getElementById('topNav').classList.toggle('open'); }
@@ -724,35 +762,52 @@ document.addEventListener('click', e => {
   if (nav && !nav.contains(e.target) && hbg && !hbg.contains(e.target)) nav.classList.remove('open');
 });
 
+/* ── SUPABASE INICIALIZACIÓN ── */
+const supabaseUrl = 'https://mvzwipqnzeqvnbkkbshn.supabase.co';
+const supabaseKey = 'sb_publishable_rC_MRTrw45InbL1FcTScKQ_wuR3PiBm';
+let supabase = null;
+try {
+  if (window.supabase) supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+} catch(e) { console.error('Supabase error', e); }
+
 /* ── DOCUMENTOS ── */
-const KEY = 'mos_docs_v3';
+let docsCache = [];
 let currentFilter = 'all';
 let searchQuery   = '';
 
-function getDocs() {
-  try { return JSON.parse(localStorage.getItem(KEY)) || []; }
-  catch(e) { return []; }
-}
-function saveDocs(d) {
-  try { localStorage.setItem(KEY, JSON.stringify(d)); } catch(e) {}
+async function fetchDocs() {
+  if (!supabase) return [];
+  const { data, error } = await supabase.from('documentos').select('*').order('fecha_subida', { ascending: false });
+  if (error) { console.error("Error DB", error); return []; }
+  docsCache = data.map(d => ({
+    id: d.id,
+    type: d.tipo,
+    emoji: d.tipo === 'word' ? '📝' : '📊',
+    titulo: d.titulo,
+    desc: d.descripcion || 'Subido por ' + (d.autor || 'Anónimo'),
+    autor: d.autor || 'Anónimo',
+    file: d.archivo_path,
+    url: d.url_archivo
+  }));
+  return docsCache;
 }
 
-function updateHeroStats() {
-  const docs = getDocs();
-  const w = docs.filter(d=>d.type==='word').length;
-  const e = docs.filter(d=>d.type==='excel').length;
-  document.getElementById('hTotal').textContent = docs.length;
+async function updateHeroStats() {
+  const w = docsCache.filter(d=>d.type==='word').length;
+  const e = docsCache.filter(d=>d.type==='excel').length;
+  document.getElementById('hTotal').textContent = docsCache.length;
   document.getElementById('hWord').textContent  = w;
   document.getElementById('hExcel').textContent = e;
 }
 
 function searchDocs() {
   searchQuery = document.getElementById('searchInput').value.toLowerCase();
-  renderDocs();
+  renderDocs(false);
 }
 
-function renderDocs() {
-  let docs = getDocs();
+async function renderDocs(refetch = true) {
+  if (refetch) await fetchDocs();
+  let docs = docsCache;
   const w = docs.filter(d=>d.type==='word').length;
   const e = docs.filter(d=>d.type==='excel').length;
   document.getElementById('dlAll').textContent   = docs.length;
@@ -770,7 +825,7 @@ function renderDocs() {
   if (!docs.length) {
     grid.innerHTML = `<div class="dl-empty">
       <div class="big">${searchQuery ? '🔍' : '📂'}</div>
-      <p>${searchQuery ? `Sin resultados para "<strong>${searchQuery}</strong>"` : 'Aún no hay documentos.<br>¡Sube el primero!'}</p>
+      <p>${searchQuery ? \`Sin resultados para "<strong>\${searchQuery}</strong>"\` : 'Aún no hay documentos.<br>¡Sube el primero!'}</p>
       ${!searchQuery ? '<button onclick="showPage(\'subir\',null)">Subir archivo →</button>' : ''}
     </div>`;
     return;
@@ -790,8 +845,8 @@ function renderDocs() {
         <div class="doc-author">👤 ${d.autor}</div>
       </div>
       <div class="doc-foot">
-        <a class="btn-dl" href="${d.url}" download="${d.file}">↓ Descargar</a>
-        <button class="btn-del" onclick="deleteDoc('${d.id}')" title="Eliminar">🗑️</button>
+        <a class="btn-dl" href="${d.url}" download>↓ Descargar</a>
+        <button class="btn-del" onclick="deleteDoc('${d.id}', '${d.file}')" title="Eliminar">🗑️</button>
       </div>
     </div>`).join('');
 }
@@ -802,13 +857,17 @@ function filterDl(type, btn) {
   currentFilter = type;
   document.querySelectorAll('.dl-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  renderDocs();
+  renderDocs(false);
 }
 
-function deleteDoc(id) {
+async function deleteDoc(id, filePath) {
   if (!confirm('¿Eliminar este documento? Esta acción no se puede deshacer.')) return;
-  saveDocs(getDocs().filter(d=>d.id!==id));
-  renderDocs(); updateHeroStats();
+  if (supabase) {
+    if (filePath) await supabase.storage.from('documentos').remove([filePath]);
+    await supabase.from('documentos').delete().eq('id', id);
+  }
+  await renderDocs(true);
+  updateHeroStats();
 }
 
 /* ── VISTA PREVIA ── */
@@ -850,7 +909,8 @@ function setFile(f){
   if(f.name.endsWith('.docx')) document.getElementById('upTipo').value='word';
   if(f.name.endsWith('.xlsx')) document.getElementById('upTipo').value='excel';
 }
-function uploadDoc(){
+
+async function uploadDoc(){
   const autor =document.getElementById('upAutor').value.trim();
   const tipo  =document.getElementById('upTipo').value;
   const titulo=document.getElementById('upTitulo').value.trim();
@@ -859,15 +919,44 @@ function uploadDoc(){
   if(!autor) {alert('Escribe el nombre del autor.');return}
   if(!tipo)  {alert('Selecciona el tipo de documento.');return}
   if(!titulo){alert('Escribe un título.');return}
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const doc={id:'u_'+Date.now(),type:tipo,emoji:tipo==='word'?'📝':'📊',titulo,desc:desc||'Subido por '+autor,autor,file:selectedFile.name,url:e.target.result};
-    const docs=getDocs(); docs.push(doc); saveDocs(docs); updateHeroStats();
+  
+  if (!supabase) { alert('La Base de Datos (Supabase) no está conectada. Espera un momento o recarga.'); return; }
+  
+  const btn = document.querySelector('.btn-upload');
+  const oTxt = btn.textContent;
+  btn.textContent = 'Subiendo... ⏳';
+  btn.disabled = true;
+
+  try {
+    // 1. Subir a Storage
+    const ext = selectedFile.name.split('.').pop();
+    const filePath = `docs/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
+    
+    const { error: upErr } = await supabase.storage.from('documentos').upload(filePath, selectedFile);
+    if (upErr) throw upErr;
+    
+    // 2. Obtener URL pública
+    const { data: publicUrlData } = supabase.storage.from('documentos').getPublicUrl(filePath);
+    
+    // 3. Guardar en Base de Datos (Tabla 'documentos')
+    const { error: dbErr } = await supabase.from('documentos').insert([{
+      titulo, descripcion: desc, tipo, autor, archivo_path: filePath, url_archivo: publicUrlData.publicUrl
+    }]);
+    if (dbErr) throw dbErr;
+    
+    await renderDocs(true);
+    updateHeroStats();
+    
     document.getElementById('uploadForm').style.display='none';
     document.getElementById('uploadOk').style.display='block';
-  };
-  reader.readAsDataURL(selectedFile);
+  } catch (err) {
+    alert('Error al subir: ' + err.message);
+  } finally {
+    btn.textContent = oTxt;
+    btn.disabled = false;
+  }
 }
+
 function resetUpload(){
   selectedFile=null;
   ['fileInput','upAutor','upTitulo','upDesc'].forEach(id=>document.getElementById(id).value='');
