@@ -1,1257 +1,898 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ricardo Zelaya — Portafolio MOS 2026</title>
-  <meta name="description" content="Portafolio profesional de Ricardo Zelaya, Especialista en Microsoft Office (MOS) e Inteligencia Artificial.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ricardo Zelaya — Portal MOS 2026</title>
+
+  <!-- ─── FAVICON (inicial RZ en canvas) ─── -->
+  <link rel="icon" id="favicon" type="image/png"/>
+
+  <!-- ─── META SEO ─── -->
+  <meta name="description" content="Portafolio profesional MOS de Ricardo Zelaya — Especialista en Microsoft Office + IA. El Salvador 2026."/>
+  <meta name="author" content="Ricardo Zelaya"/>
+
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
   <style>
-    body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
-
-    /* Gradient blur navbar effect */
-    .gradient-blur {
-      position: fixed;
-      z-index: 5;
-      inset: 0 0 auto 0;
-      height: 12%;
-      pointer-events: none;
+    /* ══════════════════════════════════════
+       VARIABLES — ESTILO VIOLETA (El estilo de la página)
+    ══════════════════════════════════════ */
+    :root {
+      --gold:#8b5cf6; /* violet-500 */
+      --gold-lt:#a78bfa; /* violet-400 */
+      --gold-dk:#6d28d9; /* violet-700 */
+      --navy:#0a0a12; /* Fondo oscuro principal */
+      --navy2:#12121e; /* Fondo oscuro secundario */
+      --bg:    #0a0a12;
+      --bg2:   #12121e;
+      --card:  #181829;
+      --text:  #f4f4f5; /* zinc-100 */
+      --muted: #a1a1aa; /* zinc-400 */
+      --border:rgba(255,255,255,.1);
+      --shadow:0 8px 32px rgba(0,0,0,.4);
+      --r:16px; --rs:10px;
+      --ease:.3s cubic-bezier(.4,0,.2,1);
     }
-    .gradient-blur > div, .gradient-blur::before, .gradient-blur::after { position: absolute; inset: 0; }
-    .gradient-blur::before { content:""; z-index:1; backdrop-filter:blur(0.5px); mask:linear-gradient(to top,rgba(0,0,0,0) 0%,rgba(0,0,0,1) 12.5%,rgba(0,0,0,1) 25%,rgba(0,0,0,0) 37.5%); }
-    .gradient-blur > div:nth-of-type(1) { z-index:2; backdrop-filter:blur(1px); mask:linear-gradient(to top,rgba(0,0,0,0) 12.5%,rgba(0,0,0,1) 25%,rgba(0,0,0,1) 37.5%,rgba(0,0,0,0) 50%); }
-    .gradient-blur > div:nth-of-type(2) { z-index:3; backdrop-filter:blur(2px); mask:linear-gradient(to top,rgba(0,0,0,0) 25%,rgba(0,0,0,1) 37.5%,rgba(0,0,0,1) 50%,rgba(0,0,0,0) 62.5%); }
-    .gradient-blur > div:nth-of-type(3) { z-index:4; backdrop-filter:blur(4px); mask:linear-gradient(to top,rgba(0,0,0,0) 37.5%,rgba(0,0,0,1) 50%,rgba(0,0,0,1) 62.5%,rgba(0,0,0,0) 75%); }
-    .gradient-blur > div:nth-of-type(4) { z-index:5; backdrop-filter:blur(8px); mask:linear-gradient(to top,rgba(0,0,0,0) 50%,rgba(0,0,0,1) 62.5%,rgba(0,0,0,1) 75%,rgba(0,0,0,0) 87.5%); }
-    .gradient-blur > div:nth-of-type(5) { z-index:6; backdrop-filter:blur(16px); mask:linear-gradient(to top,rgba(0,0,0,0) 62.5%,rgba(0,0,0,1) 75%,rgba(0,0,0,1) 87.5%,rgba(0,0,0,0) 100%); }
-    .gradient-blur > div:nth-of-type(6) { z-index:7; backdrop-filter:blur(32px); mask:linear-gradient(to top,rgba(0,0,0,0) 75%,rgba(0,0,0,1) 87.5%,rgba(0,0,0,1) 100%); }
-    .gradient-blur::after { content:""; z-index:8; backdrop-filter:blur(64px); mask:linear-gradient(to top,rgba(0,0,0,0) 87.5%,rgba(0,0,0,1) 100%); }
+    
+    /* El modo claro ahora es opcional pero se mantiene la estructura */
+    [data-theme="light"] {
+      --bg:    #FAF7F0;
+      --bg2:   #F0EBE0;
+      --card:  #ffffff;
+      --text:  #0D1B2A;
+      --muted: #5A6070;
+      --border:rgba(0,0,0,.07);
+      --shadow:0 4px 24px rgba(13,27,42,.10);
+    }
 
-    /* Shimmer button animation */
-    @keyframes rotate-gradient { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;transition:background var(--ease),color var(--ease)}
 
-    /* Toast notifications */
-    #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-    .toast { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 14px; font-size: 0.875rem; font-weight: 500; color: #fff; backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.4); min-width: 260px; max-width: 340px; pointer-events: auto; transform: translateX(120%); opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    .toast.show { transform: translateX(0); opacity: 1; }
-    .toast-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.1rem; }
-    .toast-success { background: rgba(16, 185, 129, 0.15); border-color: rgba(16,185,129,0.3); }
-    .toast-success .toast-icon { background: rgba(16,185,129,0.2); }
-    .toast-error { background: rgba(239, 68, 68, 0.15); border-color: rgba(239,68,68,0.3); }
-    .toast-error .toast-icon { background: rgba(239,68,68,0.2); }
-    .toast-info { background: rgba(139, 92, 246, 0.15); border-color: rgba(139,92,246,0.3); }
-    .toast-info .toast-icon { background: rgba(139,92,246,0.2); }
-    .toast-loading { background: rgba(99, 102, 241, 0.15); border-color: rgba(99,102,241,0.3); }
-    .toast-loading .toast-icon { background: rgba(99,102,241,0.2); }
-    .toast-progress { height: 3px; border-radius: 2px; margin-top: 8px; background: rgba(255,255,255,0.15); overflow: hidden; }
-    .toast-progress-bar { height: 100%; border-radius: 2px; background: rgba(255,255,255,0.6); transition: width linear; }
-    /* Spinner animation for toast */
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .toast-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    /* ══════════════════════════════════════
+       SPLASH / LOADER
+    ══════════════════════════════════════ */
+    #splash{
+      position:fixed;inset:0;z-index:9999;
+      background:var(--navy);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.25rem;
+      transition:opacity .5s ease;
+    }
+    .splash-logo{
+      width:80px;height:80px;border-radius:50%;
+      background:linear-gradient(135deg,var(--gold),var(--gold-lt));
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:white;
+      animation:pulse 1.2s ease infinite;
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+    }
+    .splash-txt{color:rgba(255,255,255,.6);font-size:.85rem;letter-spacing:.1em;text-transform:uppercase}
+    .splash-bar{width:180px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+    .splash-fill{height:100%;background:var(--gold);border-radius:2px;animation:load 1.2s ease forwards}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+    @keyframes load{from{width:0}to{width:100%}}
 
-    /* File preview modal */
-    #preview-modal { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 16px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
-    #preview-modal.open { opacity: 1; pointer-events: auto; }
-    #preview-modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); }
-    #preview-modal-content { position: relative; z-index: 1; background: #0f1019; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; width: 100%; max-width: 820px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; transform: scale(0.92); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    #preview-modal.open #preview-modal-content { transform: scale(1); }
-    #preview-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    #preview-modal-body { flex: 1; overflow: auto; padding: 20px; min-height: 300px; }
+    /* ══════════════════════════════════════
+       LOGIN
+    ══════════════════════════════════════ */
+    #loginScreen{
+      min-height:100vh;
+      background:linear-gradient(135deg,#06060c,#0a0a12 55%,#12121e);
+      display:none;align-items:center;justify-content:center;padding:1.5rem;
+    }
+    .lc{display:grid;grid-template-columns:1fr 1fr;max-width:860px;width:100%;min-height:520px;border-radius:24px;overflow:hidden;box-shadow:0 32px 90px rgba(0,0,0,.7)}
+    .lc-left{background:linear-gradient(160deg,#6d28d9,#2e1065);padding:3rem 2.5rem;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+    .lc-left::before{content:'';position:absolute;top:-70px;right:-70px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.07)}
+    .lc-left::after{content:'';position:absolute;bottom:-50px;left:-50px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.05)}
+    .lc-badge{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.4rem 1rem;border-radius:100px;margin-bottom:1.4rem}
+    .lc-left h2{font-family:'Playfair Display',serif;color:#fff;font-size:1.7rem;font-weight:700;line-height:1.2;margin-bottom:.9rem}
+    .lc-left h2 em{color:var(--gold-lt);font-style:normal}
+    .lc-left p{color:rgba(255,255,255,.8);font-size:.87rem;line-height:1.7;margin-bottom:1.8rem}
+    .lc-feats{list-style:none;display:flex;flex-direction:column;gap:.55rem;position:relative;z-index:1}
+    .lc-feats li{color:rgba(255,255,255,.9);font-size:.84rem;background:rgba(0,0,0,.2);border-left:3px solid var(--gold-lt);padding:.55rem 1rem;border-radius:6px}
+    .lc-foot{color:rgba(255,255,255,.4);font-size:.7rem;position:relative;z-index:1}
+    .lc-right{background:var(--card);display:flex;align-items:center;justify-content:center;padding:2.5rem 2rem}
+    .lc-form{width:100%;max-width:300px}
+    .lc-ava{width:84px;height:84px;border-radius:50%;overflow:hidden;border:3px solid var(--gold);margin:0 auto 1.2rem;box-shadow:0 4px 20px rgba(139,92,246,.3)}
+    .lc-ava img{width:100%;height:100%;object-fit:cover;object-position:center 18%;display:block}
+    .lc-title{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--text);text-align:center;margin-bottom:.2rem}
+    .lc-sub{font-size:.78rem;color:var(--muted);text-align:center;margin-bottom:1.6rem}
+    .lc-field{margin-bottom:.9rem}
+    .lc-field label{display:block;font-size:.7rem;font-weight:600;color:var(--muted);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.05em}
+    .lc-field input{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:var(--rs);padding:.7rem 1rem;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--text);outline:none;transition:var(--ease)}
+    .lc-field input:focus{border-color:var(--gold);background:rgba(255,255,255,.1)}
+    .lc-field input[readonly]{color:var(--muted);cursor:default}
+    .lc-err{display:none;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#ef4444;font-size:.76rem;padding:.5rem .9rem;border-radius:var(--rs);margin-bottom:.8rem;text-align:center}
+    .lc-btn{width:100%;padding:.8rem;background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:#fff;border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:.93rem;font-weight:700;cursor:pointer;transition:var(--ease)}
+    .lc-btn:hover{background:linear-gradient(135deg,var(--gold-lt),var(--gold));transform:translateY(-1px);box-shadow:0 6px 20px rgba(139,92,246,.35)}
+    .lc-copy{font-size:.68rem;color:var(--muted);margin-top:1.4rem;text-align:center}
 
-    /* Skill bar animation */
-    @keyframes fillBar { from { width: 0; } to { width: var(--target-width); } }
-    .skill-bar { animation: fillBar 1.2s ease-out forwards; }
+    /* ══════════════════════════════════════
+       TOPBAR
+    ══════════════════════════════════════ */
+    .topbar{
+      position:fixed;top:0;left:0;right:0;z-index:100;
+      background:rgba(10,10,18,.8);
+      backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--border);
+      height:68px;padding:0 2rem;
+      display:flex;align-items:center;justify-content:space-between;
+      transition:background var(--ease);
+    }
+    .topbar-brand{display:flex;align-items:center;gap:.75rem}
+    .brand-ava{width:42px;height:42px;border-radius:50%;overflow:hidden;border:2px solid var(--gold);flex-shrink:0}
+    .brand-ava img{width:100%;height:100%;object-fit:cover;object-position:center 18%}
+    .brand-name{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--text);line-height:1.2}
+    .brand-tag{font-size:.68rem;color:var(--muted);line-height:1.2}
+    .topbar-right{display:flex;align-items:center;gap:.2rem}
+    .nav-link{background:none;border:none;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;color:var(--muted);padding:.45rem 1rem;border-radius:6px;cursor:pointer;transition:var(--ease)}
+    .nav-link:hover{color:var(--text);background:rgba(255,255,255,.05)}
+    .nav-link.active{color:var(--gold-lt);font-weight:700;border-bottom:2px solid var(--gold);border-radius:0}
+    
+    /* Botón música */
+    .btn-theme{background:none;border:1.5px solid var(--border);color:var(--text);font-size:1rem;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--ease);margin-left:.25rem}
+    .btn-theme:hover{border-color:var(--gold);color:var(--gold);background:rgba(139,92,246,.1)}
+    
+    .nav-logout{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.76rem;font-weight:500;padding:.38rem .85rem;border-radius:100px;cursor:pointer;margin-left:.25rem;transition:var(--ease)}
+    .nav-logout:hover{background:rgba(220,50,50,.2);border-color:rgba(220,50,50,.5);color:#ff6b6b}
+    .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:6px}
+    .hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;transition:var(--ease)}
+
+    /* ══════════════════════════════════════
+       PÁGINAS
+    ══════════════════════════════════════ */
+    .page{display:none;padding-top:68px;min-height:100vh}
+    .page.active{display:block}
+
+    /* ══════════════════════════════════════
+       HOME — HERO
+    ══════════════════════════════════════ */
+    .hero{
+      min-height:calc(100vh - 68px);
+      background:radial-gradient(ellipse at top right, rgba(139,92,246,0.15), transparent 50%),
+                  radial-gradient(ellipse at bottom left, rgba(67,56,202,0.15), transparent 50%);
+      display:flex;align-items:center;justify-content:center;
+      padding:4rem 2rem;position:relative;overflow:hidden;
+    }
+    .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;max-width:1100px;width:100%;align-items:center;position:relative;z-index:1}
+    .hero-badge{display:inline-block;background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.4);color:var(--gold-lt);font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:.4rem 1rem;border-radius:100px;margin-bottom:1.5rem}
+    .hero-name{font-family:'Playfair Display',serif;font-size:clamp(2.4rem,5vw,4rem);font-weight:900;color:#fff;line-height:1.05;margin-bottom:1rem}
+    .hero-name em{color:var(--gold);font-style:normal}
+    .hero-tag{font-size:1rem;color:rgba(255,255,255,.6);margin-bottom:2.5rem}
+    .hero-cta{display:inline-flex;align-items:center;gap:.5rem;background:var(--gold);color:white;font-weight:600;font-size:.9rem;padding:.8rem 1.8rem;border-radius:100px;border:none;font-family:'DM Sans',sans-serif;cursor:pointer;transition:var(--ease)}
+    .hero-cta:hover{background:var(--gold-lt);transform:translateY(-2px);box-shadow:0 8px 20px rgba(139,92,246,.4)}
+    .hero-stats{display:flex;gap:2rem;margin-top:2.5rem}
+    .s-num{display:block;font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--gold);line-height:1}
+    .s-lbl{font-size:.7rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+    .hero-photo{display:flex;justify-content:center}
+    .p-ring{position:relative;width:280px;height:280px}
+    .p-ring::before{content:'';position:absolute;inset:-12px;border-radius:50%;border:2px solid var(--gold);opacity:.4;animation:spin 20s linear infinite}
+    .p-ring::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px dashed rgba(139,92,246,.3);animation:spin 10s linear infinite reverse}
+    .p-circle{width:280px;height:280px;border-radius:50%;overflow:hidden;border:4px solid var(--gold);background:var(--navy2)}
+    .p-circle img{width:100%;height:100%;object-fit:cover;object-position:center 15%;display:block}
+
+    /* ══════════════════════════════════════
+       SECCIONES GENERALES
+    ══════════════════════════════════════ */
+    .wrap{max-width:1100px;margin:0 auto;padding:5rem 2rem}
+    .s-lbl-top{font-size:.7rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-lt);margin-bottom:.75rem}
+    .s-lbl-lt{font-size:.7rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-lt);margin-bottom:.75rem}
+    .s-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.4rem);font-weight:700;color:var(--text);line-height:1.2;margin-bottom:1.5rem}
+    .s-title.lt{color:#fff}
+    .s-line{width:56px;height:3px;background:linear-gradient(90deg,var(--gold),transparent);border-radius:2px;margin-bottom:2.5rem}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start}
+    .perfil-text p{color:var(--muted);margin-bottom:1.25rem;line-height:1.8}
+    .skills-box{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--r);padding:2rem}
+    .skills-box h3{font-family:'Playfair Display',serif;color:var(--gold);font-size:1rem;margin-bottom:1.5rem}
+    .sk{margin-bottom:1.2rem}
+    .sk-row{display:flex;justify-content:space-between;font-size:.83rem;color:rgba(255,255,255,.8);margin-bottom:5px}
+    .sk-bar{height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden}
+    .sk-fill{height:100%;background:linear-gradient(90deg,var(--gold-dk),var(--gold));border-radius:3px}
+
+    /* IA */
+    .ia-bg{background:var(--bg2)}
+    .ia-intro{color:var(--muted);max-width:680px;margin-bottom:2.5rem;line-height:1.8}
+    .ia-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.75rem}
+    .ia-card{background:var(--card);border-radius:var(--r);padding:1.6rem;box-shadow:var(--shadow);border:1px solid var(--border);transition:var(--ease)}
+    .ia-card:hover{transform:translateY(-3px); border-color:var(--gold)}
+    .ia-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--gold-dk),var(--gold));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:.9rem}
+    .ia-card h3{font-weight:600;font-size:.95rem;color:var(--text);margin-bottom:.4rem}
+    .ia-card p{font-size:.84rem;color:var(--muted);line-height:1.7}
+    .prompt-box{margin-top:2.5rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--r);padding:2rem}
+    .prompt-box h3{font-family:'Playfair Display',serif;color:var(--gold);margin-bottom:1.25rem}
+    .px{background:rgba(255,255,255,.07);border-radius:var(--rs);padding:1rem 1.2rem;margin-bottom:.9rem;border-left:3px solid var(--gold)}
+    .px-lbl{font-size:.68rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:.35rem}
+    .px p{font-size:.83rem;color:rgba(255,255,255,.8);line-height:1.6;font-family:'Courier New',monospace}
+
+    /* Contacto */
+    .contact-bg{background:var(--navy)}
+    .contact-grid{display:grid;grid-template-columns:1fr 1.5fr;gap:4rem;align-items:start}
+    .ci h3{font-family:'Playfair Display',serif;color:var(--gold);margin-bottom:1rem}
+    .ci p{color:rgba(255,255,255,.6);font-size:.88rem;line-height:1.7;margin-bottom:1.75rem}
+    .ci-item{display:flex;align-items:center;gap:.75rem;margin-bottom:.9rem;font-size:.85rem;color:rgba(255,255,255,.65)}
+    .cf{margin-bottom:1.2rem}
+    .cf label{display:block;font-size:.75rem;font-weight:600;color:rgba(255,255,255,.5);margin-bottom:.35rem;letter-spacing:.05em;text-transform:uppercase}
+    .cf input,.cf textarea,.cf select{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:var(--rs);padding:.72rem 1rem;color:#fff;font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:var(--ease)}
+    .cf input:focus,.cf textarea:focus,.cf select:focus{border-color:var(--gold);background:rgba(255,255,255,.1)}
+    .cf textarea{resize:vertical;min-height:110px}
+    .cf select option{background:var(--navy)}
+    .btn-send{width:100%;padding:.85rem;background:var(--gold);color:white;border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;transition:var(--ease)}
+    .btn-send:hover{background:var(--gold-lt);transform:translateY(-1px)}
+    .form-ok{display:none;text-align:center;padding:2rem}
+    .ok-icon{font-size:3rem;margin-bottom:1rem}
+    .ok-t{color:var(--gold);font-size:1.1rem;font-weight:600;margin-bottom:.4rem}
+    .ok-s{color:rgba(255,255,255,.55);font-size:.88rem}
+
+    footer{background:#040408;padding:1.75rem 2rem;text-align:center;color:rgba(255,255,255,.25);font-size:.78rem}
+    footer strong{color:var(--gold)}
+
+    /* ══════════════════════════════════════
+       DESCARGAS
+    ══════════════════════════════════════ */
+    .dl-hero{background:var(--navy);padding:5rem 2rem 4rem;text-align:center}
+    .dl-hero h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3rem);font-weight:900;color:#fff;margin-bottom:1rem}
+    .dl-hero p{color:rgba(255,255,255,.6);max-width:560px;margin:0 auto;font-size:.95rem;line-height:1.8}
+
+    /* Buscador */
+    .search-wrap{max-width:480px;margin:2rem auto 0;position:relative}
+    .search-wrap input{
+      width:100%;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);
+      border-radius:100px;padding:.72rem 1rem .72rem 2.8rem;
+      color:#fff;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:var(--ease);
+    }
+    .search-wrap input::placeholder{color:rgba(255,255,255,.4)}
+    .search-wrap input:focus{border-color:var(--gold);background:rgba(255,255,255,.15)}
+    .search-icon{position:absolute;left:1rem;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none}
+
+    .dl-body{max-width:1100px;margin:0 auto;padding:3.5rem 2rem}
+    .dl-tabs{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.5rem}
+    .dl-tab{padding:.5rem 1.4rem;border-radius:100px;border:1.5px solid var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:.83rem;font-weight:600;color:var(--muted);cursor:pointer;transition:var(--ease)}
+    .dl-tab.active,.dl-tab:hover{background:var(--gold);color:white;border-color:var(--gold)}
+
+    .dl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1.5rem}
+    .dl-empty{text-align:center;padding:5rem 2rem;color:var(--muted);grid-column:1/-1}
+    .dl-empty .big{font-size:4rem;margin-bottom:1rem}
+    .dl-empty p{font-size:.95rem;line-height:1.8}
+    .dl-empty button{margin-top:1.5rem;padding:.65rem 1.5rem;background:var(--gold);color:white;border:none;border-radius:100px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.88rem;cursor:pointer;transition:var(--ease)}
+    .dl-empty button:hover{background:var(--gold-lt)}
+
+    /* Doc card */
+    .doc-card{background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border);transition:var(--ease);display:flex;flex-direction:column}
+    .doc-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.6);border-color:var(--gold)}
+    .doc-thumb{height:110px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative;cursor:pointer}
+    .doc-thumb.word{background:linear-gradient(135deg,#1B5EAB,#2B7CD3)}
+    .doc-thumb.excel{background:linear-gradient(135deg,#1A6B37,#217346)}
+    .doc-thumb-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:var(--ease);font-size:.8rem;color:#fff;font-weight:600;gap:.3rem}
+    .doc-thumb:hover .doc-thumb-overlay{opacity:1}
+    .doc-num{position:absolute;bottom:6px;right:8px;font-size:.62rem;color:rgba(255,255,255,.38);font-weight:700}
+    .doc-body{padding:1rem 1.1rem;flex:1;display:flex;flex-direction:column}
+    .doc-tag{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;display:block}
+    .doc-tag.word{color:#60a5fa} .doc-tag.excel{color:#4ade80}
+    .doc-title{font-weight:600;font-size:.88rem;color:var(--text);margin-bottom:.3rem;line-height:1.3}
+    .doc-desc{font-size:.78rem;color:var(--muted);line-height:1.5;flex:1}
+    .doc-author{font-size:.7rem;color:var(--gold-lt);margin-top:.5rem}
+    .doc-foot{padding:0 1.1rem 1rem;display:flex;gap:.5rem}
+    .btn-dl{flex:1;display:flex;align-items:center;justify-content:center;gap:.35rem;padding:.52rem;background:rgba(255,255,255,.05);color:var(--gold-lt);border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;text-decoration:none;transition:var(--ease)}
+    .btn-dl:hover{background:var(--gold);color:white}
+    .btn-del{padding:.52rem .7rem;background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.3);border-radius:var(--rs);font-size:.8rem;cursor:pointer;transition:var(--ease);flex-shrink:0}
+    .btn-del:hover{background:#ef4444;color:#fff;border-color:#ef4444}
+
+    /* Vista previa modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;display:none;align-items:center;justify-content:center;padding:1.5rem;backdrop-filter:blur(8px)}
+    .modal-overlay.open{display:flex}
+    .modal-box{background:var(--card);border-radius:var(--r);max-width:860px;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.7);border:1px solid var(--border)}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1px solid var(--border)}
+    .modal-head h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--text)}
+    .modal-close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);transition:var(--ease);line-height:1}
+    .modal-close:hover{color:white}
+    .modal-body{flex:1;overflow:auto;padding:1.5rem;display:flex;align-items:center;justify-content:center;min-height:300px}
+    .modal-info{text-align:center;color:var(--muted);font-size:.9rem;line-height:1.8}
+    .modal-info .big{font-size:4rem;margin-bottom:1rem}
+
+    /* ══════════════════════════════════════
+       SUBIR
+    ══════════════════════════════════════ */
+    .up-body{max-width:680px;margin:0 auto;padding:4rem 2rem}
+    .up-title{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:var(--text);margin-bottom:.5rem}
+    .up-sub{color:var(--muted);margin-bottom:2.5rem;font-size:.9rem;line-height:1.7}
+    .up-card{background:var(--card);border-radius:var(--r);padding:2.5rem;box-shadow:var(--shadow);border:1px solid var(--border)}
+    .drop-zone{border:2px dashed rgba(139,92,246,.4);border-radius:var(--r);padding:3rem 2rem;text-align:center;cursor:pointer;transition:var(--ease);margin-bottom:1.75rem;background:rgba(139,92,246,.03)}
+    .drop-zone:hover,.drop-zone.dragover{border-color:var(--gold);background:rgba(139,92,246,.08)}
+    .drop-icon{font-size:2.5rem;margin-bottom:.75rem}
+    .drop-main{font-weight:600;color:var(--text);margin-bottom:.3rem;font-size:.95rem}
+    .drop-sub{font-size:.8rem;color:var(--muted)}
+    .drop-fname{margin-top:.75rem;font-size:.83rem;color:var(--gold-lt);font-weight:600;background:rgba(139,92,246,.15);padding:.3rem .8rem;border-radius:6px;display:none;word-break:break-all}
+    #fileInput{display:none}
+    .up-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .uf{margin-bottom:1.25rem}
+    .uf label{display:block;font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:.4rem}
+    .uf input,.uf textarea,.uf select{width:100%;background:rgba(255,255,255,.05);border:1.5px solid var(--border);border-radius:var(--rs);padding:.72rem 1rem;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--text);outline:none;transition:var(--ease)}
+    .uf input:focus,.uf textarea:focus,.uf select:focus{border-color:var(--gold);background:rgba(255,255,255,.1)}
+    .uf textarea{resize:vertical;min-height:90px}
+    .btn-upload{width:100%;padding:.9rem;background:var(--gold);color:white;border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:var(--ease);display:flex;align-items:center;justify-content:center;gap:.5rem;margin-top:.5rem}
+    .btn-upload:hover{background:var(--gold-lt);transform:translateY(-1px)}
+    .up-note{font-size:.74rem;color:var(--muted);margin-top:1rem;text-align:center;line-height:1.6}
+    .up-ok{display:none;text-align:center;padding:2.5rem 1rem}
+    .up-ok .ok-icon{font-size:3.5rem;margin-bottom:1rem}
+    .up-ok .ok-t{color:var(--text);font-size:1.1rem;font-weight:600;margin-bottom:.4rem}
+    .up-ok .ok-s{color:var(--muted);font-size:.88rem;margin-bottom:1.5rem}
+    .btn-ghost{padding:.6rem 1.4rem;background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--border);border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;transition:var(--ease);margin:.3rem}
+    .btn-ghost:hover{background:var(--gold);color:white;border-color:var(--gold)}
+
+    /* ══════════════════════════════════════
+       ANIMACIONES
+    ══════════════════════════════════════ */
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .reveal{opacity:0;transform:translateY(20px);transition:opacity .65s ease,transform .65s ease}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+
+    /* ══════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════ */
+    @media(max-width:768px){
+      .lc{grid-template-columns:1fr} .lc-left{display:none}
+      .brand-tag{display:none}
+      .topbar-right{
+        display:none;flex-direction:column;align-items:stretch;
+        position:fixed;top:68px;left:0;right:0;
+        background:rgba(10,10,18,.98);
+        border-bottom:1px solid var(--border);
+        padding:.75rem 1rem;box-shadow:0 8px 24px rgba(0,0,0,.3);
+      }
+      .topbar-right.open{display:flex}
+      .hamburger{display:flex}
+      .nav-link{padding:.75rem 1rem;border-radius:var(--rs);text-align:left;font-size:.95rem}
+      .nav-link.active{border-bottom:none;background:rgba(139,92,246,.15);color:var(--gold-lt)}
+      .btn-theme{width:100%;border-radius:var(--rs);height:44px;justify-content:flex-start;padding-left:1rem;gap:.5rem;font-size:.95rem}
+      .nav-logout{margin:.25rem 0 0;padding:.75rem 1rem;border-radius:var(--rs);text-align:center}
+      .hero{padding:3rem 1.5rem}
+      .hero-grid{grid-template-columns:1fr;text-align:center;gap:2.5rem}
+      .hero-photo{order:-1}
+      .p-ring,.p-circle{width:200px;height:200px}
+      .hero-stats{justify-content:center}
+      .wrap{padding:3.5rem 1.5rem}
+      .two-col,.ia-grid,.contact-grid{grid-template-columns:1fr;gap:2rem}
+      .up-row{grid-template-columns:1fr}
+      .dl-grid{grid-template-columns:1fr}
+      .dl-hero{padding:3.5rem 1.5rem 3rem}
+      .up-body{padding:2.5rem 1.25rem}
+      .up-card{padding:1.75rem 1.25rem}
+    }
+    @media(max-width:480px){
+      .hero-name{font-size:2.2rem}
+      .p-ring,.p-circle{width:170px;height:170px}
+      .hero-stats{gap:1.25rem}
+      .s-num{font-size:1.6rem}
+    }
   </style>
 </head>
+<body>
 
-<body class="antialiased text-zinc-100 bg-[#0a0a12] min-h-screen">
+<!-- REPRODUCTOR DE MÚSICA INVISIBLE -->
+<audio id="bg-music" loop>
+  <source src="musica/real aesthetic lofi beats massobeats lofi mix.mp3" type="audio/mpeg">
+</audio>
 
-  <!-- Gradient blur overlay -->
-  <div class="gradient-blur">
-    <div></div><div></div><div></div><div></div><div></div><div></div>
-  </div>
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-logo">RZ</div>
+  <p class="splash-txt">Portal MOS 2026</p>
+  <div class="splash-bar"><div class="splash-fill"></div></div>
+</div>
 
-  <!-- Background static image -->
-  <div class="aura-background-component -z-10 w-full absolute top-0 h-[760px] opacity-60"
-    style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop'); background-size: cover; background-position: center; mask-image:linear-gradient(to bottom,transparent,black 0%,black 80%,transparent);-webkit-mask-image:linear-gradient(to bottom,transparent,black 0%,black 80%,transparent)">
-  </div>
-
-  <!-- ============================================================ -->
-  <!-- NAVBAR -->
-  <!-- ============================================================ -->
-  <header class="sticky z-50 top-0">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex h-16 items-center justify-between">
-
-        <!-- Logo / Brand -->
-        <a href="#" onclick="switchTab('inicio'); return false;" class="flex items-center gap-2 group">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
-            <i data-lucide="graduation-cap" class="h-4 w-4 text-white"></i>
-          </div>
-          <span class="text-sm font-semibold text-white hidden sm:block">MOS 2026</span>
-        </a>
-
-        <!-- Nav tabs -->
-        <nav class="hidden md:flex border border-slate-50/10 rounded-full px-4 backdrop-blur-lg gap-1 items-center bg-white/5">
-          <a href="#" onclick="switchTab('inicio'); return false;" id="nav-inicio"
-            class="nav-btn text-white bg-white/10 rounded-full text-sm font-medium py-2 px-4 transition-all">
-            Inicio
-          </a>
-          <a href="#" onclick="switchTab('descargas'); return false;" id="nav-descargas"
-            class="nav-btn px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white transition-all rounded-full">
-            Descargas
-          </a>
-          <a href="#" onclick="promptPassword(); return false;" id="nav-subir"
-            class="nav-btn px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white transition-all rounded-full">
-            Subir
-          </a>
-        </nav>
-
-        <!-- Right controls -->
-        <div class="flex gap-2 items-center">
-
-          <!-- Mobile menu toggle -->
-          <div class="md:hidden flex border border-slate-50/10 rounded-full px-1 backdrop-blur-lg bg-white/5 gap-1">
-            <a href="#" onclick="switchTab('inicio'); return false;" id="nav-inicio-m" class="nav-btn-m text-white bg-white/10 rounded-full text-xs font-medium py-1.5 px-3 transition-all">Inicio</a>
-            <a href="#" onclick="switchTab('descargas'); return false;" id="nav-descargas-m" class="nav-btn-m px-3 py-1.5 text-xs font-medium text-zinc-300 hover:text-white transition-all rounded-full">Docs</a>
-            <a href="#" onclick="promptPassword(); return false;" id="nav-subir-m" class="nav-btn-m px-3 py-1.5 text-xs font-medium text-zinc-300 hover:text-white transition-all rounded-full">Admin</a>
-          </div>
-
-          <!-- Music Controls -->
-          <div class="flex items-center gap-1 border border-slate-50/10 rounded-full px-2 py-1 backdrop-blur-lg bg-white/5">
-            <button onclick="togglePlay()" id="btn-play"
-              class="p-1.5 text-zinc-300 hover:text-white rounded-full hover:bg-white/10 transition" title="Reproducir/Pausar">
-              <i data-lucide="play" class="h-4 w-4"></i>
-            </button>
-            <button onclick="changeVolume(-0.1)"
-              class="p-1.5 text-zinc-300 hover:text-white rounded-full hover:bg-white/10 transition" title="Bajar volumen">
-              <i data-lucide="volume-1" class="h-4 w-4"></i>
-            </button>
-            <button onclick="changeVolume(0.1)"
-              class="p-1.5 text-zinc-300 hover:text-white rounded-full hover:bg-white/10 transition" title="Subir volumen">
-              <i data-lucide="volume-2" class="h-4 w-4"></i>
-            </button>
-          </div>
-
-          <!-- Exit button (admin only) -->
-          <button id="btn-salir" type="button" onclick="logout()"
-            class="hidden items-center gap-1.5 text-xs font-medium text-white rounded-full px-3 py-2 transition-all"
-            style="background-image:linear-gradient(144deg,#FF4040,#F34242 50%,#EB0000);">
-            <i data-lucide="log-out" class="h-3.5 w-3.5"></i>
-            <span>Salir</span>
-          </button>
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="lc">
+    <div class="lc-left">
+      <div>
+        <span class="lc-badge">🎓 Portal MOS 2026</span>
+        <h2>Portafolio Profesional<br><em>Ricardo Zelaya</em></h2>
+        <p>Documentos Microsoft Office avanzados desarrollados con apoyo de Inteligencia Artificial.</p>
+      </div>
+      <ul class="lc-feats">
+        <li>📄 Documentos Word profesionales</li>
+        <li>📊 Hojas Excel con fórmulas avanzadas</li>
+        <li>🤖 Creado con Claude AI · El Salvador</li>
+      </ul>
+      <p class="lc-foot">© 2026 Ricardo Zelaya</p>
+    </div>
+    <div class="lc-right">
+      <div class="lc-form">
+        <div class="lc-ava"><img src="imagen perfil/foto.jpg" alt="Ricardo Zelaya" onerror="this.src='assets/foto.jpg'"/></div>
+        <h1 class="lc-title">Iniciar Sesión</h1>
+        <p class="lc-sub">Portal Académico MOS · Ricardo Zelaya</p>
+        <div class="lc-field">
+          <label>👤 Usuario</label>
+          <input type="text" value="Ricardo" readonly/>
         </div>
+        <div class="lc-field">
+          <label>🔒 Contraseña</label>
+          <input type="password" id="loginPass" placeholder="Escribe tu contraseña (mos2025)…"
+            onkeydown="if(event.key==='Enter')doLogin()"/>
+        </div>
+        <p class="lc-err" id="loginErr">❌ Contraseña incorrecta. Intenta de nuevo.</p>
+        <button class="lc-btn" onclick="doLogin()">Ingresar al Portal →</button>
+        <p class="lc-copy">© 2026 Sistema MOS · Hecho con Claude AI</p>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+
+  <header class="topbar">
+    <div class="topbar-brand">
+      <div class="brand-ava"><img src="imagen perfil/foto.jpg" alt="RZ" onerror="this.src='assets/foto.jpg'"/></div>
+      <div>
+        <div class="brand-name">Ricardo Zelaya</div>
+        <div class="brand-tag">Estudiante MOS | Especialista en Office + IA</div>
+      </div>
+    </div>
+    <div class="topbar-right" id="topNav">
+      <!-- BOTÓN DE MÚSICA -->
+      <button class="btn-theme" id="btn-play" onclick="togglePlay()" title="Reproducir música Lofi">🎵</button>
+      
+      <button class="nav-link active" onclick="showPage('home',this)">Home</button>
+      <button class="nav-link" onclick="showPage('descargas',this)">Descargas</button>
+      <button class="nav-link" onclick="showPage('subir',this)">Subir</button>
+      <button class="nav-logout" onclick="doLogout()">Salir 🚪</button>
+    </div>
+    <button class="hamburger" id="hbg" onclick="toggleNav()" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
   </header>
 
-  <!-- ============================================================ -->
-  <!-- AUDIO -->
-  <!-- ============================================================ -->
-  <audio id="bg-music" loop>
-    <source src="musica/real aesthetic lofi beats  massobeats lofi mix.mp3" type="audio/mpeg">
-    <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
-  </audio>
-
-  <!-- ============================================================ -->
-  <!-- VIEW: INICIO -->
-  <!-- ============================================================ -->
-  <div id="inicio-view">
-
-    <!-- HERO -->
-    <section class="z-10 mt-0 relative">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20"
-        style="mask-image:linear-gradient(180deg,transparent,black 0%,black 60%,transparent);-webkit-mask-image:linear-gradient(180deg,transparent,black 0%,black 60%,transparent)">
-        <div class="flex flex-col text-center mt-12 mx-auto space-y-6 items-center">
-
-          <!-- Avatar -->
-          <div class="mb-2 flex flex-col items-center">
-            <div class="w-28 h-28 rounded-full mb-6 border-2 border-violet-500/50 overflow-hidden shadow-2xl shadow-violet-500/30 ring-4 ring-violet-500/10">
-              <img src="imagen perfil/foto.jpg" alt="Ricardo Zelaya" class="w-full h-full object-cover object-top">
-            </div>
-            <span class="inline-flex items-center gap-2 text-xs font-medium text-zinc-200 bg-slate-950/60 border-white/10 border rounded-full py-1 px-4 backdrop-blur-xl">
-              <i data-lucide="sparkles" class="h-3.5 w-3.5 text-violet-400"></i>
-              PORTAFOLIO PROFESIONAL MOS — 2026
-            </span>
+  <!-- ══ HOME ══ -->
+  <div id="page-home" class="page active">
+    <section class="hero">
+      <div class="hero-grid">
+        <div>
+          <span class="hero-badge">Portafolio Profesional MOS · 2026</span>
+          <h1 class="hero-name">RICARDO<br><em>ZELAYA</em></h1>
+          <p class="hero-tag">Estudiante MOS &nbsp;|&nbsp; Especialista en Office + IA</p>
+          <button class="hero-cta" onclick="showPage('descargas',null)">↓ Ver mis documentos</button>
+          <div class="hero-stats">
+            <div><span class="s-num" id="hTotal">0</span><span class="s-lbl">Documentos</span></div>
+            <div><span class="s-num" id="hWord">0</span><span class="s-lbl">Word</span></div>
+            <div><span class="s-num" id="hExcel">0</span><span class="s-lbl">Excel</span></div>
           </div>
-
-          <!-- Name -->
-          <span class="block bg-clip-text text-6xl sm:text-8xl font-semibold text-transparent tracking-tight bg-gradient-to-r from-[#d8ccff] to-[#a39fea] pb-3"
-            style="mask-image:linear-gradient(140deg,transparent,black 10%,black 65%,transparent);-webkit-mask-image:linear-gradient(140deg,transparent,black 10%,black 65%,transparent)">
-            RICARDO ZELAYA
-          </span>
-          <p class="sm:text-lg text-base text-purple-300 bg-gray-950/50 max-w-2xl py-2 px-4 drop-shadow-lg"
-            style="mask-image:linear-gradient(180deg,transparent,black 25%,black 70%,transparent);-webkit-mask-image:linear-gradient(180deg,transparent,black 25%,black 70%,transparent)">
-            Estudiante MOS | Especialista en Office + IA
-          </p>
-
-          <!-- CTA + Stats -->
-          <div class="flex flex-col sm:flex-row gap-6 mt-8 pb-14 items-center">
-
-            <!-- Shimmer Button -->
-            <button onclick="switchTab('descargas')"
-              class="group isolate inline-flex cursor-pointer overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_8px_rgba(129,140,248,0.35)] rounded-full relative shadow-[0_8px_40px_rgba(129,140,248,0.25)]"
-              style="--spread:90deg;--shimmer-color:rgba(255,255,255,0.6);--speed:4s;--cut:1px">
-              <div class="absolute inset-0">
-                <div class="absolute inset-[-200%] w-[400%] h-[400%]" style="animation:rotate-gradient var(--speed) linear infinite">
-                  <div style="position:absolute;inset:0;background:conic-gradient(from calc(270deg - (var(--spread)*0.5)),transparent 0,var(--shimmer-color) var(--spread),transparent var(--spread))"></div>
-                </div>
-              </div>
-              <div style="position:absolute;inset:var(--cut);background:rgba(255,255,255,0.05);border-radius:9999px;backdrop-filter:blur(4px)"></div>
-              <div class="z-10 flex gap-3 overflow-hidden text-base font-medium text-white py-3 px-5 relative items-center" style="border-radius:9999px">
-                <div style="position:absolute;inset:1px;background:rgba(10,11,20,0.8);border-radius:9999px;backdrop-filter:blur(8px)"></div>
-                <span class="whitespace-nowrap z-10 relative">Ver mis documentos</span>
-                <span class="inline-flex items-center justify-center z-10 bg-white/10 w-7 h-7 rounded-full ml-1 relative">
-                  <i data-lucide="arrow-down" class="w-4 h-4 text-white"></i>
-                </span>
-              </div>
-            </button>
-
-            <!-- Stats -->
-            <div class="flex gap-4 items-center">
-              <div class="text-center px-4 py-2 bg-white/5 rounded-2xl border border-white/10">
-                <div class="text-xl font-bold text-white">17</div>
-                <div class="text-xs text-zinc-400">DOCUMENTOS</div>
-              </div>
-              <div class="text-center px-4 py-2 bg-white/5 rounded-2xl border border-white/10">
-                <div class="text-xl font-bold text-blue-400">11</div>
-                <div class="text-xs text-zinc-400">WORD</div>
-              </div>
-              <div class="text-center px-4 py-2 bg-white/5 rounded-2xl border border-white/10">
-                <div class="text-xl font-bold text-green-400">6</div>
-                <div class="text-xs text-zinc-400">EXCEL</div>
-              </div>
-            </div>
-          </div>
+        </div>
+        <div class="hero-photo">
+          <div class="p-ring"><div class="p-circle">
+            <img src="imagen perfil/foto.jpg" alt="Ricardo Zelaya" onerror="this.src='assets/foto.jpg'"/>
+          </div></div>
         </div>
       </div>
     </section>
-    <!-- ============================================================ -->
-    <!-- SOBRE MÍ -->
-    <!-- ============================================================ -->
-    <section class="z-10 relative px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto pb-20">
-      <div class="supports-[backdrop-filter]:bg-white/5 overflow-hidden text-white bg-white/5 border-slate-50/10 border rounded-2xl ring-white/10 ring-1 relative backdrop-blur-xl p-8 sm:p-12">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
-          <!-- Texto -->
+    <div class="wrap reveal">
+      <p class="s-lbl-top">Perfil profesional</p>
+      <h2 class="s-title">Sobre Mí</h2>
+      <div class="s-line"></div>
+      <div class="two-col">
+        <div class="perfil-text">
+          <p>Soy Ricardo Zelaya, un estudiante comprometido con el dominio de las herramientas de productividad Microsoft Office, actualmente en preparación para obtener la certificación Microsoft Office Specialist (MOS). Mi interés por la tecnología me ha llevado a explorar no solo el uso estándar de las aplicaciones, sino también su integración con inteligencia artificial para optimizar procesos y elevar la calidad del trabajo profesional.</p>
+          <p>A lo largo de este portafolio presento una selección de documentos que evidencian mi competencia en el manejo avanzado de Microsoft Office. Cada proyecto fue desarrollado con atención al detalle y apoyo de herramientas de IA, reflejando mi capacidad para combinar habilidades técnicas con pensamiento analítico y creatividad orientada a resultados.</p>
+        </div>
+        <div class="skills-box">
+          <h3>⚡ Habilidades Técnicas</h3>
+          <div class="sk"><div class="sk-row"><span>Microsoft Word</span><span>90%</span></div><div class="sk-bar"><div class="sk-fill" style="width:90%"></div></div></div>
+          <div class="sk"><div class="sk-row"><span>Microsoft Excel</span><span>80%</span></div><div class="sk-bar"><div class="sk-fill" style="width:80%"></div></div></div>
+          <div class="sk"><div class="sk-row"><span>Inteligencia Artificial</span><span>85%</span></div><div class="sk-bar"><div class="sk-fill" style="width:85%"></div></div></div>
+          <div class="sk"><div class="sk-row"><span>Diseño de documentos</span><span>75%</span></div><div class="sk-bar"><div class="sk-fill" style="width:75%"></div></div></div>
+          <div class="sk"><div class="sk-row"><span>Análisis de datos</span><span>70%</span></div><div class="sk-bar"><div class="sk-fill" style="width:70%"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ia-bg">
+      <div class="wrap reveal">
+        <p class="s-lbl-top">Proceso creativo</p>
+        <h2 class="s-title">Cómo Usé la IA</h2>
+        <div class="s-line"></div>
+        <p class="ia-intro">Durante el desarrollo de este portafolio utilicé Claude (IA de Anthropic) en cada etapa: ideación, redacción de documentos, fórmulas Excel y diseño completo de este sitio web.</p>
+        <div class="ia-grid">
+          <div class="ia-card"><div class="ia-icon">🧠</div><h3>Ideación</h3><p>Pedí sugerencias de documentos Word y Excel que demostraran habilidades MOS avanzadas para un portafolio coherente.</p></div>
+          <div class="ia-card"><div class="ia-icon">✍️</div><h3>Redacción</h3><p>Claude generó textos formales, corrigió estilo y ortografía, y sugirió mejoras en todos mis documentos Word.</p></div>
+          <div class="ia-card"><div class="ia-icon">📊</div><h3>Fórmulas Excel</h3><p>La IA proporcionó fórmulas exactas (BUSCARV, SUMAR.SI, SI anidado) con explicaciones paso a paso.</p></div>
+          <div class="ia-card"><div class="ia-icon">🎨</div><h3>Diseño Web</h3><p>Claude generó todo el HTML, CSS y JavaScript con diseño UX/UI profesional, login, modo oscuro y responsive.</p></div>
+        </div>
+        <div class="prompt-box">
+          <h3>📋 Prompts reales que usé</h3>
+          <div class="px"><span class="px-lbl">Para Word</span><p>"Actúa como experto en Microsoft Word. Crea una carta formal de presentación para el sector tecnológico con encabezado profesional, 3 párrafos estructurados y cierre formal en español."</p></div>
+          <div class="px"><span class="px-lbl">Para Excel</span><p>"Crea una plantilla de control de inventario en Excel con columnas: Código, Producto, Categoría, Cantidad, Precio, Total. Incluye fórmulas automáticas y formato condicional."</p></div>
+          <div class="px"><span class="px-lbl">Para este portafolio</span><p>"Crea mi portafolio MOS 2026 con login, múltiples páginas, buscador, modo oscuro, splash screen, formulario real y botón de eliminar documentos."</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="contact-bg">
+      <div class="wrap reveal">
+        <p class="s-lbl-lt">Hablemos</p>
+        <h2 class="s-title lt">Contacto</h2>
+        <div class="s-line"></div>
+        <div class="contact-grid">
+          <div class="ci">
+            <h3>¿Tienes alguna pregunta?</h3>
+            <p>Estoy disponible para consultas sobre mi portafolio, documentos MOS o proceso con inteligencia artificial.</p>
+            <div class="ci-item">📧 <span>ricardo@correo.com</span></div>
+            <div class="ci-item">🎓 <span>Estudiante MOS · Certificación en proceso</span></div>
+            <div class="ci-item">🌎 <span>El Salvador</span></div>
+            <div class="ci-item">🤖 <span>Portafolio creado con Claude AI</span></div>
+          </div>
           <div>
-            <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-200 backdrop-blur mb-6">
-              <i data-lucide="user-circle" class="h-3.5 w-3.5 text-violet-400"></i>
-              Quién Soy
-            </div>
-            <h2 class="text-3xl font-semibold tracking-tight text-white mb-6">Sobre Mí</h2>
-            <p class="text-zinc-300 leading-relaxed text-base">
-              Soy <strong class="text-white">Ricardo Zelaya</strong>, un estudiante comprometido con el dominio de las herramientas de productividad Microsoft Office, actualmente en preparación para obtener la certificación <strong class="text-violet-300">Microsoft Office Specialist (MOS)</strong>. Mi interés por la tecnología me ha llevado a explorar no solo el uso estándar de las aplicaciones, sino también su integración con Inteligencia Artificial para optimizar procesos y elevar la calidad del trabajo profesional. A lo largo de este portafolio presento una selección de documentos que demuestran mi capacidad para estructurar, analizar y presentar información de manera efectiva.
-            </p>
-            <div class="mt-8 flex gap-3 flex-wrap">
-              <span class="inline-flex items-center gap-1.5 text-xs font-medium text-blue-300 bg-blue-500/10 border border-blue-500/20 rounded-full px-3 py-1">
-                <i data-lucide="file-text" class="h-3 w-3"></i> Microsoft Word
-              </span>
-              <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-300 bg-green-500/10 border border-green-500/20 rounded-full px-3 py-1">
-                <i data-lucide="table" class="h-3 w-3"></i> Microsoft Excel
-              </span>
-              <span class="inline-flex items-center gap-1.5 text-xs font-medium text-violet-300 bg-violet-500/10 border border-violet-500/20 rounded-full px-3 py-1">
-                <i data-lucide="bot" class="h-3 w-3"></i> Inteligencia Artificial
-              </span>
-            </div>
-          </div>
-
-          <!-- Habilidades -->
-          <div class="space-y-5">
-            <h3 class="text-xl font-medium text-white mb-6">Habilidades Técnicas</h3>
-
-            <div class="space-y-2">
-              <div class="flex justify-between text-sm">
-                <span class="text-zinc-300 font-medium">Microsoft Word</span>
-                <span class="text-blue-400 font-bold">90%</span>
-              </div>
-              <div class="w-full bg-white/10 rounded-full h-2">
-                <div class="bg-gradient-to-r from-blue-500 to-blue-400 h-2 rounded-full skill-bar" style="--target-width:90%; width:90%"></div>
-              </div>
-            </div>
-
-            <div class="space-y-2">
-              <div class="flex justify-between text-sm">
-                <span class="text-zinc-300 font-medium">Microsoft Excel</span>
-                <span class="text-green-400 font-bold">80%</span>
-              </div>
-              <div class="w-full bg-white/10 rounded-full h-2">
-                <div class="bg-gradient-to-r from-green-500 to-green-400 h-2 rounded-full skill-bar" style="--target-width:80%; width:80%"></div>
-              </div>
-            </div>
-
-            <div class="space-y-2">
-              <div class="flex justify-between text-sm">
-                <span class="text-zinc-300 font-medium">Inteligencia Artificial</span>
-                <span class="text-violet-400 font-bold">85%</span>
-              </div>
-              <div class="w-full bg-white/10 rounded-full h-2">
-                <div class="bg-gradient-to-r from-violet-500 to-violet-400 h-2 rounded-full skill-bar" style="--target-width:85%; width:85%"></div>
-              </div>
-            </div>
-
-            <div class="space-y-2">
-              <div class="flex justify-between text-sm">
-                <span class="text-zinc-300 font-medium">Diseño de documentos</span>
-                <span class="text-indigo-400 font-bold">75%</span>
-              </div>
-              <div class="w-full bg-white/10 rounded-full h-2">
-                <div class="bg-gradient-to-r from-indigo-500 to-indigo-400 h-2 rounded-full skill-bar" style="--target-width:75%; width:75%"></div>
-              </div>
-            </div>
-
-            <div class="space-y-2">
-              <div class="flex justify-between text-sm">
-                <span class="text-zinc-300 font-medium">Análisis de datos</span>
-                <span class="text-emerald-400 font-bold">70%</span>
-              </div>
-              <div class="w-full bg-white/10 rounded-full h-2">
-                <div class="bg-gradient-to-r from-emerald-500 to-emerald-400 h-2 rounded-full skill-bar" style="--target-width:70%; width:70%"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- CÓMO USÉ LA IA -->
-    <!-- ============================================================ -->
-    <section class="z-10 relative">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-20">
-
-        <!-- Title -->
-        <div class="text-center mb-16">
-          <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-200 backdrop-blur mb-6">
-            <i data-lucide="bot" class="h-3.5 w-3.5 text-violet-400"></i>
-            Proceso Creativo
-          </div>
-          <h2 class="text-3xl sm:text-4xl font-semibold text-white tracking-tight">Cómo Usé la IA</h2>
-          <p class="mt-3 text-base text-zinc-300 max-w-2xl mx-auto">
-            La integración de Inteligencia Artificial, específicamente Claude, fue un pilar en cada etapa de mi preparación y en la creación de este portafolio.
-          </p>
-        </div>
-
-        <!-- 4 Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-
-          <!-- Card 1: Ideación -->
-          <div class="z-10 h-full rounded-3xl p-[1px] relative"
-            style="background:radial-gradient(230px at 0% 0%,rgba(139,92,246,0.4),rgb(12,13,13));mask-image:linear-gradient(180deg,transparent,black 0%,black 70%,transparent);-webkit-mask-image:linear-gradient(180deg,transparent,black 0%,black 70%,transparent)">
-            <div class="flex flex-col hover:bg-white/10 transition-all duration-300 z-10 h-full rounded-3xl backdrop-blur"
-              style="background:radial-gradient(circle 280px at 0% 0%,rgba(68,68,68,0.3),#0c0d0d);border:1px solid #202222">
-              <div class="blur-[10px] opacity-40 w-[220px] h-[45px] rounded-full absolute top-0 left-0 pointer-events-none"
-                style="background-color:rgba(139,92,246,0.3);box-shadow:0 0 50px rgba(139,92,246,0.5);transform:rotate(40deg);transform-origin:10%"></div>
-              <div class="p-8 z-10 relative flex flex-col items-start h-full">
-                <div class="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center mb-6 ring-1 ring-violet-500/30">
-                  <i data-lucide="lightbulb" class="h-6 w-6 text-violet-300"></i>
-                </div>
-                <h3 class="text-xl font-semibold tracking-tight text-white mb-3">1. Ideación</h3>
-                <p class="text-sm leading-relaxed text-neutral-300">Utilicé sugerencias de documentos y lluvia de ideas con IA para estructurar los proyectos que conforman este portafolio y los requerimientos MOS.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 2: Redacción -->
-          <div class="z-10 h-full rounded-3xl p-[1px] relative"
-            style="background:radial-gradient(230px at 0% 0%,rgba(99,102,241,0.4),#0c0d0d);mask-image:linear-gradient(180deg,transparent,black 0%,black 70%,transparent);-webkit-mask-image:linear-gradient(180deg,transparent,black 0%,black 70%,transparent)">
-            <div class="flex flex-col hover:bg-white/10 transition-all duration-300 z-10 h-full rounded-3xl backdrop-blur"
-              style="background:radial-gradient(circle 280px at 0% 0%,rgba(68,68,68,0.3),#0c0d0d);border:1px solid #202222">
-              <div class="blur-[10px] opacity-40 w-[220px] h-[45px] rounded-full absolute top-0 left-0 pointer-events-none"
-                style="background-color:rgba(99,102,241,0.3);box-shadow:0 0 50px rgba(99,102,241,0.5);transform:rotate(40deg);transform-origin:10%"></div>
-              <div class="p-8 z-10 relative flex flex-col items-start h-full">
-                <div class="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center mb-6 ring-1 ring-indigo-500/30">
-                  <i data-lucide="pen-tool" class="h-6 w-6 text-indigo-300"></i>
-                </div>
-                <h3 class="text-xl font-semibold tracking-tight text-white mb-3">2. Redacción</h3>
-                <p class="text-sm leading-relaxed text-neutral-300">Apoyo en la creación de textos formales, cartas, manuales y la corrección ortotipográfica para asegurar un tono profesional en cada documento.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 3: Fórmulas Excel -->
-          <div class="z-10 h-full rounded-3xl p-[1px] relative"
-            style="background:radial-gradient(230px at 0% 0%,rgba(16,185,129,0.4),#0c0d0d);mask-image:linear-gradient(180deg,transparent,black 0%,black 70%,transparent);-webkit-mask-image:linear-gradient(180deg,transparent,black 0%,black 70%,transparent)">
-            <div class="flex flex-col hover:bg-white/10 transition-all duration-300 z-10 h-full rounded-3xl backdrop-blur"
-              style="background:radial-gradient(circle 280px at 0% 0%,rgba(68,68,68,0.3),#0c0d0d);border:1px solid #202222">
-              <div class="blur-[10px] opacity-40 w-[220px] h-[45px] rounded-full absolute top-0 left-0 pointer-events-none"
-                style="background-color:rgba(16,185,129,0.3);box-shadow:0 0 50px rgba(16,185,129,0.5);transform:rotate(40deg);transform-origin:10%"></div>
-              <div class="p-8 z-10 relative flex flex-col items-start h-full">
-                <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center mb-6 ring-1 ring-emerald-500/30">
-                  <i data-lucide="table-2" class="h-6 w-6 text-emerald-300"></i>
-                </div>
-                <h3 class="text-xl font-semibold tracking-tight text-white mb-3">3. Fórmulas Excel</h3>
-                <p class="text-sm leading-relaxed text-neutral-300">Asistencia en la lógica y sintaxis de fórmulas avanzadas como BUSCARV, SUMAR.SI y validación de datos complejos en hojas de cálculo.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 4: Diseño Web -->
-          <div class="z-10 h-full rounded-3xl p-[1px] relative"
-            style="background:radial-gradient(230px at 0% 0%,rgba(236,72,153,0.4),#0c0d0d);mask-image:linear-gradient(180deg,transparent,black 0%,black 70%,transparent);-webkit-mask-image:linear-gradient(180deg,transparent,black 0%,black 70%,transparent)">
-            <div class="flex flex-col hover:bg-white/10 transition-all duration-300 z-10 h-full rounded-3xl backdrop-blur"
-              style="background:radial-gradient(circle 280px at 0% 0%,rgba(68,68,68,0.3),#0c0d0d);border:1px solid #202222">
-              <div class="blur-[10px] opacity-40 w-[220px] h-[45px] rounded-full absolute top-0 left-0 pointer-events-none"
-                style="background-color:rgba(236,72,153,0.3);box-shadow:0 0 50px rgba(236,72,153,0.5);transform:rotate(40deg);transform-origin:10%"></div>
-              <div class="p-8 z-10 relative flex flex-col items-start h-full">
-                <div class="w-12 h-12 rounded-xl bg-pink-500/20 flex items-center justify-center mb-6 ring-1 ring-pink-500/30">
-                  <i data-lucide="code-2" class="h-6 w-6 text-pink-300"></i>
-                </div>
-                <h3 class="text-xl font-semibold tracking-tight text-white mb-3">4. Diseño Web</h3>
-                <p class="text-sm leading-relaxed text-neutral-300">Generación de código, estructura y estilos (HTML/CSS/JS) para crear esta interfaz web, conectando APIs e integrando Supabase como base de datos.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Prompts Console -->
-        <div class="mt-16">
-          <div class="text-center mb-10">
-            <h3 class="text-2xl font-semibold text-white tracking-tight">Prompts reales que usé</h3>
-            <p class="text-sm text-zinc-400 mt-2">Ejemplos de cómo estructuré mis solicitudes a la IA</p>
-          </div>
-          <div class="bg-[#0b0f17] rounded-2xl border border-white/10 p-6 md:p-8 font-mono text-sm shadow-2xl relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-violet-500 via-indigo-500 to-pink-500"></div>
-            <!-- Mac-style dots -->
-            <div class="flex gap-2 mb-6">
-              <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
-              <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-              <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
-              <span class="ml-2 text-xs text-zinc-500">terminal — prompts MOS 2026</span>
-            </div>
-            <div class="space-y-6">
-              <div>
-                <span class="text-blue-400 font-bold"># PARA WORD:</span>
-                <p class="text-zinc-300 mt-2 pl-4 border-l-2 border-blue-500/30">"Actúa como experto en Microsoft Word. Crea una carta formal dirigida a una junta directiva proponiendo la adopción de una nueva herramienta de IA, con formato profesional, márgenes correctos y estilo APA..."</p>
-              </div>
-              <div>
-                <span class="text-green-400 font-bold"># PARA EXCEL:</span>
-                <p class="text-zinc-300 mt-2 pl-4 border-l-2 border-green-500/30">"Crea una plantilla de control de inventario en Excel. Dame las fórmulas exactas para usar BUSCARV y condicionales para alertar cuando el stock esté por debajo del mínimo establecido..."</p>
-              </div>
-              <div>
-                <span class="text-violet-400 font-bold"># PARA ESTE PORTAFOLIO:</span>
-                <p class="text-zinc-300 mt-2 pl-4 border-l-2 border-violet-500/30">"Actúa como desarrollador web full-stack experto. Crea mi portafolio MOS 2026 con sistema de tabs, integración con Supabase para gestión de documentos, reproductor de música lofi y un diseño glassmorphism oscuro con Tailwind CSS..."</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- CONTACTO -->
-    <!-- ============================================================ -->
-    <section class="z-10 relative mt-4 mb-24">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-
-          <!-- Texto izquierda -->
-          <div class="space-y-6">
-            <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-200 backdrop-blur">
-              <i data-lucide="mail" class="h-3.5 w-3.5 text-violet-400"></i>
-              Contacto
-            </div>
-            <h2 class="text-3xl sm:text-4xl font-semibold text-white tracking-tight">¿Hablamos?</h2>
-            <p class="text-lg text-zinc-300 leading-relaxed max-w-lg">
-              Ponte en contacto conmigo si quieres saber más sobre mi preparación para la certificación MOS o sobre los proyectos que he realizado integrando herramientas de Office con Inteligencia Artificial.
-            </p>
-            <div class="flex items-center gap-4 pt-6 mt-6 border-t border-white/10">
-              <div class="h-12 w-12 rounded-xl bg-violet-500/20 flex items-center justify-center ring-1 ring-violet-500/30">
-                <i data-lucide="message-square" class="h-6 w-6 text-violet-300"></i>
-              </div>
-              <div>
-                <h4 class="text-white font-medium">Respuesta rápida</h4>
-                <p class="text-sm text-zinc-400">Normalmente respondo en menos de 24 horas.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Formulario derecha -->
-          <div class="ring-1 ring-white/10 bg-white/5 rounded-2xl p-8 backdrop-blur-xl">
-            <form action="https://formspree.io/f/xzdwbgqn" method="POST" class="space-y-5">
-              <div>
-                <label class="block text-sm font-medium text-zinc-300 mb-2">Nombre completo</label>
-                <input type="text" name="name" required placeholder="Tu nombre"
-                  class="w-full bg-[#0a0a12]/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500 transition-shadow">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-zinc-300 mb-2">Correo electrónico</label>
-                <input type="email" name="email" required placeholder="tu@correo.com"
-                  class="w-full bg-[#0a0a12]/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500 transition-shadow">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-zinc-300 mb-2">Mensaje</label>
-                <textarea name="message" rows="4" required placeholder="¿En qué te puedo ayudar?"
-                  class="w-full bg-[#0a0a12]/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500 transition-shadow"></textarea>
-              </div>
-              <button type="submit"
-                class="w-full flex justify-center items-center gap-2 text-base font-semibold text-white bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl px-4 py-3.5 shadow-lg shadow-violet-900/25 transition-all duration-300 hover:shadow-[0_8px_20px_-6px_rgba(139,92,246,0.5)] hover:-translate-y-0.5">
-                Enviar Mensaje
-                <i data-lucide="send" class="h-4 w-4"></i>
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </div>
-  <!-- END: inicio-view -->
-
-  <!-- ============================================================ -->
-  <!-- VIEW: DESCARGAS -->
-  <!-- ============================================================ -->
-  <div id="descargas-view" class="hidden">
-    <section class="z-10 relative py-16">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        <!-- Title -->
-        <div class="text-center mb-12">
-          <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-200 backdrop-blur mb-6">
-            <i data-lucide="folder-open" class="h-3.5 w-3.5 text-violet-400"></i>
-            Repositorio MOS
-          </div>
-          <h2 class="text-3xl sm:text-4xl font-semibold text-white tracking-tight">Mis Documentos</h2>
-          <p class="mt-3 text-base text-zinc-300">Colección de proyectos y documentos creados durante mi preparación MOS</p>
-        </div>
-
-        <!-- Search + Filters -->
-        <div class="mb-8 flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div class="relative w-full sm:w-96">
-            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400"></i>
-            <input type="text" id="searchInput" placeholder="Buscar documentos..."
-              class="w-full bg-white/5 border border-white/10 rounded-full py-2.5 pl-10 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-violet-500">
-          </div>
-          <div class="flex gap-2 flex-wrap">
-            <button onclick="filterDocs('Todos')"
-              class="px-4 py-1.5 rounded-full text-sm font-medium bg-white/10 text-white border border-white/20 filter-btn transition-all" data-filter="Todos">
-              Todos
-            </button>
-            <button onclick="filterDocs('Word')"
-              class="px-4 py-1.5 rounded-full text-sm font-medium bg-white/5 text-zinc-300 hover:text-white border border-white/10 filter-btn transition-all" data-filter="Word">
-              <i data-lucide="file-text" class="h-3 w-3 inline mr-1"></i>Word
-            </button>
-            <button onclick="filterDocs('Excel')"
-              class="px-4 py-1.5 rounded-full text-sm font-medium bg-white/5 text-zinc-300 hover:text-white border border-white/10 filter-btn transition-all" data-filter="Excel">
-              <i data-lucide="table" class="h-3 w-3 inline mr-1"></i>Excel
-            </button>
-          </div>
-        </div>
-
-        <!-- Docs Grid -->
-        <div id="docs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div class="text-center col-span-full py-12 text-zinc-400">Cargando documentos...</div>
-        </div>
-      </div>
-    </section>
-  </div>
-  <!-- END: descargas-view -->
-
-  <!-- ============================================================ -->
-  <!-- VIEW: SUBIR (Admin) -->
-  <!-- ============================================================ -->
-  <div id="subir-view" class="hidden">
-    <section class="z-10 relative py-16">
-      <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="ring-1 ring-white/10 bg-white/5 rounded-2xl p-8 backdrop-blur-xl shadow-2xl">
-
-          <!-- Header -->
-          <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-violet-500/20 text-violet-300 mb-4 ring-1 ring-violet-500/30">
-              <i data-lucide="upload-cloud" class="h-7 w-7"></i>
-            </div>
-            <h2 class="text-2xl font-semibold text-white tracking-tight">Subir Archivo</h2>
-            <p class="text-sm text-zinc-400 mt-2">Sube documentos Word o Excel a tu portafolio</p>
-          </div>
-
-          <form id="uploadForm" class="space-y-6">
-            <!-- Dropzone -->
-            <div class="border-2 border-dashed border-white/10 rounded-xl p-8 text-center hover:bg-white/5 transition-colors cursor-pointer group" id="dropzone">
-              <i data-lucide="file-plus" class="h-8 w-8 mx-auto text-zinc-400 group-hover:text-violet-400 mb-3 transition-colors"></i>
-              <p class="text-sm text-zinc-300 font-medium">Arrastra tu archivo aquí</p>
-              <p class="text-xs text-zinc-500 mt-1">o haz clic para buscar</p>
-              <input type="file" id="fileInput" class="hidden" accept=".doc,.docx,.xls,.xlsx,.pdf">
-              <p id="fileNameDisplay" class="hidden mt-3 text-xs text-violet-400 font-medium"></p>
-            </div>
-
-            <!-- Fields -->
-            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <div>
-                <label class="block text-sm font-medium text-zinc-300 mb-1">Autor</label>
-                <input type="text" id="autorInput" required value="Ricardo Zelaya"
-                  class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-violet-500">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-zinc-300 mb-1">Tipo</label>
-                <select id="tipoInput" required
-                  class="w-full bg-[#0a0a12] border border-white/10 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-violet-500">
-                  <option value="Word">Word</option>
-                  <option value="Excel">Excel</option>
+            <form id="contactForm" action="TU_URL_FORMSPREE" method="POST" onsubmit="sendContact(event)">
+              <div class="cf"><label>Nombre completo</label><input type="text" name="nombre" required placeholder="Tu nombre"/></div>
+              <div class="cf"><label>Correo electrónico</label><input type="email" name="email" required placeholder="tu@correo.com"/></div>
+              <div class="cf"><label>Asunto</label>
+                <select name="asunto">
+                  <option value="">Selecciona un asunto…</option>
+                  <option>Consulta sobre documentos MOS</option>
+                  <option>Colaboración académica</option>
+                  <option>Solicitud de información</option>
+                  <option>Otro</option>
                 </select>
               </div>
+              <div class="cf"><label>Mensaje</label><textarea name="mensaje" required placeholder="Escribe tu mensaje…"></textarea></div>
+              <button type="submit" class="btn-send">Enviar mensaje ✉️</button>
+            </form>
+            <div class="form-ok" id="contactOk">
+              <div class="ok-icon">✅</div>
+              <p class="ok-t">¡Mensaje enviado!</p>
+              <p class="ok-s">Gracias por contactarme. Te responderé pronto a tu correo.</p>
             </div>
-
-            <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1">Título del documento</label>
-              <input type="text" id="tituloInput" required placeholder="Ej: Carta formal empresa XYZ"
-                class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-violet-500">
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1">Descripción</label>
-              <textarea id="descInput" rows="3" required placeholder="Breve descripción del documento..."
-                class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-violet-500"></textarea>
-            </div>
-
-            <button type="submit" id="btn-submit-upload"
-              class="w-full flex justify-center items-center gap-2 text-sm font-semibold text-white bg-gradient-to-br from-violet-500 to-indigo-600 rounded-lg px-4 py-3 shadow-lg shadow-violet-900/25 transition-all duration-300 hover:shadow-[0_8px_20px_-6px_rgba(139,92,246,0.5)] hover:-translate-y-0.5">
-              <i data-lucide="upload" class="h-4 w-4"></i> Subir a Supabase
-            </button>
-          </form>
-        </div>
-      </div>
-    </section>
-  </div>
-  <!-- END: subir-view -->
-
-  <!-- ============================================================ -->
-  <!-- TOAST CONTAINER -->
-  <!-- ============================================================ -->
-  <div id="toast-container"></div>
-
-  <!-- ============================================================ -->
-  <!-- FILE PREVIEW MODAL -->
-  <!-- ============================================================ -->
-  <div id="preview-modal">
-    <div id="preview-modal-backdrop" onclick="closePreview()"></div>
-    <div id="preview-modal-content">
-      <div id="preview-modal-header">
-        <div class="flex items-center gap-3">
-          <div id="preview-modal-icon" class="w-9 h-9 rounded-xl flex items-center justify-center"></div>
-          <div>
-            <h3 id="preview-modal-title" class="text-sm font-semibold text-white"></h3>
-            <p id="preview-modal-type" class="text-xs text-zinc-400"></p>
           </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <a id="preview-modal-download" href="#" target="_blank"
-            class="flex items-center gap-1.5 text-xs font-medium text-violet-300 hover:text-violet-200 bg-violet-500/10 border border-violet-500/20 rounded-lg px-3 py-1.5 transition-colors">
-            <i data-lucide="download" class="h-3.5 w-3.5"></i> Descargar
-          </a>
-          <button onclick="closePreview()"
-            class="p-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
-            <i data-lucide="x" class="h-4 w-4"></i>
-          </button>
-        </div>
-      </div>
-      <div id="preview-modal-body" class="flex items-center justify-center">
-        <!-- Content injected by JS -->
-      </div>
-    </div>
-  </div>
-
-  <!-- ============================================================ -->
-  <!-- FOOTER -->
-  <!-- ============================================================ -->
-  <footer class="relative z-10 border-t border-white/10 mt-10">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-          <div class="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
-            <i data-lucide="graduation-cap" class="h-3.5 w-3.5 text-white"></i>
-          </div>
-          <span class="text-sm font-medium text-zinc-300">© 2026 Ricardo Zelaya — Portafolio MOS</span>
-        </div>
-        <div class="flex items-center gap-2 text-xs text-zinc-500">
-          <i data-lucide="award" class="h-3.5 w-3.5 text-violet-400"></i>
-          <span>Microsoft Office Specialist 2026</span>
         </div>
       </div>
     </div>
-  </footer>
+    <footer><p>© 2026 <strong>Ricardo Zelaya</strong> · Portafolio MOS con IA · Hecho con Claude AI · El Salvador</p></footer>
+  </div>
 
-  <!-- ============================================================ -->
-  <!-- LUCIDE ICONS -->
-  <!-- ============================================================ -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- ══ DESCARGAS ══ -->
+  <div id="page-descargas" class="page">
+    <div class="dl-hero">
+      <h1>Mis Documentos</h1>
+      <p>Colección de proyectos técnicos desarrollados con Microsoft Word y Excel.</p>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Buscar documento…" oninput="searchDocs()"/>
+      </div>
+    </div>
+    <div class="dl-body">
+      <div class="dl-tabs">
+        <button class="dl-tab active" onclick="filterDl('all',this)">Todos (<span id="dlAll">0</span>)</button>
+        <button class="dl-tab" onclick="filterDl('word',this)">📄 Word (<span id="dlWord">0</span>)</button>
+        <button class="dl-tab" onclick="filterDl('excel',this)">📊 Excel (<span id="dlExcel">0</span>)</button>
+      </div>
+      <div class="dl-grid" id="dlGrid">
+        <div class="dl-empty"><div class="big">📂</div><p>Aún no hay documentos.<br>¡Sube el primero!</p><button onclick="showPage('subir',null)">Subir archivo →</button></div>
+      </div>
+    </div>
+    <footer><p>© 2026 <strong>Ricardo Zelaya</strong> · Portafolio MOS con IA · El Salvador</p></footer>
+  </div>
 
-  <!-- ============================================================ -->
-  <!-- APP JAVASCRIPT -->
-  <!-- ============================================================ -->
-  <script>
-    // ==========================================
-    // 1. SUPABASE INITIALIZATION
-    // ==========================================
-    const supabaseUrl = 'https://mvzwipqnzeqvnbkkbshn.supabase.co';
-    const supabaseKey = 'sb_publishable_rC_MRTrw45InbL1FcTScKQ_wuR3PiBm';
-    
-    let supabase = null;
-    try {
-      if (window.supabase) {
-        supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-      } else {
-        console.warn("Supabase no se cargó correctamente desde el CDN.");
-      }
-    } catch (e) {
-      console.error("Error inicializando Supabase:", e);
-    }
-
-    let isAdmin = false;
-
-    // ==========================================
-    // 2. SISTEMA DE NOTIFICACIONES (TOAST)
-    // ==========================================
-    let toastId = 0;
-    
-    function showToast(type, icon, title, subtitle, duration = 4000) {
-      try {
-        const container = document.getElementById('toast-container');
-        if (!container) return null;
-
-        const id = 'toast-' + (++toastId);
-        const el = document.createElement('div');
-        el.id = id;
-        el.className = 'toast toast-' + type;
-        el.innerHTML = `
-          <div class="toast-icon">${icon}</div>
-          <div class="flex-1 min-w-0">
-            <p class="font-semibold text-sm text-white">${title}</p>
-            ${subtitle ? `<p class="text-xs text-white/60 mt-0.5 truncate">${subtitle}</p>` : ''}
-            <div class="toast-progress mt-2">
-              <div class="toast-progress-bar" style="width:100%; transition:width ${duration}ms linear"></div>
+  <!-- ══ SUBIR ══ -->
+  <div id="page-subir" class="page">
+    <div class="up-body">
+      <h1 class="up-title">Subir Archivo</h1>
+      <p class="up-sub">Comparte un documento Word o Excel. Aparece al instante en Descargas y puedes borrarlo con el botón 🗑️.</p>
+      <div class="up-card">
+        <div id="uploadForm">
+          <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <div class="drop-icon">⬆️</div>
+            <p class="drop-main">Arrastra tu archivo aquí o haz clic para buscar</p>
+            <p class="drop-sub">Soporta Word (.docx) y Excel (.xlsx) hasta 20MB</p>
+            <span class="drop-fname" id="dropName"></span>
+          </div>
+          <input type="file" id="fileInput" accept=".docx,.xlsx" onchange="handleFile(this)"/>
+          <div class="up-row">
+            <div class="uf"><label>Autor *</label><input type="text" id="upAutor" placeholder="Tu nombre"/></div>
+            <div class="uf"><label>Tipo *</label>
+              <select id="upTipo">
+                <option value="">Selecciona el tipo</option>
+                <option value="word">📄 Word (.docx)</option>
+                <option value="excel">📊 Excel (.xlsx)</option>
+              </select>
             </div>
           </div>
-        `;
-        
-        container.appendChild(el);
-        
-        requestAnimationFrame(() => {
-          el.classList.add('show');
-          setTimeout(() => { 
-            const progressBar = el.querySelector('.toast-progress-bar');
-            if (progressBar) progressBar.style.width = '0%'; 
-          }, 50);
-        });
-        
-        setTimeout(() => {
-          el.classList.remove('show');
-          setTimeout(() => el.remove(), 500);
-        }, duration);
-        
-        return id;
-      } catch (e) {
-        console.error("Error en showToast:", e);
-      }
-    }
+          <div class="uf"><label>Título *</label><input type="text" id="upTitulo" placeholder="Ej: Carta de Presentación Profesional"/></div>
+          <div class="uf"><label>Descripción (Opcional)</label><textarea id="upDesc" placeholder="¿De qué trata este documento?…"></textarea></div>
+          <button class="btn-upload" onclick="uploadDoc()">⬆️ Compartir Archivo</button>
+          <p class="up-note">Los archivos se guardan en este navegador. Puedes eliminarlos desde Descargas con el botón 🗑️</p>
+        </div>
+        <div class="up-ok" id="uploadOk">
+          <div class="ok-icon">🎉</div>
+          <p class="ok-t">¡Archivo compartido!</p>
+          <p class="ok-s">Tu documento ya aparece en Descargas.</p>
+          <button class="btn-ghost" onclick="showPage('descargas',null)">Ver mis documentos →</button>
+          <button class="btn-ghost" onclick="resetUpload()">Subir otro archivo</button>
+        </div>
+      </div>
+    </div>
+    <footer><p>© 2026 <strong>Ricardo Zelaya</strong> · Portafolio MOS con IA · El Salvador</p></footer>
+  </div>
 
-    function showLoadingToast(icon, title, subtitle) {
-      try {
-        const container = document.getElementById('toast-container');
-        if (!container) return null;
+</div><!-- fin app -->
 
-        const id = 'toast-' + (++toastId);
-        const el = document.createElement('div');
-        el.id = id;
-        el.className = 'toast toast-loading';
-        el.innerHTML = `
-          <div class="toast-icon"><div class="toast-spinner"></div></div>
-          <div class="flex-1 min-w-0">
-            <p class="font-semibold text-sm text-white">${title}</p>
-            ${subtitle ? `<p class="text-xs text-white/60 mt-0.5">${subtitle}</p>` : ''}
-          </div>
-        `;
-        container.appendChild(el);
-        requestAnimationFrame(() => el.classList.add('show'));
-        return id;
-      } catch (e) {
-        console.error("Error en showLoadingToast:", e);
-      }
-    }
+<!-- MODAL VISTA PREVIA -->
+<div class="modal-overlay" id="previewModal" onclick="closePreview(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalTitle">Vista previa</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <div class="modal-info">
+        <div class="big">📄</div>
+        <p>Haz clic en el ícono del documento<br>para ver la vista previa.</p>
+      </div>
+    </div>
+  </div>
+</div>
 
-    function dismissToast(id) {
-      try {
-        if (!id) return;
-        const el = document.getElementById(id);
-        if (el) { 
-          el.classList.remove('show'); 
-          setTimeout(() => el.remove(), 500); 
-        }
-      } catch (e) {
-        console.error("Error en dismissToast:", e);
-      }
-    }
+<script>
+/* ══════════════════════════════════════
+   CONTRASEÑA — cámbiala aquí ↓
+══════════════════════════════════════ */
+const PASSWORD = "mos2025";
 
-    // ==========================================
-    // 3. NAVEGACIÓN Y PESTAÑAS (TABS)
-    // ==========================================
-    function switchTab(tabId) {
-      try {
-        // Ocultar todas las vistas
-        ['inicio', 'descargas', 'subir'].forEach(id => {
-          const view = document.getElementById(id + '-view');
-          if (view) view.classList.add('hidden');
-        });
+/* ── SPLASH ── */
+window.addEventListener('load', () => {
+  // Generar favicon con canvas
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#8b5cf6';
+  ctx.beginPath(); ctx.arc(32,32,32,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 28px serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('RZ', 32, 33);
+  document.getElementById('favicon').href = c.toDataURL();
 
-        // Reiniciar botones del menú
-        document.querySelectorAll('.nav-btn, .nav-btn-m').forEach(btn => {
-          btn.classList.remove('bg-white/10', 'text-white');
-          btn.classList.add('text-zinc-300');
-        });
+  // Ocultar splash después de 1.4s
+  setTimeout(() => {
+    const s = document.getElementById('splash');
+    s.style.opacity = '0';
+    setTimeout(() => { s.style.display = 'none'; document.getElementById('loginScreen').style.display = 'flex'; }, 500);
+  }, 1400);
+});
 
-        // Mostrar la vista objetivo
-        const targetView = document.getElementById(tabId + '-view');
-        if (targetView) targetView.classList.remove('hidden');
+/* ── LOGIN / LOGOUT ── */
+function doLogin() {
+  const v = document.getElementById('loginPass').value;
+  const e = document.getElementById('loginErr');
+  if (v === PASSWORD) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    e.style.display = 'none';
+    renderDocs(); updateHeroStats(); initReveal();
+  } else {
+    e.style.display = 'block';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+  }
+}
+function doLogout() {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginPass').value = '';
+}
 
-        // Activar el botón de navegación correspondiente (Desktop)
-        const navBtn = document.getElementById('nav-' + tabId);
-        if (navBtn) { 
-          navBtn.classList.add('bg-white/10', 'text-white'); 
-          navBtn.classList.remove('text-zinc-300'); 
-        }
+/* ── AUDIO LOFI ── */
+const bgAudio = document.getElementById('bg-music');
+let isPlaying = false;
+function togglePlay() {
+  const btn = document.getElementById('btn-play');
+  if (isPlaying) {
+    bgAudio.pause();
+    btn.textContent = '🎵';
+  } else {
+    bgAudio.play().catch(e => console.warn("Audio bloqueado:", e));
+    btn.textContent = '⏸️';
+  }
+  isPlaying = !isPlaying;
+}
 
-        // Activar el botón de navegación correspondiente (Móvil)
-        const navBtnM = document.getElementById('nav-' + tabId + '-m');
-        if (navBtnM) { 
-          navBtnM.classList.add('bg-white/10', 'text-white'); 
-          navBtnM.classList.remove('text-zinc-300'); 
-        }
+/* ── NAV ── */
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else document.querySelectorAll('.nav-link').forEach(b => {
+    if (b.textContent.trim().toLowerCase().startsWith(id.slice(0,4))) b.classList.add('active');
+  });
+  document.getElementById('topNav').classList.remove('open');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if (id==='descargas') { renderDocs(); document.getElementById('searchInput').value=''; }
+  if (id==='home') updateHeroStats();
+}
+function toggleNav() { document.getElementById('topNav').classList.toggle('open'); }
+document.addEventListener('click', e => {
+  const nav = document.getElementById('topNav');
+  const hbg = document.getElementById('hbg');
+  if (nav && !nav.contains(e.target) && hbg && !hbg.contains(e.target)) nav.classList.remove('open');
+});
 
-        // Cargar documentos si se entra a la pestaña de descargas
-        if (tabId === 'descargas') {
-          loadDocuments();
-        }
+/* ── DOCUMENTOS ── */
+const KEY = 'mos_docs_v3';
+let currentFilter = 'all';
+let searchQuery   = '';
 
-        // Manejar visibilidad del botón de Salir (Admin)
-        const btnSalir = document.getElementById('btn-salir');
-        if (btnSalir) {
-          if (tabId === 'subir') {
-            btnSalir.classList.remove('hidden');
-            btnSalir.classList.add('flex');
-          } else {
-            btnSalir.classList.add('hidden');
-            btnSalir.classList.remove('flex');
-          }
-        }
+function getDocs() {
+  try { return JSON.parse(localStorage.getItem(KEY)) || []; }
+  catch(e) { return []; }
+}
+function saveDocs(d) {
+  try { localStorage.setItem(KEY, JSON.stringify(d)); } catch(e) {}
+}
 
-        // Volver arriba y refrescar iconos
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        if (window.lucide) {
-          lucide.createIcons();
-        }
-      } catch (e) {
-        console.error("Error en switchTab:", e);
-      }
-    }
+function updateHeroStats() {
+  const docs = getDocs();
+  const w = docs.filter(d=>d.type==='word').length;
+  const e = docs.filter(d=>d.type==='excel').length;
+  document.getElementById('hTotal').textContent = docs.length;
+  document.getElementById('hWord').textContent  = w;
+  document.getElementById('hExcel').textContent = e;
+}
 
-    function promptPassword() {
-      if (isAdmin) { 
-        switchTab('subir'); 
-        return; 
-      }
-      const pw = prompt('Introduce la contraseña de administrador (1234):');
-      if (pw === '1234') { 
-        isAdmin = true; 
-        switchTab('subir'); 
-        showToast('success', '🔓', 'Acceso concedido', 'Bienvenido al panel de administrador');
-      } else if (pw !== null) { 
-        showToast('error', '🔒', 'Acceso denegado', 'Contraseña incorrecta'); 
-      }
-    }
+function searchDocs() {
+  searchQuery = document.getElementById('searchInput').value.toLowerCase();
+  renderDocs();
+}
 
-    function logout() { 
-      isAdmin = false; 
-      switchTab('inicio'); 
-      showToast('info', '👋', 'Sesión cerrada', 'Has salido del panel de administrador'); 
-    }
+function renderDocs() {
+  let docs = getDocs();
+  const w = docs.filter(d=>d.type==='word').length;
+  const e = docs.filter(d=>d.type==='excel').length;
+  document.getElementById('dlAll').textContent   = docs.length;
+  document.getElementById('dlWord').textContent  = w;
+  document.getElementById('dlExcel').textContent = e;
 
-    // ==========================================
-    // 4. CONTROL DE AUDIO (LOFI)
-    // ==========================================
-    const audio = document.getElementById('bg-music');
-    let isPlaying = false;
-    
-    function togglePlay() {
-      if (!audio) return;
-      const icon = document.querySelector('#btn-play i');
-      
-      try {
-        if (isPlaying) {
-          audio.pause();
-          if (icon) icon.setAttribute('data-lucide', 'play');
-          showToast('info', '⏸️', 'Música pausada', 'Lofi beats');
-        } else {
-          audio.play().catch((err) => {
-            console.warn("Reproducción bloqueada:", err);
-            showToast('error', '🔇', 'Sin audio', 'Interactúa con la página primero');
-          });
-          if (icon) icon.setAttribute('data-lucide', 'pause');
-          showToast('info', '🎵', 'Reproduciendo música', 'Lofi study beats');
-        }
-        isPlaying = !isPlaying;
-        if (window.lucide) lucide.createIcons();
-      } catch (e) {
-        console.error("Error en togglePlay:", e);
-      }
-    }
+  if (currentFilter !== 'all') docs = docs.filter(d=>d.type===currentFilter);
+  if (searchQuery) docs = docs.filter(d =>
+    d.titulo.toLowerCase().includes(searchQuery) ||
+    d.desc.toLowerCase().includes(searchQuery) ||
+    d.autor.toLowerCase().includes(searchQuery)
+  );
 
-    function changeVolume(amount) { 
-      if (audio) {
-        audio.volume = Math.min(1, Math.max(0, audio.volume + amount)); 
-      }
-    }
+  const grid = document.getElementById('dlGrid');
+  if (!docs.length) {
+    grid.innerHTML = `<div class="dl-empty">
+      <div class="big">${searchQuery ? '🔍' : '📂'}</div>
+      <p>${searchQuery ? `Sin resultados para "<strong>${searchQuery}</strong>"` : 'Aún no hay documentos.<br>¡Sube el primero!'}</p>
+      ${!searchQuery ? '<button onclick="showPage(\'subir\',null)">Subir archivo →</button>' : ''}
+    </div>`;
+    return;
+  }
 
-    // ==========================================
-    // 5. SUPABASE: CARGA DE DOCUMENTOS
-    // ==========================================
-    async function loadDocuments() {
-      const grid = document.getElementById('docs-grid');
-      if (!grid) return;
+  grid.innerHTML = docs.map((d,i) => `
+    <div class="doc-card">
+      <div class="doc-thumb ${d.type}" onclick="previewDoc('${d.id}','${escHtml(d.titulo)}','${d.type}','${d.url}')">
+        <span>${d.emoji}</span>
+        <div class="doc-thumb-overlay">👁️ Vista previa</div>
+        <span class="doc-num">${d.type==='word'?'W':'E'}${String(i+1).padStart(2,'0')}</span>
+      </div>
+      <div class="doc-body">
+        <span class="doc-tag ${d.type}">${d.type==='word'?'● Microsoft Word':'● Microsoft Excel'}</span>
+        <p class="doc-title">${d.titulo}</p>
+        <p class="doc-desc">${d.desc}</p>
+        <div class="doc-author">👤 ${d.autor}</div>
+      </div>
+      <div class="doc-foot">
+        <a class="btn-dl" href="${d.url}" download="${d.file}">↓ Descargar</a>
+        <button class="btn-del" onclick="deleteDoc('${d.id}')" title="Eliminar">🗑️</button>
+      </div>
+    </div>`).join('');
+}
 
-      grid.innerHTML = '<div class="text-center col-span-full py-12 text-zinc-400 flex flex-col items-center gap-3"><div class="w-8 h-8 border-2 border-violet-500/50 border-t-violet-400 rounded-full animate-spin"></div>Cargando documentos...</div>';
-      
-      if (!supabase) {
-        grid.innerHTML = '<div class="text-center col-span-full py-12 text-red-400">Error: Supabase no está conectado.</div>';
-        return;
-      }
+function escHtml(s) { return s.replace(/'/g,"&#39;"); }
 
-      try {
-        const { data, error } = await supabase.from('archivos').select('*').order('created_at', { ascending: false });
-        if (error) throw error;
-        
-        window.allDocs = data || [];
-        renderDocs(window.allDocs);
-      } catch (error) {
-        console.error("Error al cargar documentos:", error);
-        grid.innerHTML = '<div class="text-center col-span-full py-12 text-red-400">Hubo un error al descargar la base de datos. Verifica tu conexión.</div>';
-        showToast('error', '❌', 'Error de conexión', 'No se pudieron cargar los documentos');
-      }
-    }
+function filterDl(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll('.dl-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderDocs();
+}
 
-    // ==========================================
-    // 6. FILTROS Y BÚSQUEDA
-    // ==========================================
-    function filterDocs(type) {
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('bg-white/10', 'text-white', 'border-white/20');
-        btn.classList.add('bg-white/5', 'text-zinc-300', 'border-white/10');
-      });
-      
-      const active = document.querySelector('.filter-btn[data-filter="' + type + '"]');
-      if (active) { 
-        active.classList.add('bg-white/10', 'text-white', 'border-white/20'); 
-        active.classList.remove('bg-white/5', 'text-zinc-300', 'border-white/10'); 
-      }
-      
-      const filtered = type === 'Todos' ? window.allDocs : window.allDocs.filter(d => d.tipo === type);
-      renderDocs(filtered);
-    }
+function deleteDoc(id) {
+  if (!confirm('¿Eliminar este documento? Esta acción no se puede deshacer.')) return;
+  saveDocs(getDocs().filter(d=>d.id!==id));
+  renderDocs(); updateHeroStats();
+}
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const searchInput = document.getElementById('searchInput');
-      if (searchInput) {
-        searchInput.addEventListener('input', e => {
-          const term = e.target.value.toLowerCase();
-          const filtered = (window.allDocs || []).filter(d =>
-            (d.titulo && d.titulo.toLowerCase().includes(term)) ||
-            (d.descripcion && d.descripcion.toLowerCase().includes(term))
-          );
-          renderDocs(filtered);
-        });
-      }
-    });
+/* ── VISTA PREVIA ── */
+function previewDoc(id, titulo, tipo, url) {
+  document.getElementById('modalTitle').textContent = titulo;
+  const body = document.getElementById('modalBody');
+  if (!url) { body.innerHTML='<div class="modal-info"><div class="big">📄</div><p>Sin vista previa disponible.</p></div>'; }
+  else {
+    body.innerHTML = `
+      <div class="modal-info">
+        <div class="big">${tipo==='word'?'📄':'📊'}</div>
+        <p><strong>${titulo}</strong></p>
+        <p style="margin:.5rem 0 1.5rem">Para ver el contenido completo,<br>descarga el archivo.</p>
+        <a href="${url}" download style="display:inline-flex;align-items:center;gap:.4rem;padding:.7rem 1.5rem;background:var(--gold);color:white;border-radius:8px;font-weight:600;text-decoration:none;font-size:.9rem">↓ Descargar ahora</a>
+      </div>`;
+  }
+  document.getElementById('previewModal').classList.add('open');
+}
+function closePreview(e) { if (e.target===document.getElementById('previewModal')) closeModal(); }
+function closeModal() { document.getElementById('previewModal').classList.remove('open'); }
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
 
-    // ==========================================
-    // 7. RENDERIZADO DEL GRID DE DOCUMENTOS
-    // ==========================================
-    function renderDocs(docs) {
-      const grid = document.getElementById('docs-grid');
-      if (!grid) return;
+/* ── SUBIDA ── */
+let selectedFile = null;
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e=>{e.preventDefault();dropZone.classList.add('dragover')});
+dropZone.addEventListener('dragleave', ()=>dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e=>{
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  if(e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+});
+function handleFile(input){if(input.files[0])setFile(input.files[0])}
+function setFile(f){
+  if(!f.name.match(/\.(docx|xlsx)$/i)){alert('Solo se aceptan .docx o .xlsx');return}
+  if(f.size>20*1024*1024){alert('El archivo supera los 20MB');return}
+  selectedFile=f;
+  const n=document.getElementById('dropName');
+  n.textContent='📎 '+f.name; n.style.display='inline-block';
+  if(f.name.endsWith('.docx')) document.getElementById('upTipo').value='word';
+  if(f.name.endsWith('.xlsx')) document.getElementById('upTipo').value='excel';
+}
+function uploadDoc(){
+  const autor =document.getElementById('upAutor').value.trim();
+  const tipo  =document.getElementById('upTipo').value;
+  const titulo=document.getElementById('upTitulo').value.trim();
+  const desc  =document.getElementById('upDesc').value.trim();
+  if(!selectedFile){alert('Selecciona un archivo primero.');return}
+  if(!autor) {alert('Escribe el nombre del autor.');return}
+  if(!tipo)  {alert('Selecciona el tipo de documento.');return}
+  if(!titulo){alert('Escribe un título.');return}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const doc={id:'u_'+Date.now(),type:tipo,emoji:tipo==='word'?'📝':'📊',titulo,desc:desc||'Subido por '+autor,autor,file:selectedFile.name,url:e.target.result};
+    const docs=getDocs(); docs.push(doc); saveDocs(docs); updateHeroStats();
+    document.getElementById('uploadForm').style.display='none';
+    document.getElementById('uploadOk').style.display='block';
+  };
+  reader.readAsDataURL(selectedFile);
+}
+function resetUpload(){
+  selectedFile=null;
+  ['fileInput','upAutor','upTitulo','upDesc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('upTipo').value='';
+  const n=document.getElementById('dropName');
+  n.textContent=''; n.style.display='none';
+  document.getElementById('uploadForm').style.display='block';
+  document.getElementById('uploadOk').style.display='none';
+}
 
-      if (!docs || docs.length === 0) {
-        grid.innerHTML = '<div class="text-center col-span-full py-16 text-zinc-400"><i data-lucide="folder-open" class="h-12 w-12 mx-auto mb-4 opacity-30"></i><p>No hay documentos disponibles en esta categoría.</p></div>';
-        if (window.lucide) lucide.createIcons(); 
-        return;
-      }
+/* ── CONTACTO (Formspree) ── */
+async function sendContact(e) {
+  e.preventDefault();
+  const form = document.getElementById('contactForm');
+  const action = form.action;
+  if (action === 'TU_URL_FORMSPREE') {
+    form.style.display='none';
+    document.getElementById('contactOk').style.display='block';
+    return;
+  }
+  try {
+    const res = await fetch(action, {method:'POST',body:new FormData(form),headers:{Accept:'application/json'}});
+    if (res.ok) { form.style.display='none'; document.getElementById('contactOk').style.display='block'; }
+    else alert('Hubo un error al enviar. Intenta de nuevo.');
+  } catch(err) { alert('Sin conexión. Intenta de nuevo.'); }
+}
 
-      grid.innerHTML = docs.map(doc => {
-        const isWord = doc.tipo === 'Word';
-        const icon = isWord ? 'file-text' : 'table';
-        const color = isWord ? 'text-blue-400' : 'text-green-400';
-        const bg = isWord ? 'bg-blue-400/10 ring-blue-400/20' : 'bg-green-400/10 ring-green-400/20';
-        const badge = isWord
-          ? '<span class="text-xs font-medium text-blue-300 bg-blue-500/10 border border-blue-500/20 rounded-full px-2 py-0.5">Word</span>'
-          : '<span class="text-xs font-medium text-green-300 bg-green-500/10 border border-green-500/20 rounded-full px-2 py-0.5">Excel</span>';
-        const delBtn = isAdmin
-          ? `<button onclick="deleteDoc('${doc.id}')" class="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition" title="Eliminar"><i data-lucide="trash-2" class="h-4 w-4"></i></button>`
-          : '';
-        
-        // Codificar el objeto doc para pasarlo de forma segura
-        const docJSON = encodeURIComponent(JSON.stringify(doc));
-        
-        return `
-          <div class="ring-1 ring-white/10 bg-white/5 rounded-2xl p-5 hover:bg-white/[0.08] hover:ring-white/20 transition-all duration-300 flex flex-col h-full group cursor-pointer shadow-lg" onclick="openPreview(JSON.parse(decodeURIComponent('${docJSON}')))"> 
-            <div class="flex justify-between items-start mb-4">
-              <div class="w-11 h-11 rounded-xl ${bg} ${color} flex items-center justify-center ring-1">
-                <i data-lucide="${icon}" class="h-5 w-5"></i>
-              </div>
-              <div class="flex items-center gap-1" onclick="event.stopPropagation()">
-                ${badge}
-                ${delBtn}
-              </div>
-            </div>
-            <h3 class="text-base font-semibold text-white tracking-tight mb-2 leading-tight">${doc.titulo}</h3>
-            <p class="text-sm text-zinc-400 mb-4 flex-grow leading-relaxed">${doc.descripcion}</p>
-            <div class="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
-              <span class="text-xs text-zinc-500 flex items-center gap-1">
-                <i data-lucide="user" class="h-3 w-3"></i> ${doc.autor}
-              </span>
-              <a href="${doc.archivo_url || '#'}" target="_blank" onclick="event.stopPropagation(); trackDownload('${doc.titulo}')"
-                class="text-xs font-medium text-violet-300 hover:text-violet-200 flex items-center gap-1.5 transition-colors">
-                Descargar <i data-lucide="download" class="h-3.5 w-3.5"></i>
-              </a>
-            </div>
-          </div>`;
-      }).join('');
-      
-      if (window.lucide) lucide.createIcons();
-    }
-
-    // ==========================================
-    // 8. VISTA PREVIA (MODAL)
-    // ==========================================
-    function openPreview(doc) {
-      try {
-        const modal = document.getElementById('preview-modal');
-        const title = document.getElementById('preview-modal-title');
-        const type = document.getElementById('preview-modal-type');
-        const iconEl = document.getElementById('preview-modal-icon');
-        const body = document.getElementById('preview-modal-body');
-        const dlBtn = document.getElementById('preview-modal-download');
-        
-        if (!modal) return;
-        
-        const isWord = doc.tipo === 'Word';
-
-        title.textContent = doc.titulo;
-        type.textContent = doc.tipo + ' · ' + doc.autor;
-        
-        iconEl.className = 'w-9 h-9 rounded-xl flex items-center justify-center ' + (isWord ? 'bg-blue-500/20 text-blue-300' : 'bg-green-500/20 text-green-300');
-        iconEl.innerHTML = isWord
-          ? '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'
-          : '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>';
-        
-        dlBtn.href = doc.archivo_url || '#';
-
-        // Lógica de visualización de vista previa
-        const url = doc.archivo_url || '';
-        const ext = url.split('.').pop().toLowerCase();
-        
-        if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)) {
-          body.innerHTML = `<img src="${url}" alt="${doc.titulo}" class="max-w-full max-h-[60vh] rounded-xl object-contain shadow-2xl">`;
-        } else if (ext === 'pdf') {
-          body.innerHTML = `<iframe src="${url}" class="w-full" style="height:60vh; border:none; border-radius:12px;"></iframe>`;
-        } else {
-          // Documentos Word o Excel que no se pueden renderizar en iframe
-          body.innerHTML = `
-            <div class="flex flex-col items-center justify-center py-16 gap-4 text-center">
-              <div class="w-20 h-20 rounded-2xl ${isWord ? 'bg-blue-500/15 ring-blue-500/20' : 'bg-green-500/15 ring-green-500/20'} flex items-center justify-center ring-1 shadow-lg">
-                ${iconEl.innerHTML}
-              </div>
-              <div class="max-w-xs">
-                <p class="text-white font-semibold mb-1 text-lg">${doc.titulo}</p>
-                <p class="text-zinc-400 text-sm mb-6">${doc.descripcion}</p>
-                <div class="bg-white/5 border border-white/10 rounded-lg p-3 text-xs text-zinc-400 mb-4">
-                  <p>La vista previa en el navegador no está disponible para archivos <strong>${doc.tipo}</strong> nativos.</p>
-                </div>
-              </div>
-              <a href="${url}" target="_blank" onclick="trackDownload('${doc.titulo}')"
-                class="flex items-center gap-2 text-sm font-medium text-white bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl px-6 py-3 hover:-translate-y-0.5 transition-all shadow-[0_8px_20px_-6px_rgba(139,92,246,0.5)]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Descargar Archivo
-              </a>
-            </div>`;
-        }
-        
-        modal.classList.add('open');
-        document.body.style.overflow = 'hidden';
-      } catch (e) {
-        console.error("Error en openPreview:", e);
-      }
-    }
-
-    function closePreview() {
-      const modal = document.getElementById('preview-modal');
-      if (modal) {
-        modal.classList.remove('open');
-        document.body.style.overflow = '';
-        setTimeout(() => { 
-          const body = document.getElementById('preview-modal-body');
-          if (body) body.innerHTML = ''; 
-        }, 300);
-      }
-    }
-    
-    document.addEventListener('keydown', e => { 
-      if (e.key === 'Escape') closePreview(); 
-    });
-
-    function trackDownload(titulo) {
-      showToast('success', '⬇️', 'Descarga iniciada', titulo, 3500);
-    }
-
-    // ==========================================
-    // 9. ELIMINAR DOCUMENTO (ADMIN)
-    // ==========================================
-    async function deleteDoc(id) {
-      if (!confirm('¿Estás seguro de que deseas eliminar este documento permanentemente?')) return;
-      
-      const t = showLoadingToast('🗑️', 'Eliminando archivo...', 'Por favor espera');
-      try {
-        const { error } = await supabase.from('archivos').delete().eq('id', id);
-        dismissToast(t);
-        
-        if (error) throw error;
-        
-        showToast('success', '✅', 'Documento eliminado', 'El archivo fue borrado exitosamente'); 
-        loadDocuments(); 
-      } catch (err) {
-        dismissToast(t);
-        showToast('error', '❌', 'Error al eliminar', err.message);
-      }
-    }
-
-    // ==========================================
-    // 10. DROPZONE (SUBIDA DE ARCHIVOS)
-    // ==========================================
-    const dropzone = document.getElementById('dropzone');
-    const fileInput = document.getElementById('fileInput');
-    const fileNameDisplay = document.getElementById('fileNameDisplay');
-    let currentFile = null;
-    
-    if (dropzone && fileInput && fileNameDisplay) {
-      dropzone.addEventListener('click', () => fileInput.click());
-      
-      dropzone.addEventListener('dragover', e => { 
-        e.preventDefault(); 
-        dropzone.classList.add('bg-white/10', 'border-violet-500/50'); 
-      });
-      
-      dropzone.addEventListener('dragleave', () => {
-        dropzone.classList.remove('bg-white/10', 'border-violet-500/50');
-      });
-      
-      dropzone.addEventListener('drop', e => {
-        e.preventDefault(); 
-        dropzone.classList.remove('bg-white/10', 'border-violet-500/50');
-        if (e.dataTransfer.files.length) {
-          currentFile = e.dataTransfer.files[0];
-          fileNameDisplay.textContent = '📎 ' + currentFile.name;
-          fileNameDisplay.classList.remove('hidden');
-          showToast('info', '📎', 'Archivo seleccionado', currentFile.name, 3000);
-        }
-      });
-      
-      fileInput.addEventListener('change', e => {
-        if (e.target.files.length) {
-          currentFile = e.target.files[0];
-          fileNameDisplay.textContent = '📎 ' + currentFile.name;
-          fileNameDisplay.classList.remove('hidden');
-          showToast('info', '📎', 'Archivo seleccionado', currentFile.name, 3000);
-        }
-      });
-    }
-
-    // ==========================================
-    // 11. FORMULARIO DE SUBIDA (ADMIN)
-    // ==========================================
-    const uploadForm = document.getElementById('uploadForm');
-    if (uploadForm) {
-      uploadForm.addEventListener('submit', async e => {
-        e.preventDefault();
-        if (!currentFile) { 
-          showToast('error', '⚠️', 'Falta el archivo', 'Selecciona un documento primero'); 
-          return; 
-        }
-        
-        if (!supabase) {
-          showToast('error', '❌', 'Error de conexión', 'No hay conexión con la base de datos');
-          return;
-        }
-
-        const btn = document.getElementById('btn-submit-upload');
-        if (btn) {
-          btn.innerHTML = '<div class="toast-spinner mr-2"></div> Subiendo...';
-          btn.disabled = true;
-        }
-        
-        const loadingId = showLoadingToast('📤', 'Subiendo archivo...', currentFile.name);
-        
-        try {
-          const fileExt = currentFile.name.split('.').pop();
-          const fileName = Date.now() + '_' + Math.random().toString(36).substring(2) + '.' + fileExt;
-          
-          // 1. Subir al Storage de Supabase
-          const { error: uploadError } = await supabase.storage.from('documentos').upload(fileName, currentFile);
-          if (uploadError) throw uploadError;
-          
-          // 2. Obtener URL pública
-          const { data: urlData } = supabase.storage.from('documentos').getPublicUrl(fileName);
-          
-          // 3. Insertar en base de datos
-          const { error: dbError } = await supabase.from('archivos').insert([{
-            titulo: document.getElementById('tituloInput').value,
-            descripcion: document.getElementById('descInput').value,
-            autor: document.getElementById('autorInput').value,
-            tipo: document.getElementById('tipoInput').value,
-            archivo_url: urlData.publicUrl
-          }]);
-          
-          if (dbError) throw dbError;
-          
-          dismissToast(loadingId);
-          showToast('success', '✅', '¡Éxito!', 'Archivo guardado correctamente en la base de datos', 5000);
-          
-          // Resetear formulario
-          uploadForm.reset(); 
-          currentFile = null; 
-          if (fileNameDisplay) fileNameDisplay.classList.add('hidden');
-          
-        } catch (err) {
-          console.error("Error subiendo archivo:", err);
-          dismissToast(loadingId);
-          showToast('error', '❌', 'Error al subir', err.message, 6000);
-        } finally {
-          if (btn) {
-            btn.innerHTML = '<i data-lucide="upload" class="h-4 w-4"></i> Subir a Supabase';
-            btn.disabled = false; 
-            if (window.lucide) lucide.createIcons();
-          }
-        }
-      });
-    }
-
-    // ==========================================
-    // 12. INICIALIZACIÓN GENERAL
-    // ==========================================
-    document.addEventListener('DOMContentLoaded', () => {
-      // Formulario de contacto
-      const contactForm = document.querySelector('form[action*="formspree"]');
-      if (contactForm) {
-        contactForm.addEventListener('submit', () => {
-          showToast('success', '✉️', '¡Mensaje enviado!', 'Me pondré en contacto contigo muy pronto', 5000);
-        });
-      }
-      
-      // Iconos Lucide
-      if (window.lucide) {
-        lucide.createIcons();
-      }
-    });
-  </script>
-
+/* ── REVEAL ── */
+function initReveal(){
+  const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+}
+</script>
 </body>
 </html>
