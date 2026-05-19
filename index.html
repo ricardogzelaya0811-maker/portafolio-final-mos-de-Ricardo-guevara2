@@ -814,8 +814,8 @@ async function renderDocs(refetch = true) {
   if (!docs.length) {
     grid.innerHTML = `<div class="dl-empty">
       <div class="big">${searchQuery ? '🔍' : '📂'}</div>
-      <p>${searchQuery ? \`Sin resultados para "<strong>\${searchQuery}</strong>"\` : 'Aún no hay documentos.<br>¡Sube el primero!'}</p>
-      ${!searchQuery ? '<button onclick="showPage(\'subir\',null)">Subir archivo →</button>' : ''}
+      <p>${searchQuery ? 'Sin resultados para "<strong>' + searchQuery + '</strong>"' : 'Aún no hay documentos.<br>¡Sube el primero!'}</p>
+      ${!searchQuery ? "<button onclick='showPage(\"subir\",null)'>Subir archivo →</button>" : ""}
     </div>`;
     return;
   }
