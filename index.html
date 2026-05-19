@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8"/>
@@ -762,6 +762,10 @@ sbScript.onload = () => {
   try {
     if (window.supabase) supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
     console.log("Supabase cargado exitosamente.");
+    // Si ya inició sesión o está en descargas, re-renderizar para traer los archivos de la nube
+    if (document.getElementById('app').style.display === 'block') {
+      renderDocs(true);
+    }
   } catch(e) { console.error('Supabase error', e); }
 };
 sbScript.onerror = () => console.warn("No se pudo cargar Supabase desde el CDN. Revisa tu conexión a internet.");
@@ -773,23 +777,46 @@ let currentFilter = 'all';
 let searchQuery   = '';
 
 async function fetchDocs() {
-  if (!supabase) return [];
-  const { data, error } = await supabase.from('documentos').select('*').order('fecha_subida', { ascending: false });
-  if (error) { console.error("Error DB", error); return []; }
-  docsCache = data.map(d => ({
-    id: d.id,
-    type: d.tipo,
-    emoji: d.tipo === 'word' ? '📝' : '📊',
-    titulo: d.titulo,
-    desc: d.descripcion || 'Subido por ' + (d.autor || 'Anónimo'),
-    autor: d.autor || 'Anónimo',
-    file: d.archivo_path,
-    url: d.url_archivo
-  }));
+  let localDocs = [];
+  try {
+    localDocs = JSON.parse(localStorage.getItem('mos_docs_v3')) || [];
+  } catch(e) { console.error("Error reading localStorage", e); }
+
+  if (!supabase) {
+    docsCache = localDocs;
+    return docsCache;
+  }
+
+  try {
+    const { data, error } = await supabase.from('documentos').select('*').order('fecha_subida', { ascending: false });
+    if (error) throw error;
+    
+    const dbDocs = data.map(d => ({
+      id: d.id,
+      type: d.tipo,
+      emoji: d.tipo === 'word' ? '📝' : '📊',
+      titulo: d.titulo,
+      desc: d.descripcion || 'Subido por ' + (d.autor || 'Anónimo'),
+      autor: d.autor || 'Anónimo',
+      file: d.archivo_path,
+      url: d.url_archivo
+    }));
+    
+    // Unir ambos: locales y de la nube
+    docsCache = [...localDocs, ...dbDocs];
+  } catch(err) {
+    console.error("Error cargando base de datos, usando local:", err);
+    docsCache = localDocs;
+  }
   return docsCache;
 }
 
 async function updateHeroStats() {
+  if (docsCache.length === 0) {
+    try {
+      docsCache = JSON.parse(localStorage.getItem('mos_docs_v3')) || [];
+    } catch(e) {}
+  }
   const w = docsCache.filter(d=>d.type==='word').length;
   const e = docsCache.filter(d=>d.type==='excel').length;
   document.getElementById('hTotal').textContent = docsCache.length;
@@ -859,10 +886,22 @@ function filterDl(type, btn) {
 
 async function deleteDoc(id, filePath) {
   if (!confirm('¿Eliminar este documento? Esta acción no se puede deshacer.')) return;
-  if (supabase) {
-    if (filePath) await supabase.storage.from('documentos').remove([filePath]);
-    await supabase.from('documentos').delete().eq('id', id);
+  
+  if (String(id).startsWith('u_')) {
+    // Eliminar de LocalStorage
+    try {
+      let localDocs = JSON.parse(localStorage.getItem('mos_docs_v3')) || [];
+      localDocs = localDocs.filter(d => d.id !== id);
+      localStorage.setItem('mos_docs_v3', JSON.stringify(localDocs));
+    } catch(e) { console.error(e); }
+  } else {
+    // Eliminar de Supabase
+    if (supabase) {
+      if (filePath) await supabase.storage.from('documentos').remove([filePath]);
+      await supabase.from('documentos').delete().eq('id', id);
+    }
   }
+  
   await renderDocs(true);
   updateHeroStats();
 }
@@ -917,10 +956,48 @@ async function uploadDoc(){
   if(!tipo)  {alert('Selecciona el tipo de documento.');return}
   if(!titulo){alert('Escribe un título.');return}
   
-  if (!supabase) { alert('La Base de Datos (Supabase) no está conectada. Espera un momento o recarga.'); return; }
-  
   const btn = document.querySelector('.btn-upload');
   const oTxt = btn.textContent;
+
+  // Fallback local si Supabase no está disponible o desconectado
+  if (!supabase) {
+    const confirmLocal = confirm('La base de datos en la nube no está disponible en este momento. ¿Deseas subir este archivo de forma local en tu navegador para no perderlo?');
+    if (!confirmLocal) return;
+
+    btn.textContent = 'Subiendo local... ⏳';
+    btn.disabled = true;
+    
+    const reader = new FileReader();
+    reader.onload = async e => {
+      const doc = {
+        id: 'u_' + Date.now(),
+        type: tipo,
+        emoji: tipo === 'word' ? '📝' : '📊',
+        titulo,
+        desc: desc || 'Subido por ' + autor,
+        autor,
+        file: selectedFile.name,
+        url: e.target.result
+      };
+      try {
+        const docs = JSON.parse(localStorage.getItem('mos_docs_v3')) || [];
+        docs.push(doc);
+        localStorage.setItem('mos_docs_v3', JSON.stringify(docs));
+        await renderDocs(true);
+        updateHeroStats();
+        document.getElementById('uploadForm').style.display = 'none';
+        document.getElementById('uploadOk').style.display = 'block';
+      } catch(err) {
+        alert('Error al guardar localmente: ' + err.message);
+      } finally {
+        btn.textContent = oTxt;
+        btn.disabled = false;
+      }
+    };
+    reader.readAsDataURL(selectedFile);
+    return;
+  }
+  
   btn.textContent = 'Subiendo... ⏳';
   btn.disabled = true;
 
