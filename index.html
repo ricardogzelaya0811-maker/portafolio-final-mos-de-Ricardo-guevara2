@@ -30,7 +30,7 @@
       --text:  #f4f4f5; /* zinc-100 */
       --muted: #a1a1aa; /* zinc-400 */
       --border:rgba(255,255,255,.1);
-      --shadow:0 8px 32px rgba(0,0,0,.4);
+      --shadow:0 8px 32px rgba(0,0,0,.5), 0 0 20px rgba(139, 92, 246, 0.15);
       --r:16px; --rs:10px;
       --ease:.3s cubic-bezier(.4,0,.2,1);
     }
@@ -160,8 +160,8 @@
     .hero-name{font-family:'Playfair Display',serif;font-size:clamp(2.4rem,5vw,4rem);font-weight:900;color:#fff;line-height:1.05;margin-bottom:1rem}
     .hero-name em{color:var(--gold);font-style:normal}
     .hero-tag{font-size:1rem;color:rgba(255,255,255,.6);margin-bottom:2.5rem}
-    .hero-cta{display:inline-flex;align-items:center;gap:.5rem;background:var(--gold);color:white;font-weight:600;font-size:.9rem;padding:.8rem 1.8rem;border-radius:100px;border:none;font-family:'DM Sans',sans-serif;cursor:pointer;transition:var(--ease)}
-    .hero-cta:hover{background:var(--gold-lt);transform:translateY(-2px);box-shadow:0 8px 20px rgba(139,92,246,.4)}
+    .hero-cta{display:inline-flex;align-items:center;gap:.5rem;background:var(--gold);color:white;font-weight:600;font-size:.9rem;padding:.8rem 1.8rem;border-radius:100px;border:none;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .4s cubic-bezier(.4,0,.2,1)}
+    .hero-cta:hover{background:var(--gold-lt);transform:translateY(-3px);box-shadow:0 8px 25px rgba(139,92,246,.5)}
     .hero-stats{display:flex;gap:2rem;margin-top:2.5rem}
     .s-num{display:block;font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--gold);line-height:1}
     .s-lbl{font-size:.7rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
@@ -194,8 +194,8 @@
     .ia-bg{background:var(--bg2)}
     .ia-intro{color:var(--muted);max-width:680px;margin-bottom:2.5rem;line-height:1.8}
     .ia-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.75rem}
-    .ia-card{background:var(--card);border-radius:var(--r);padding:1.6rem;box-shadow:var(--shadow);border:1px solid var(--border);transition:var(--ease)}
-    .ia-card:hover{transform:translateY(-3px); border-color:var(--gold)}
+    .ia-card{background:var(--card);border-radius:var(--r);padding:1.6rem;box-shadow:var(--shadow);border:1px solid var(--border);transition:all .4s cubic-bezier(.4,0,.2,1)}
+    .ia-card:hover{transform:translateY(-6px); border-color:var(--gold); box-shadow:0 16px 40px rgba(0,0,0,.6), 0 0 30px rgba(139, 92, 246, 0.3)}
     .ia-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--gold-dk),var(--gold));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:.9rem}
     .ia-card h3{font-weight:600;font-size:.95rem;color:var(--text);margin-bottom:.4rem}
     .ia-card p{font-size:.84rem;color:var(--muted);line-height:1.7}
@@ -258,8 +258,8 @@
     .dl-empty button:hover{background:var(--gold-lt)}
 
     /* Doc card */
-    .doc-card{background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border);transition:var(--ease);display:flex;flex-direction:column}
-    .doc-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.6);border-color:var(--gold)}
+    .doc-card{background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border);transition:all .4s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+    .doc-card:hover{transform:translateY(-6px);box-shadow:0 16px 48px rgba(0,0,0,.6), 0 0 30px rgba(139, 92, 246, 0.3);border-color:var(--gold)}
     .doc-thumb{height:110px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative;cursor:pointer}
     .doc-thumb.word{background:linear-gradient(135deg,#1B5EAB,#2B7CD3)}
     .doc-thumb.excel{background:linear-gradient(135deg,#1A6B37,#217346)}
@@ -371,7 +371,7 @@
 
 <!-- REPRODUCTOR DE MÚSICA INVISIBLE -->
 <audio id="bg-music" loop>
-  <source src="musica/real aesthetic lofi beats massobeats lofi mix.mp3" type="audio/mpeg">
+  <source src="musica/real aesthetic lofi beats  massobeats lofi mix.mp3" type="audio/mpeg">
 </audio>
 
 <!-- SPLASH -->
@@ -698,6 +698,13 @@ function togglePlay() {
 
 /* ── NAV ── */
 function showPage(id, btn) {
+  if (id === 'subir') {
+    const pwd = prompt("Acceso Administrativo: Ingrese la contraseña para subir archivos");
+    if (pwd !== "1234") {
+      alert("Contraseña incorrecta. Acceso denegado.");
+      return;
+    }
+  }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
