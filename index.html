@@ -47,8 +47,21 @@
     }
 
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    @keyframes auroraBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
     html{scroll-behavior:smooth}
-    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;transition:background var(--ease),color var(--ease)}
+    body{
+      font-family:'DM Sans',sans-serif;
+      color:var(--text);
+      line-height:1.7;
+      background: linear-gradient(-45deg, #0a0a12, #1b0e2f, #110822, #0a0a12);
+      background-size: 400% 400%;
+      animation: auroraBG 15s ease infinite;
+      transition:color var(--ease);
+    }
 
     /* ══════════════════════════════════════
        SPLASH / LOADER
@@ -667,50 +680,7 @@ setTimeout(() => {
   }
 }, 3500);
 
-/* ── ESTRELLAS ANIMADAS ── */
-try {
-  const starsContainer = document.createElement('div');
-  starsContainer.style.position = 'fixed';
-  starsContainer.style.top = '0';
-  starsContainer.style.left = '0';
-  starsContainer.style.width = '100%';
-  starsContainer.style.height = '100%';
-  starsContainer.style.zIndex = '0';
-  starsContainer.style.pointerEvents = 'none';
-  starsContainer.style.overflow = 'hidden';
-  document.body.prepend(starsContainer);
-  for (let i = 0; i < 80; i++) {
-    const star = document.createElement('div');
-    const size = Math.random() * 2 + 1;
-    star.style.position = 'absolute';
-    star.style.left = Math.random() * 100 + 'vw';
-    star.style.top = Math.random() * 100 + 'vh';
-    star.style.width = size + 'px';
-    star.style.height = size + 'px';
-    star.style.backgroundColor = '#fff';
-    star.style.borderRadius = '50%';
-    star.style.boxShadow = '0 0 ' + (size*2) + 'px rgba(139, 92, 246, 0.8)';
-    star.style.opacity = Math.random();
-    starsContainer.appendChild(star);
-    if(typeof star.animate === 'function') {
-      star.animate([
-        { opacity: 0.1, transform: 'scale(0.8)' },
-        { opacity: 1, transform: 'scale(1.2)' }
-      ], {
-        duration: Math.random() * 3000 + 2000,
-        direction: 'alternate',
-        iterations: Infinity
-      });
-    }
-  }
-} catch(e) { console.error(e); }
-
-try {
-  document.getElementById('loginScreen').style.position = 'relative';
-  document.getElementById('loginScreen').style.zIndex = '1';
-  document.getElementById('app').style.position = 'relative';
-  document.getElementById('app').style.zIndex = '1';
-} catch(e) {}
+/* ── OPTIMIZACIÓN: Animación de estrellas removida por rendimiento ── */
 
 /* ══════════════════════════════════════
    CONTRASEÑA — cámbiala aquí ↓
