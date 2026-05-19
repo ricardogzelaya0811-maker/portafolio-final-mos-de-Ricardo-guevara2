@@ -683,229 +683,300 @@
   <!-- APP JAVASCRIPT -->
   <!-- ============================================================ -->
   <script>
-    // === SUPABASE INIT ===
+    // ==========================================
+    // 1. SUPABASE INITIALIZATION
+    // ==========================================
     const supabaseUrl = 'https://mvzwipqnzeqvnbkkbshn.supabase.co';
     const supabaseKey = 'sb_publishable_rC_MRTrw45InbL1FcTScKQ_wuR3PiBm';
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    
+    let supabase = null;
+    try {
+      if (window.supabase) {
+        supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+      } else {
+        console.warn("Supabase no se cargó correctamente desde el CDN.");
+      }
+    } catch (e) {
+      console.error("Error inicializando Supabase:", e);
+    }
+
     let isAdmin = false;
 
     // ==========================================
-    // TOAST NOTIFICATION SYSTEM
+    // 2. SISTEMA DE NOTIFICACIONES (TOAST)
     // ==========================================
     let toastId = 0;
+    
     function showToast(type, icon, title, subtitle, duration = 4000) {
-      const container = document.getElementById('toast-container');
-      const id = 'toast-' + (++toastId);
-      const el = document.createElement('div');
-      el.id = id;
-      el.className = 'toast toast-' + type;
-      el.innerHTML = `
-        <div class="toast-icon">${icon}</div>
-        <div class="flex-1 min-w-0">
-          <p class="font-semibold text-sm text-white">${title}</p>
-          ${subtitle ? `<p class="text-xs text-white/60 mt-0.5 truncate">${subtitle}</p>` : ''}
-          <div class="toast-progress mt-2"><div class="toast-progress-bar" style="width:100%;transition:width ${duration}ms linear"></div></div>
-        </div>
-      `;
-      container.appendChild(el);
-      requestAnimationFrame(() => {
-        el.classList.add('show');
-        setTimeout(() => { el.querySelector('.toast-progress-bar').style.width = '0%'; }, 50);
-      });
-      setTimeout(() => {
-        el.classList.remove('show');
-        setTimeout(() => el.remove(), 500);
-      }, duration);
-      return id;
+      try {
+        const container = document.getElementById('toast-container');
+        if (!container) return null;
+
+        const id = 'toast-' + (++toastId);
+        const el = document.createElement('div');
+        el.id = id;
+        el.className = 'toast toast-' + type;
+        el.innerHTML = `
+          <div class="toast-icon">${icon}</div>
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-sm text-white">${title}</p>
+            ${subtitle ? `<p class="text-xs text-white/60 mt-0.5 truncate">${subtitle}</p>` : ''}
+            <div class="toast-progress mt-2">
+              <div class="toast-progress-bar" style="width:100%; transition:width ${duration}ms linear"></div>
+            </div>
+          </div>
+        `;
+        
+        container.appendChild(el);
+        
+        requestAnimationFrame(() => {
+          el.classList.add('show');
+          setTimeout(() => { 
+            const progressBar = el.querySelector('.toast-progress-bar');
+            if (progressBar) progressBar.style.width = '0%'; 
+          }, 50);
+        });
+        
+        setTimeout(() => {
+          el.classList.remove('show');
+          setTimeout(() => el.remove(), 500);
+        }, duration);
+        
+        return id;
+      } catch (e) {
+        console.error("Error en showToast:", e);
+      }
     }
+
     function showLoadingToast(icon, title, subtitle) {
-      const container = document.getElementById('toast-container');
-      const id = 'toast-' + (++toastId);
-      const el = document.createElement('div');
-      el.id = id;
-      el.className = 'toast toast-loading';
-      el.innerHTML = `
-        <div class="toast-icon"><div class="toast-spinner"></div></div>
-        <div class="flex-1 min-w-0">
-          <p class="font-semibold text-sm text-white">${title}</p>
-          ${subtitle ? `<p class="text-xs text-white/60 mt-0.5">${subtitle}</p>` : ''}
-        </div>
-      `;
-      container.appendChild(el);
-      requestAnimationFrame(() => el.classList.add('show'));
-      return id;
+      try {
+        const container = document.getElementById('toast-container');
+        if (!container) return null;
+
+        const id = 'toast-' + (++toastId);
+        const el = document.createElement('div');
+        el.id = id;
+        el.className = 'toast toast-loading';
+        el.innerHTML = `
+          <div class="toast-icon"><div class="toast-spinner"></div></div>
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-sm text-white">${title}</p>
+            ${subtitle ? `<p class="text-xs text-white/60 mt-0.5">${subtitle}</p>` : ''}
+          </div>
+        `;
+        container.appendChild(el);
+        requestAnimationFrame(() => el.classList.add('show'));
+        return id;
+      } catch (e) {
+        console.error("Error en showLoadingToast:", e);
+      }
     }
+
     function dismissToast(id) {
-      const el = document.getElementById(id);
-      if (el) { el.classList.remove('show'); setTimeout(() => el.remove(), 500); }
+      try {
+        if (!id) return;
+        const el = document.getElementById(id);
+        if (el) { 
+          el.classList.remove('show'); 
+          setTimeout(() => el.remove(), 500); 
+        }
+      } catch (e) {
+        console.error("Error en dismissToast:", e);
+      }
     }
 
     // ==========================================
-    // TABS
+    // 3. NAVEGACIÓN Y PESTAÑAS (TABS)
     // ==========================================
     function switchTab(tabId) {
-      ['inicio', 'descargas', 'subir'].forEach(id => {
-        document.getElementById(id + '-view').classList.add('hidden');
-      });
-      document.querySelectorAll('.nav-btn, .nav-btn-m').forEach(btn => {
-        btn.classList.remove('bg-white/10', 'text-white');
-        btn.classList.add('text-zinc-300');
-      });
-      document.getElementById(tabId + '-view').classList.remove('hidden');
-      const navBtn = document.getElementById('nav-' + tabId);
-      if (navBtn) { navBtn.classList.add('bg-white/10', 'text-white'); navBtn.classList.remove('text-zinc-300'); }
-      const navBtnM = document.getElementById('nav-' + tabId + '-m');
-      if (navBtnM) { navBtnM.classList.add('bg-white/10', 'text-white'); navBtnM.classList.remove('text-zinc-300'); }
-      if (tabId === 'descargas') loadDocuments();
-      if (tabId === 'subir') {
-        document.getElementById('btn-salir').classList.remove('hidden');
-        document.getElementById('btn-salir').classList.add('flex');
-      } else {
-        document.getElementById('btn-salir').classList.add('hidden');
-        document.getElementById('btn-salir').classList.remove('flex');
+      try {
+        // Ocultar todas las vistas
+        ['inicio', 'descargas', 'subir'].forEach(id => {
+          const view = document.getElementById(id + '-view');
+          if (view) view.classList.add('hidden');
+        });
+
+        // Reiniciar botones del menú
+        document.querySelectorAll('.nav-btn, .nav-btn-m').forEach(btn => {
+          btn.classList.remove('bg-white/10', 'text-white');
+          btn.classList.add('text-zinc-300');
+        });
+
+        // Mostrar la vista objetivo
+        const targetView = document.getElementById(tabId + '-view');
+        if (targetView) targetView.classList.remove('hidden');
+
+        // Activar el botón de navegación correspondiente (Desktop)
+        const navBtn = document.getElementById('nav-' + tabId);
+        if (navBtn) { 
+          navBtn.classList.add('bg-white/10', 'text-white'); 
+          navBtn.classList.remove('text-zinc-300'); 
+        }
+
+        // Activar el botón de navegación correspondiente (Móvil)
+        const navBtnM = document.getElementById('nav-' + tabId + '-m');
+        if (navBtnM) { 
+          navBtnM.classList.add('bg-white/10', 'text-white'); 
+          navBtnM.classList.remove('text-zinc-300'); 
+        }
+
+        // Cargar documentos si se entra a la pestaña de descargas
+        if (tabId === 'descargas') {
+          loadDocuments();
+        }
+
+        // Manejar visibilidad del botón de Salir (Admin)
+        const btnSalir = document.getElementById('btn-salir');
+        if (btnSalir) {
+          if (tabId === 'subir') {
+            btnSalir.classList.remove('hidden');
+            btnSalir.classList.add('flex');
+          } else {
+            btnSalir.classList.add('hidden');
+            btnSalir.classList.remove('flex');
+          }
+        }
+
+        // Volver arriba y refrescar iconos
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.lucide) {
+          lucide.createIcons();
+        }
+      } catch (e) {
+        console.error("Error en switchTab:", e);
       }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      lucide.createIcons();
     }
 
     function promptPassword() {
-      if (isAdmin) { switchTab('subir'); return; }
-      const pw = prompt('Introduce la contraseña de administrador:');
-      if (pw === '1234') { isAdmin = true; switchTab('subir'); }
-      else if (pw !== null) { showToast('error', '🔒', 'Acceso denegado', 'Contraseña incorrecta'); }
+      if (isAdmin) { 
+        switchTab('subir'); 
+        return; 
+      }
+      const pw = prompt('Introduce la contraseña de administrador (1234):');
+      if (pw === '1234') { 
+        isAdmin = true; 
+        switchTab('subir'); 
+        showToast('success', '🔓', 'Acceso concedido', 'Bienvenido al panel de administrador');
+      } else if (pw !== null) { 
+        showToast('error', '🔒', 'Acceso denegado', 'Contraseña incorrecta'); 
+      }
     }
-    function logout() { isAdmin = false; switchTab('inicio'); showToast('info', '👋', 'Sesión cerrada', 'Has salido del panel de administrador'); }
+
+    function logout() { 
+      isAdmin = false; 
+      switchTab('inicio'); 
+      showToast('info', '👋', 'Sesión cerrada', 'Has salido del panel de administrador'); 
+    }
 
     // ==========================================
-    // AUDIO
+    // 4. CONTROL DE AUDIO (LOFI)
     // ==========================================
     const audio = document.getElementById('bg-music');
     let isPlaying = false;
+    
     function togglePlay() {
+      if (!audio) return;
       const icon = document.querySelector('#btn-play i');
-      if (isPlaying) {
-        audio.pause();
-        icon.setAttribute('data-lucide', 'play');
-        showToast('info', '⏸️', 'Música pausada', 'Lofi beats');
-      } else {
-        audio.play().catch(() => showToast('error', '🔇', 'Sin audio', 'El navegador bloqueó la reproducción automática'));
-        icon.setAttribute('data-lucide', 'pause');
-        showToast('info', '🎵', 'Reproduciendo música', 'Lofi study beats — relajate y trabaja');
+      
+      try {
+        if (isPlaying) {
+          audio.pause();
+          if (icon) icon.setAttribute('data-lucide', 'play');
+          showToast('info', '⏸️', 'Música pausada', 'Lofi beats');
+        } else {
+          audio.play().catch((err) => {
+            console.warn("Reproducción bloqueada:", err);
+            showToast('error', '🔇', 'Sin audio', 'Interactúa con la página primero');
+          });
+          if (icon) icon.setAttribute('data-lucide', 'pause');
+          showToast('info', '🎵', 'Reproduciendo música', 'Lofi study beats');
+        }
+        isPlaying = !isPlaying;
+        if (window.lucide) lucide.createIcons();
+      } catch (e) {
+        console.error("Error en togglePlay:", e);
       }
-      isPlaying = !isPlaying;
-      lucide.createIcons();
     }
-    function changeVolume(amount) { audio.volume = Math.min(1, Math.max(0, audio.volume + amount)); }
+
+    function changeVolume(amount) { 
+      if (audio) {
+        audio.volume = Math.min(1, Math.max(0, audio.volume + amount)); 
+      }
+    }
 
     // ==========================================
-    // LOAD DOCUMENTS
+    // 5. SUPABASE: CARGA DE DOCUMENTOS
     // ==========================================
     async function loadDocuments() {
       const grid = document.getElementById('docs-grid');
+      if (!grid) return;
+
       grid.innerHTML = '<div class="text-center col-span-full py-12 text-zinc-400 flex flex-col items-center gap-3"><div class="w-8 h-8 border-2 border-violet-500/50 border-t-violet-400 rounded-full animate-spin"></div>Cargando documentos...</div>';
-      const { data, error } = await supabase.from('archivos').select('*').order('created_at', { ascending: false });
-      if (error) {
-        grid.innerHTML = '<div class="text-center col-span-full py-12 text-red-400">Error al cargar documentos.</div>';
-        showToast('error', '❌', 'Error de conexión', 'No se pudieron cargar los documentos');
+      
+      if (!supabase) {
+        grid.innerHTML = '<div class="text-center col-span-full py-12 text-red-400">Error: Supabase no está conectado.</div>';
         return;
       }
-      window.allDocs = data || [];
-      renderDocs(window.allDocs);
+
+      try {
+        const { data, error } = await supabase.from('archivos').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+        
+        window.allDocs = data || [];
+        renderDocs(window.allDocs);
+      } catch (error) {
+        console.error("Error al cargar documentos:", error);
+        grid.innerHTML = '<div class="text-center col-span-full py-12 text-red-400">Hubo un error al descargar la base de datos. Verifica tu conexión.</div>';
+        showToast('error', '❌', 'Error de conexión', 'No se pudieron cargar los documentos');
+      }
     }
 
     // ==========================================
-    // FILTER + SEARCH
+    // 6. FILTROS Y BÚSQUEDA
     // ==========================================
     function filterDocs(type) {
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('bg-white/10', 'text-white', 'border-white/20');
         btn.classList.add('bg-white/5', 'text-zinc-300', 'border-white/10');
       });
+      
       const active = document.querySelector('.filter-btn[data-filter="' + type + '"]');
-      if (active) { active.classList.add('bg-white/10', 'text-white', 'border-white/20'); active.classList.remove('bg-white/5', 'text-zinc-300', 'border-white/10'); }
-      renderDocs(type === 'Todos' ? window.allDocs : window.allDocs.filter(d => d.tipo === type));
+      if (active) { 
+        active.classList.add('bg-white/10', 'text-white', 'border-white/20'); 
+        active.classList.remove('bg-white/5', 'text-zinc-300', 'border-white/10'); 
+      }
+      
+      const filtered = type === 'Todos' ? window.allDocs : window.allDocs.filter(d => d.tipo === type);
+      renderDocs(filtered);
     }
+
     document.addEventListener('DOMContentLoaded', () => {
-      const si = document.getElementById('searchInput');
-      if (si) si.addEventListener('input', e => {
-        const term = e.target.value.toLowerCase();
-        renderDocs((window.allDocs || []).filter(d =>
-          (d.titulo && d.titulo.toLowerCase().includes(term)) ||
-          (d.descripcion && d.descripcion.toLowerCase().includes(term))
-        ));
-      });
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', e => {
+          const term = e.target.value.toLowerCase();
+          const filtered = (window.allDocs || []).filter(d =>
+            (d.titulo && d.titulo.toLowerCase().includes(term)) ||
+            (d.descripcion && d.descripcion.toLowerCase().includes(term))
+          );
+          renderDocs(filtered);
+        });
+      }
     });
 
     // ==========================================
-    // FILE PREVIEW MODAL
-    // ==========================================
-    function openPreview(doc) {
-      const modal = document.getElementById('preview-modal');
-      const title = document.getElementById('preview-modal-title');
-      const type = document.getElementById('preview-modal-type');
-      const iconEl = document.getElementById('preview-modal-icon');
-      const body = document.getElementById('preview-modal-body');
-      const dlBtn = document.getElementById('preview-modal-download');
-      const isWord = doc.tipo === 'Word';
-
-      title.textContent = doc.titulo;
-      type.textContent = doc.tipo + ' · ' + doc.autor;
-      iconEl.className = 'w-9 h-9 rounded-xl flex items-center justify-center ' + (isWord ? 'bg-blue-500/20 text-blue-300' : 'bg-green-500/20 text-green-300');
-      iconEl.innerHTML = isWord
-        ? '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'
-        : '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>';
-      dlBtn.href = doc.archivo_url || '#';
-
-      // Build preview content
-      const url = doc.archivo_url || '';
-      const ext = url.split('.').pop().toLowerCase();
-      if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)) {
-        body.innerHTML = `<img src="${url}" alt="${doc.titulo}" class="max-w-full max-h-[60vh] rounded-xl object-contain">`;
-      } else if (ext === 'pdf') {
-        body.innerHTML = `<iframe src="${url}" class="w-full" style="height:60vh;border:none;border-radius:12px;"></iframe>`;
-      } else {
-        body.innerHTML = `
-          <div class="flex flex-col items-center justify-center py-16 gap-4">
-            <div class="w-20 h-20 rounded-2xl ${isWord ? 'bg-blue-500/15' : 'bg-green-500/15'} flex items-center justify-center">
-              ${iconEl.innerHTML}
-            </div>
-            <div class="text-center">
-              <p class="text-white font-semibold mb-1">${doc.titulo}</p>
-              <p class="text-zinc-400 text-sm mb-4">${doc.descripcion}</p>
-              <p class="text-zinc-500 text-xs">Vista previa no disponible para archivos ${doc.tipo}.</p>
-              <p class="text-zinc-500 text-xs">Descarga el archivo para abrirlo en Microsoft Office.</p>
-            </div>
-            <a href="${url}" target="_blank" onclick="trackDownload('${doc.titulo}')"
-              class="flex items-center gap-2 text-sm font-medium text-white bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl px-5 py-2.5 mt-2 hover:-translate-y-0.5 transition-transform shadow-lg shadow-violet-900/25">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Descargar archivo
-            </a>
-          </div>`;
-      }
-      modal.classList.add('open');
-      document.body.style.overflow = 'hidden';
-      lucide.createIcons();
-    }
-    function closePreview() {
-      document.getElementById('preview-modal').classList.remove('open');
-      document.body.style.overflow = '';
-      setTimeout(() => { document.getElementById('preview-modal-body').innerHTML = ''; }, 300);
-    }
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closePreview(); });
-
-    function trackDownload(titulo) {
-      showToast('success', '⬇️', 'Descarga iniciada', titulo, 3500);
-    }
-
-    // ==========================================
-    // RENDER DOCS
+    // 7. RENDERIZADO DEL GRID DE DOCUMENTOS
     // ==========================================
     function renderDocs(docs) {
       const grid = document.getElementById('docs-grid');
+      if (!grid) return;
+
       if (!docs || docs.length === 0) {
-        grid.innerHTML = '<div class="text-center col-span-full py-16 text-zinc-400"><i data-lucide="folder-open" class="h-12 w-12 mx-auto mb-4 opacity-30"></i><p>No hay documentos disponibles.</p></div>';
-        lucide.createIcons(); return;
+        grid.innerHTML = '<div class="text-center col-span-full py-16 text-zinc-400"><i data-lucide="folder-open" class="h-12 w-12 mx-auto mb-4 opacity-30"></i><p>No hay documentos disponibles en esta categoría.</p></div>';
+        if (window.lucide) lucide.createIcons(); 
+        return;
       }
+
       grid.innerHTML = docs.map(doc => {
         const isWord = doc.tipo === 'Word';
         const icon = isWord ? 'file-text' : 'table';
@@ -917,9 +988,12 @@
         const delBtn = isAdmin
           ? `<button onclick="deleteDoc('${doc.id}')" class="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition" title="Eliminar"><i data-lucide="trash-2" class="h-4 w-4"></i></button>`
           : '';
+        
+        // Codificar el objeto doc para pasarlo de forma segura
         const docJSON = encodeURIComponent(JSON.stringify(doc));
+        
         return `
-          <div class="ring-1 ring-white/10 bg-white/5 rounded-2xl p-5 hover:bg-white/[0.08] hover:ring-white/20 transition-all duration-300 flex flex-col h-full group cursor-pointer" onclick="openPreview(JSON.parse(decodeURIComponent('${docJSON}')))"> 
+          <div class="ring-1 ring-white/10 bg-white/5 rounded-2xl p-5 hover:bg-white/[0.08] hover:ring-white/20 transition-all duration-300 flex flex-col h-full group cursor-pointer shadow-lg" onclick="openPreview(JSON.parse(decodeURIComponent('${docJSON}')))"> 
             <div class="flex justify-between items-start mb-4">
               <div class="w-11 h-11 rounded-xl ${bg} ${color} flex items-center justify-center ring-1">
                 <i data-lucide="${icon}" class="h-5 w-5"></i>
@@ -942,34 +1016,137 @@
             </div>
           </div>`;
       }).join('');
-      lucide.createIcons();
+      
+      if (window.lucide) lucide.createIcons();
     }
 
     // ==========================================
-    // DELETE DOC
+    // 8. VISTA PREVIA (MODAL)
+    // ==========================================
+    function openPreview(doc) {
+      try {
+        const modal = document.getElementById('preview-modal');
+        const title = document.getElementById('preview-modal-title');
+        const type = document.getElementById('preview-modal-type');
+        const iconEl = document.getElementById('preview-modal-icon');
+        const body = document.getElementById('preview-modal-body');
+        const dlBtn = document.getElementById('preview-modal-download');
+        
+        if (!modal) return;
+        
+        const isWord = doc.tipo === 'Word';
+
+        title.textContent = doc.titulo;
+        type.textContent = doc.tipo + ' · ' + doc.autor;
+        
+        iconEl.className = 'w-9 h-9 rounded-xl flex items-center justify-center ' + (isWord ? 'bg-blue-500/20 text-blue-300' : 'bg-green-500/20 text-green-300');
+        iconEl.innerHTML = isWord
+          ? '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'
+          : '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>';
+        
+        dlBtn.href = doc.archivo_url || '#';
+
+        // Lógica de visualización de vista previa
+        const url = doc.archivo_url || '';
+        const ext = url.split('.').pop().toLowerCase();
+        
+        if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)) {
+          body.innerHTML = `<img src="${url}" alt="${doc.titulo}" class="max-w-full max-h-[60vh] rounded-xl object-contain shadow-2xl">`;
+        } else if (ext === 'pdf') {
+          body.innerHTML = `<iframe src="${url}" class="w-full" style="height:60vh; border:none; border-radius:12px;"></iframe>`;
+        } else {
+          // Documentos Word o Excel que no se pueden renderizar en iframe
+          body.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-16 gap-4 text-center">
+              <div class="w-20 h-20 rounded-2xl ${isWord ? 'bg-blue-500/15 ring-blue-500/20' : 'bg-green-500/15 ring-green-500/20'} flex items-center justify-center ring-1 shadow-lg">
+                ${iconEl.innerHTML}
+              </div>
+              <div class="max-w-xs">
+                <p class="text-white font-semibold mb-1 text-lg">${doc.titulo}</p>
+                <p class="text-zinc-400 text-sm mb-6">${doc.descripcion}</p>
+                <div class="bg-white/5 border border-white/10 rounded-lg p-3 text-xs text-zinc-400 mb-4">
+                  <p>La vista previa en el navegador no está disponible para archivos <strong>${doc.tipo}</strong> nativos.</p>
+                </div>
+              </div>
+              <a href="${url}" target="_blank" onclick="trackDownload('${doc.titulo}')"
+                class="flex items-center gap-2 text-sm font-medium text-white bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl px-6 py-3 hover:-translate-y-0.5 transition-all shadow-[0_8px_20px_-6px_rgba(139,92,246,0.5)]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Descargar Archivo
+              </a>
+            </div>`;
+        }
+        
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      } catch (e) {
+        console.error("Error en openPreview:", e);
+      }
+    }
+
+    function closePreview() {
+      const modal = document.getElementById('preview-modal');
+      if (modal) {
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+        setTimeout(() => { 
+          const body = document.getElementById('preview-modal-body');
+          if (body) body.innerHTML = ''; 
+        }, 300);
+      }
+    }
+    
+    document.addEventListener('keydown', e => { 
+      if (e.key === 'Escape') closePreview(); 
+    });
+
+    function trackDownload(titulo) {
+      showToast('success', '⬇️', 'Descarga iniciada', titulo, 3500);
+    }
+
+    // ==========================================
+    // 9. ELIMINAR DOCUMENTO (ADMIN)
     // ==========================================
     async function deleteDoc(id) {
-      if (!confirm('¿Seguro que deseas eliminar este documento?')) return;
-      const t = showLoadingToast('🗑️', 'Eliminando...', 'Por favor espera');
-      const { error } = await supabase.from('archivos').delete().eq('id', id);
-      dismissToast(t);
-      if (error) showToast('error', '❌', 'Error al eliminar', error.message);
-      else { showToast('success', '✅', 'Documento eliminado', 'El archivo fue eliminado correctamente'); loadDocuments(); }
+      if (!confirm('¿Estás seguro de que deseas eliminar este documento permanentemente?')) return;
+      
+      const t = showLoadingToast('🗑️', 'Eliminando archivo...', 'Por favor espera');
+      try {
+        const { error } = await supabase.from('archivos').delete().eq('id', id);
+        dismissToast(t);
+        
+        if (error) throw error;
+        
+        showToast('success', '✅', 'Documento eliminado', 'El archivo fue borrado exitosamente'); 
+        loadDocuments(); 
+      } catch (err) {
+        dismissToast(t);
+        showToast('error', '❌', 'Error al eliminar', err.message);
+      }
     }
 
     // ==========================================
-    // DROPZONE
+    // 10. DROPZONE (SUBIDA DE ARCHIVOS)
     // ==========================================
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('fileInput');
     const fileNameDisplay = document.getElementById('fileNameDisplay');
     let currentFile = null;
-    if (dropzone) {
+    
+    if (dropzone && fileInput && fileNameDisplay) {
       dropzone.addEventListener('click', () => fileInput.click());
-      dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('bg-white/10', 'border-violet-500/50'); });
-      dropzone.addEventListener('dragleave', () => dropzone.classList.remove('bg-white/10', 'border-violet-500/50'));
+      
+      dropzone.addEventListener('dragover', e => { 
+        e.preventDefault(); 
+        dropzone.classList.add('bg-white/10', 'border-violet-500/50'); 
+      });
+      
+      dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('bg-white/10', 'border-violet-500/50');
+      });
+      
       dropzone.addEventListener('drop', e => {
-        e.preventDefault(); dropzone.classList.remove('bg-white/10', 'border-violet-500/50');
+        e.preventDefault(); 
+        dropzone.classList.remove('bg-white/10', 'border-violet-500/50');
         if (e.dataTransfer.files.length) {
           currentFile = e.dataTransfer.files[0];
           fileNameDisplay.textContent = '📎 ' + currentFile.name;
@@ -977,6 +1154,7 @@
           showToast('info', '📎', 'Archivo seleccionado', currentFile.name, 3000);
         }
       });
+      
       fileInput.addEventListener('change', e => {
         if (e.target.files.length) {
           currentFile = e.target.files[0];
@@ -988,23 +1166,42 @@
     }
 
     // ==========================================
-    // UPLOAD FORM
+    // 11. FORMULARIO DE SUBIDA (ADMIN)
     // ==========================================
     const uploadForm = document.getElementById('uploadForm');
     if (uploadForm) {
       uploadForm.addEventListener('submit', async e => {
         e.preventDefault();
-        if (!currentFile) { showToast('error', '⚠️', 'Sin archivo', 'Selecciona un archivo primero'); return; }
+        if (!currentFile) { 
+          showToast('error', '⚠️', 'Falta el archivo', 'Selecciona un documento primero'); 
+          return; 
+        }
+        
+        if (!supabase) {
+          showToast('error', '❌', 'Error de conexión', 'No hay conexión con la base de datos');
+          return;
+        }
+
         const btn = document.getElementById('btn-submit-upload');
-        btn.innerHTML = '<div class="toast-spinner mr-2"></div> Subiendo...';
-        btn.disabled = true;
+        if (btn) {
+          btn.innerHTML = '<div class="toast-spinner mr-2"></div> Subiendo...';
+          btn.disabled = true;
+        }
+        
         const loadingId = showLoadingToast('📤', 'Subiendo archivo...', currentFile.name);
+        
         try {
           const fileExt = currentFile.name.split('.').pop();
           const fileName = Date.now() + '_' + Math.random().toString(36).substring(2) + '.' + fileExt;
+          
+          // 1. Subir al Storage de Supabase
           const { error: uploadError } = await supabase.storage.from('documentos').upload(fileName, currentFile);
           if (uploadError) throw uploadError;
+          
+          // 2. Obtener URL pública
           const { data: urlData } = supabase.storage.from('documentos').getPublicUrl(fileName);
+          
+          // 3. Insertar en base de datos
           const { error: dbError } = await supabase.from('archivos').insert([{
             titulo: document.getElementById('tituloInput').value,
             descripcion: document.getElementById('descInput').value,
@@ -1012,31 +1209,47 @@
             tipo: document.getElementById('tipoInput').value,
             archivo_url: urlData.publicUrl
           }]);
+          
           if (dbError) throw dbError;
+          
           dismissToast(loadingId);
-          showToast('success', '✅', '¡Archivo subido!', document.getElementById('tituloInput').value, 5000);
-          uploadForm.reset(); currentFile = null; fileNameDisplay.classList.add('hidden');
+          showToast('success', '✅', '¡Éxito!', 'Archivo guardado correctamente en la base de datos', 5000);
+          
+          // Resetear formulario
+          uploadForm.reset(); 
+          currentFile = null; 
+          if (fileNameDisplay) fileNameDisplay.classList.add('hidden');
+          
         } catch (err) {
+          console.error("Error subiendo archivo:", err);
           dismissToast(loadingId);
           showToast('error', '❌', 'Error al subir', err.message, 6000);
         } finally {
-          btn.innerHTML = '<i data-lucide="upload" class="h-4 w-4"></i> Subir a Supabase';
-          btn.disabled = false; lucide.createIcons();
+          if (btn) {
+            btn.innerHTML = '<i data-lucide="upload" class="h-4 w-4"></i> Subir a Supabase';
+            btn.disabled = false; 
+            if (window.lucide) lucide.createIcons();
+          }
         }
       });
     }
 
     // ==========================================
-    // CONTACT FORM TOAST
+    // 12. INICIALIZACIÓN GENERAL
     // ==========================================
     document.addEventListener('DOMContentLoaded', () => {
+      // Formulario de contacto
       const contactForm = document.querySelector('form[action*="formspree"]');
       if (contactForm) {
         contactForm.addEventListener('submit', () => {
-          showToast('success', '✉️', '¡Mensaje enviado!', 'Recibirás respuesta en menos de 24 horas', 5000);
+          showToast('success', '✉️', '¡Mensaje enviado!', 'Me pondré en contacto contigo muy pronto', 5000);
         });
       }
-      lucide.createIcons();
+      
+      // Iconos Lucide
+      if (window.lucide) {
+        lucide.createIcons();
+      }
     });
   </script>
 
