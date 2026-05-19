@@ -623,6 +623,42 @@
   <!-- END: subir-view -->
 
   <!-- ============================================================ -->
+  <!-- TOAST CONTAINER -->
+  <!-- ============================================================ -->
+  <div id="toast-container"></div>
+
+  <!-- ============================================================ -->
+  <!-- FILE PREVIEW MODAL -->
+  <!-- ============================================================ -->
+  <div id="preview-modal">
+    <div id="preview-modal-backdrop" onclick="closePreview()"></div>
+    <div id="preview-modal-content">
+      <div id="preview-modal-header">
+        <div class="flex items-center gap-3">
+          <div id="preview-modal-icon" class="w-9 h-9 rounded-xl flex items-center justify-center"></div>
+          <div>
+            <h3 id="preview-modal-title" class="text-sm font-semibold text-white"></h3>
+            <p id="preview-modal-type" class="text-xs text-zinc-400"></p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <a id="preview-modal-download" href="#" target="_blank"
+            class="flex items-center gap-1.5 text-xs font-medium text-violet-300 hover:text-violet-200 bg-violet-500/10 border border-violet-500/20 rounded-lg px-3 py-1.5 transition-colors">
+            <i data-lucide="download" class="h-3.5 w-3.5"></i> Descargar
+          </a>
+          <button onclick="closePreview()"
+            class="p-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+            <i data-lucide="x" class="h-4 w-4"></i>
+          </button>
+        </div>
+      </div>
+      <div id="preview-modal-body" class="flex items-center justify-center">
+        <!-- Content injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
   <!-- FOOTER -->
   <!-- ============================================================ -->
   <footer class="relative z-10 border-t border-white/10 mt-10">
@@ -655,6 +691,361 @@
     const supabaseUrl = 'https://mvzwipqnzeqvnbkkbshn.supabase.co';
     const supabaseKey = 'sb_publishable_rC_MRTrw45InbL1FcTScKQ_wuR3PiBm';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    let isAdmin = false;
+
+    // ==========================================
+    // TOAST NOTIFICATION SYSTEM
+    // ==========================================
+    let toastId = 0;
+    function showToast(type, icon, title, subtitle, duration = 4000) {
+      const container = document.getElementById('toast-container');
+      const id = 'toast-' + (++toastId);
+      const el = document.createElement('div');
+      el.id = id;
+      el.className = 'toast toast-' + type;
+      el.innerHTML = `
+        <div class="toast-icon">${icon}</div>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-sm text-white">${title}</p>
+          ${subtitle ? `<p class="text-xs text-white/60 mt-0.5 truncate">${subtitle}</p>` : ''}
+          <div class="toast-progress mt-2"><div class="toast-progress-bar" style="width:100%;transition:width ${duration}ms linear"></div></div>
+        </div>
+      `;
+      container.appendChild(el);
+      requestAnimationFrame(() => {
+        el.classList.add('show');
+        setTimeout(() => { el.querySelector('.toast-progress-bar').style.width = '0%'; }, 50);
+      });
+      setTimeout(() => {
+        el.classList.remove('show');
+        setTimeout(() => el.remove(), 500);
+      }, duration);
+      return id;
+    }
+    function showLoadingToast(icon, title, subtitle) {
+      const container = document.getElementById('toast-container');
+      const id = 'toast-' + (++toastId);
+      const el = document.createElement('div');
+      el.id = id;
+      el.className = 'toast toast-loading';
+      el.innerHTML = `
+        <div class="toast-icon"><div class="toast-spinner"></div></div>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-sm text-white">${title}</p>
+          ${subtitle ? `<p class="text-xs text-white/60 mt-0.5">${subtitle}</p>` : ''}
+        </div>
+      `;
+      container.appendChild(el);
+      requestAnimationFrame(() => el.classList.add('show'));
+      return id;
+    }
+    function dismissToast(id) {
+      const el = document.getElementById(id);
+      if (el) { el.classList.remove('show'); setTimeout(() => el.remove(), 500); }
+    }
+
+    // ==========================================
+    // TABS
+    // ==========================================
+    function switchTab(tabId) {
+      ['inicio', 'descargas', 'subir'].forEach(id => {
+        document.getElementById(id + '-view').classList.add('hidden');
+      });
+      document.querySelectorAll('.nav-btn, .nav-btn-m').forEach(btn => {
+        btn.classList.remove('bg-white/10', 'text-white');
+        btn.classList.add('text-zinc-300');
+      });
+      document.getElementById(tabId + '-view').classList.remove('hidden');
+      const navBtn = document.getElementById('nav-' + tabId);
+      if (navBtn) { navBtn.classList.add('bg-white/10', 'text-white'); navBtn.classList.remove('text-zinc-300'); }
+      const navBtnM = document.getElementById('nav-' + tabId + '-m');
+      if (navBtnM) { navBtnM.classList.add('bg-white/10', 'text-white'); navBtnM.classList.remove('text-zinc-300'); }
+      if (tabId === 'descargas') loadDocuments();
+      if (tabId === 'subir') {
+        document.getElementById('btn-salir').classList.remove('hidden');
+        document.getElementById('btn-salir').classList.add('flex');
+      } else {
+        document.getElementById('btn-salir').classList.add('hidden');
+        document.getElementById('btn-salir').classList.remove('flex');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      lucide.createIcons();
+    }
+
+    function promptPassword() {
+      if (isAdmin) { switchTab('subir'); return; }
+      const pw = prompt('Introduce la contraseña de administrador:');
+      if (pw === '1234') { isAdmin = true; switchTab('subir'); }
+      else if (pw !== null) { showToast('error', '🔒', 'Acceso denegado', 'Contraseña incorrecta'); }
+    }
+    function logout() { isAdmin = false; switchTab('inicio'); showToast('info', '👋', 'Sesión cerrada', 'Has salido del panel de administrador'); }
+
+    // ==========================================
+    // AUDIO
+    // ==========================================
+    const audio = document.getElementById('bg-music');
+    let isPlaying = false;
+    function togglePlay() {
+      const icon = document.querySelector('#btn-play i');
+      if (isPlaying) {
+        audio.pause();
+        icon.setAttribute('data-lucide', 'play');
+        showToast('info', '⏸️', 'Música pausada', 'Lofi beats');
+      } else {
+        audio.play().catch(() => showToast('error', '🔇', 'Sin audio', 'El navegador bloqueó la reproducción automática'));
+        icon.setAttribute('data-lucide', 'pause');
+        showToast('info', '🎵', 'Reproduciendo música', 'Lofi study beats — relajate y trabaja');
+      }
+      isPlaying = !isPlaying;
+      lucide.createIcons();
+    }
+    function changeVolume(amount) { audio.volume = Math.min(1, Math.max(0, audio.volume + amount)); }
+
+    // ==========================================
+    // LOAD DOCUMENTS
+    // ==========================================
+    async function loadDocuments() {
+      const grid = document.getElementById('docs-grid');
+      grid.innerHTML = '<div class="text-center col-span-full py-12 text-zinc-400 flex flex-col items-center gap-3"><div class="w-8 h-8 border-2 border-violet-500/50 border-t-violet-400 rounded-full animate-spin"></div>Cargando documentos...</div>';
+      const { data, error } = await supabase.from('archivos').select('*').order('created_at', { ascending: false });
+      if (error) {
+        grid.innerHTML = '<div class="text-center col-span-full py-12 text-red-400">Error al cargar documentos.</div>';
+        showToast('error', '❌', 'Error de conexión', 'No se pudieron cargar los documentos');
+        return;
+      }
+      window.allDocs = data || [];
+      renderDocs(window.allDocs);
+    }
+
+    // ==========================================
+    // FILTER + SEARCH
+    // ==========================================
+    function filterDocs(type) {
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-white/10', 'text-white', 'border-white/20');
+        btn.classList.add('bg-white/5', 'text-zinc-300', 'border-white/10');
+      });
+      const active = document.querySelector('.filter-btn[data-filter="' + type + '"]');
+      if (active) { active.classList.add('bg-white/10', 'text-white', 'border-white/20'); active.classList.remove('bg-white/5', 'text-zinc-300', 'border-white/10'); }
+      renderDocs(type === 'Todos' ? window.allDocs : window.allDocs.filter(d => d.tipo === type));
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const si = document.getElementById('searchInput');
+      if (si) si.addEventListener('input', e => {
+        const term = e.target.value.toLowerCase();
+        renderDocs((window.allDocs || []).filter(d =>
+          (d.titulo && d.titulo.toLowerCase().includes(term)) ||
+          (d.descripcion && d.descripcion.toLowerCase().includes(term))
+        ));
+      });
+    });
+
+    // ==========================================
+    // FILE PREVIEW MODAL
+    // ==========================================
+    function openPreview(doc) {
+      const modal = document.getElementById('preview-modal');
+      const title = document.getElementById('preview-modal-title');
+      const type = document.getElementById('preview-modal-type');
+      const iconEl = document.getElementById('preview-modal-icon');
+      const body = document.getElementById('preview-modal-body');
+      const dlBtn = document.getElementById('preview-modal-download');
+      const isWord = doc.tipo === 'Word';
+
+      title.textContent = doc.titulo;
+      type.textContent = doc.tipo + ' · ' + doc.autor;
+      iconEl.className = 'w-9 h-9 rounded-xl flex items-center justify-center ' + (isWord ? 'bg-blue-500/20 text-blue-300' : 'bg-green-500/20 text-green-300');
+      iconEl.innerHTML = isWord
+        ? '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'
+        : '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>';
+      dlBtn.href = doc.archivo_url || '#';
+
+      // Build preview content
+      const url = doc.archivo_url || '';
+      const ext = url.split('.').pop().toLowerCase();
+      if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)) {
+        body.innerHTML = `<img src="${url}" alt="${doc.titulo}" class="max-w-full max-h-[60vh] rounded-xl object-contain">`;
+      } else if (ext === 'pdf') {
+        body.innerHTML = `<iframe src="${url}" class="w-full" style="height:60vh;border:none;border-radius:12px;"></iframe>`;
+      } else {
+        body.innerHTML = `
+          <div class="flex flex-col items-center justify-center py-16 gap-4">
+            <div class="w-20 h-20 rounded-2xl ${isWord ? 'bg-blue-500/15' : 'bg-green-500/15'} flex items-center justify-center">
+              ${iconEl.innerHTML}
+            </div>
+            <div class="text-center">
+              <p class="text-white font-semibold mb-1">${doc.titulo}</p>
+              <p class="text-zinc-400 text-sm mb-4">${doc.descripcion}</p>
+              <p class="text-zinc-500 text-xs">Vista previa no disponible para archivos ${doc.tipo}.</p>
+              <p class="text-zinc-500 text-xs">Descarga el archivo para abrirlo en Microsoft Office.</p>
+            </div>
+            <a href="${url}" target="_blank" onclick="trackDownload('${doc.titulo}')"
+              class="flex items-center gap-2 text-sm font-medium text-white bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl px-5 py-2.5 mt-2 hover:-translate-y-0.5 transition-transform shadow-lg shadow-violet-900/25">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Descargar archivo
+            </a>
+          </div>`;
+      }
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      lucide.createIcons();
+    }
+    function closePreview() {
+      document.getElementById('preview-modal').classList.remove('open');
+      document.body.style.overflow = '';
+      setTimeout(() => { document.getElementById('preview-modal-body').innerHTML = ''; }, 300);
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closePreview(); });
+
+    function trackDownload(titulo) {
+      showToast('success', '⬇️', 'Descarga iniciada', titulo, 3500);
+    }
+
+    // ==========================================
+    // RENDER DOCS
+    // ==========================================
+    function renderDocs(docs) {
+      const grid = document.getElementById('docs-grid');
+      if (!docs || docs.length === 0) {
+        grid.innerHTML = '<div class="text-center col-span-full py-16 text-zinc-400"><i data-lucide="folder-open" class="h-12 w-12 mx-auto mb-4 opacity-30"></i><p>No hay documentos disponibles.</p></div>';
+        lucide.createIcons(); return;
+      }
+      grid.innerHTML = docs.map(doc => {
+        const isWord = doc.tipo === 'Word';
+        const icon = isWord ? 'file-text' : 'table';
+        const color = isWord ? 'text-blue-400' : 'text-green-400';
+        const bg = isWord ? 'bg-blue-400/10 ring-blue-400/20' : 'bg-green-400/10 ring-green-400/20';
+        const badge = isWord
+          ? '<span class="text-xs font-medium text-blue-300 bg-blue-500/10 border border-blue-500/20 rounded-full px-2 py-0.5">Word</span>'
+          : '<span class="text-xs font-medium text-green-300 bg-green-500/10 border border-green-500/20 rounded-full px-2 py-0.5">Excel</span>';
+        const delBtn = isAdmin
+          ? `<button onclick="deleteDoc('${doc.id}')" class="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition" title="Eliminar"><i data-lucide="trash-2" class="h-4 w-4"></i></button>`
+          : '';
+        const docJSON = encodeURIComponent(JSON.stringify(doc));
+        return `
+          <div class="ring-1 ring-white/10 bg-white/5 rounded-2xl p-5 hover:bg-white/[0.08] hover:ring-white/20 transition-all duration-300 flex flex-col h-full group cursor-pointer" onclick="openPreview(JSON.parse(decodeURIComponent('${docJSON}')))"> 
+            <div class="flex justify-between items-start mb-4">
+              <div class="w-11 h-11 rounded-xl ${bg} ${color} flex items-center justify-center ring-1">
+                <i data-lucide="${icon}" class="h-5 w-5"></i>
+              </div>
+              <div class="flex items-center gap-1" onclick="event.stopPropagation()">
+                ${badge}
+                ${delBtn}
+              </div>
+            </div>
+            <h3 class="text-base font-semibold text-white tracking-tight mb-2 leading-tight">${doc.titulo}</h3>
+            <p class="text-sm text-zinc-400 mb-4 flex-grow leading-relaxed">${doc.descripcion}</p>
+            <div class="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
+              <span class="text-xs text-zinc-500 flex items-center gap-1">
+                <i data-lucide="user" class="h-3 w-3"></i> ${doc.autor}
+              </span>
+              <a href="${doc.archivo_url || '#'}" target="_blank" onclick="event.stopPropagation(); trackDownload('${doc.titulo}')"
+                class="text-xs font-medium text-violet-300 hover:text-violet-200 flex items-center gap-1.5 transition-colors">
+                Descargar <i data-lucide="download" class="h-3.5 w-3.5"></i>
+              </a>
+            </div>
+          </div>`;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    // ==========================================
+    // DELETE DOC
+    // ==========================================
+    async function deleteDoc(id) {
+      if (!confirm('¿Seguro que deseas eliminar este documento?')) return;
+      const t = showLoadingToast('🗑️', 'Eliminando...', 'Por favor espera');
+      const { error } = await supabase.from('archivos').delete().eq('id', id);
+      dismissToast(t);
+      if (error) showToast('error', '❌', 'Error al eliminar', error.message);
+      else { showToast('success', '✅', 'Documento eliminado', 'El archivo fue eliminado correctamente'); loadDocuments(); }
+    }
+
+    // ==========================================
+    // DROPZONE
+    // ==========================================
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    let currentFile = null;
+    if (dropzone) {
+      dropzone.addEventListener('click', () => fileInput.click());
+      dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('bg-white/10', 'border-violet-500/50'); });
+      dropzone.addEventListener('dragleave', () => dropzone.classList.remove('bg-white/10', 'border-violet-500/50'));
+      dropzone.addEventListener('drop', e => {
+        e.preventDefault(); dropzone.classList.remove('bg-white/10', 'border-violet-500/50');
+        if (e.dataTransfer.files.length) {
+          currentFile = e.dataTransfer.files[0];
+          fileNameDisplay.textContent = '📎 ' + currentFile.name;
+          fileNameDisplay.classList.remove('hidden');
+          showToast('info', '📎', 'Archivo seleccionado', currentFile.name, 3000);
+        }
+      });
+      fileInput.addEventListener('change', e => {
+        if (e.target.files.length) {
+          currentFile = e.target.files[0];
+          fileNameDisplay.textContent = '📎 ' + currentFile.name;
+          fileNameDisplay.classList.remove('hidden');
+          showToast('info', '📎', 'Archivo seleccionado', currentFile.name, 3000);
+        }
+      });
+    }
+
+    // ==========================================
+    // UPLOAD FORM
+    // ==========================================
+    const uploadForm = document.getElementById('uploadForm');
+    if (uploadForm) {
+      uploadForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        if (!currentFile) { showToast('error', '⚠️', 'Sin archivo', 'Selecciona un archivo primero'); return; }
+        const btn = document.getElementById('btn-submit-upload');
+        btn.innerHTML = '<div class="toast-spinner mr-2"></div> Subiendo...';
+        btn.disabled = true;
+        const loadingId = showLoadingToast('📤', 'Subiendo archivo...', currentFile.name);
+        try {
+          const fileExt = currentFile.name.split('.').pop();
+          const fileName = Date.now() + '_' + Math.random().toString(36).substring(2) + '.' + fileExt;
+          const { error: uploadError } = await supabase.storage.from('documentos').upload(fileName, currentFile);
+          if (uploadError) throw uploadError;
+          const { data: urlData } = supabase.storage.from('documentos').getPublicUrl(fileName);
+          const { error: dbError } = await supabase.from('archivos').insert([{
+            titulo: document.getElementById('tituloInput').value,
+            descripcion: document.getElementById('descInput').value,
+            autor: document.getElementById('autorInput').value,
+            tipo: document.getElementById('tipoInput').value,
+            archivo_url: urlData.publicUrl
+          }]);
+          if (dbError) throw dbError;
+          dismissToast(loadingId);
+          showToast('success', '✅', '¡Archivo subido!', document.getElementById('tituloInput').value, 5000);
+          uploadForm.reset(); currentFile = null; fileNameDisplay.classList.add('hidden');
+        } catch (err) {
+          dismissToast(loadingId);
+          showToast('error', '❌', 'Error al subir', err.message, 6000);
+        } finally {
+          btn.innerHTML = '<i data-lucide="upload" class="h-4 w-4"></i> Subir a Supabase';
+          btn.disabled = false; lucide.createIcons();
+        }
+      });
+    }
+
+    // ==========================================
+    // CONTACT FORM TOAST
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+      const contactForm = document.querySelector('form[action*="formspree"]');
+      if (contactForm) {
+        contactForm.addEventListener('submit', () => {
+          showToast('success', '✉️', '¡Mensaje enviado!', 'Recibirás respuesta en menos de 24 horas', 5000);
+        });
+      }
+      lucide.createIcons();
+    });
+  </script>
+
+</body>
+</html>
 
     let isAdmin = false;
 
