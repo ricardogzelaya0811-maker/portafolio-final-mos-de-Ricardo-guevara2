@@ -57,10 +57,11 @@
       font-family:'DM Sans',sans-serif;
       color:var(--text);
       line-height:1.7;
-      background: linear-gradient(-45deg, #0a0a12, #1b0e2f, #110822, #0a0a12);
+      background: linear-gradient(-45deg, #06060c, #160a2c, #32165e, #1a083a, #06060c);
       background-size: 400% 400%;
-      animation: auroraBG 15s ease infinite;
-      transition:color var(--ease);
+      animation: auroraBG 16s ease infinite;
+      background-attachment: fixed;
+      transition:color var(--ease), background var(--ease);
     }
 
     /* ══════════════════════════════════════
@@ -163,8 +164,8 @@
     ══════════════════════════════════════ */
     .hero{
       min-height:calc(100vh - 68px);
-      background:radial-gradient(ellipse at top right, rgba(139,92,246,0.15), transparent 50%),
-                  radial-gradient(ellipse at bottom left, rgba(67,56,202,0.15), transparent 50%);
+      background: radial-gradient(ellipse at top right, rgba(139,92,246,0.22), transparent 60%),
+                  radial-gradient(ellipse at bottom left, rgba(67,56,202,0.25), transparent 60%);
       display:flex;align-items:center;justify-content:center;
       padding:4rem 2rem;position:relative;overflow:hidden;
     }
@@ -885,6 +886,12 @@ function filterDl(type, btn) {
 }
 
 async function deleteDoc(id, filePath) {
+  const pwd = prompt("Acceso Administrativo: Ingrese la contraseña para eliminar este documento");
+  if (pwd !== "1234") {
+    alert("Contraseña incorrecta. Acceso denegado.");
+    return;
+  }
+  
   if (!confirm('¿Eliminar este documento? Esta acción no se puede deshacer.')) return;
   
   if (String(id).startsWith('u_')) {
