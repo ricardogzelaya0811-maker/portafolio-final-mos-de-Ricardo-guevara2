@@ -634,69 +634,88 @@
 </div>
 
 <script>
-/* ── ESTRELLAS ANIMADAS ── */
-const starsContainer = document.createElement('div');
-starsContainer.style.position = 'fixed';
-starsContainer.style.inset = '0';
-starsContainer.style.zIndex = '0';
-starsContainer.style.pointerEvents = 'none';
-starsContainer.style.overflow = 'hidden';
-document.body.prepend(starsContainer);
-for (let i = 0; i < 80; i++) {
-  const star = document.createElement('div');
-  const size = Math.random() * 2 + 1;
-  star.style.position = 'absolute';
-  star.style.left = Math.random() * 100 + 'vw';
-  star.style.top = Math.random() * 100 + 'vh';
-  star.style.width = size + 'px';
-  star.style.height = size + 'px';
-  star.style.backgroundColor = '#fff';
-  star.style.borderRadius = '50%';
-  star.style.boxShadow = '0 0 ' + (size*2) + 'px rgba(139, 92, 246, 0.8)';
-  star.style.opacity = Math.random();
-  star.animate([
-    { opacity: 0.1, transform: 'scale(0.8)' },
-    { opacity: 1, transform: 'scale(1.2)' }
-  ], {
-    duration: Math.random() * 3000 + 2000,
-    direction: 'alternate',
-    iterations: Infinity
-  });
-  starsContainer.appendChild(star);
-}
+/* ── SPLASH (Prioridad Alta) ── */
+window.addEventListener('DOMContentLoaded', () => {
+  try {
+    const c = document.createElement('canvas');
+    c.width = c.height = 64;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#8b5cf6';
+    ctx.beginPath(); ctx.arc(32,32,32,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 28px serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('RZ', 32, 33);
+    document.getElementById('favicon').href = c.toDataURL();
+  } catch(e) {}
 
-// Asegurar que el contenido principal se muestre encima de las estrellas
-document.getElementById('loginScreen').style.position = 'relative';
-document.getElementById('loginScreen').style.zIndex = '1';
-document.getElementById('app').style.position = 'relative';
-document.getElementById('app').style.zIndex = '1';
+  setTimeout(() => {
+    const s = document.getElementById('splash');
+    if(s) {
+      s.style.opacity = '0';
+      setTimeout(() => { s.style.display = 'none'; document.getElementById('loginScreen').style.display = 'flex'; }, 500);
+    }
+  }, 1400);
+});
+
+// Fallback de seguridad por si falla el evento DOMContentLoaded
+setTimeout(() => {
+  const s = document.getElementById('splash');
+  if(s && s.style.display !== 'none') {
+    s.style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
+}, 3500);
+
+/* ── ESTRELLAS ANIMADAS ── */
+try {
+  const starsContainer = document.createElement('div');
+  starsContainer.style.position = 'fixed';
+  starsContainer.style.top = '0';
+  starsContainer.style.left = '0';
+  starsContainer.style.width = '100%';
+  starsContainer.style.height = '100%';
+  starsContainer.style.zIndex = '0';
+  starsContainer.style.pointerEvents = 'none';
+  starsContainer.style.overflow = 'hidden';
+  document.body.prepend(starsContainer);
+  for (let i = 0; i < 80; i++) {
+    const star = document.createElement('div');
+    const size = Math.random() * 2 + 1;
+    star.style.position = 'absolute';
+    star.style.left = Math.random() * 100 + 'vw';
+    star.style.top = Math.random() * 100 + 'vh';
+    star.style.width = size + 'px';
+    star.style.height = size + 'px';
+    star.style.backgroundColor = '#fff';
+    star.style.borderRadius = '50%';
+    star.style.boxShadow = '0 0 ' + (size*2) + 'px rgba(139, 92, 246, 0.8)';
+    star.style.opacity = Math.random();
+    starsContainer.appendChild(star);
+    if(typeof star.animate === 'function') {
+      star.animate([
+        { opacity: 0.1, transform: 'scale(0.8)' },
+        { opacity: 1, transform: 'scale(1.2)' }
+      ], {
+        duration: Math.random() * 3000 + 2000,
+        direction: 'alternate',
+        iterations: Infinity
+      });
+    }
+  }
+} catch(e) { console.error(e); }
+
+try {
+  document.getElementById('loginScreen').style.position = 'relative';
+  document.getElementById('loginScreen').style.zIndex = '1';
+  document.getElementById('app').style.position = 'relative';
+  document.getElementById('app').style.zIndex = '1';
+} catch(e) {}
 
 /* ══════════════════════════════════════
    CONTRASEÑA — cámbiala aquí ↓
 ══════════════════════════════════════ */
 const PASSWORD = "mos2025";
-
-/* ── SPLASH ── */
-window.addEventListener('DOMContentLoaded', () => {
-  // Generar favicon con canvas
-  const c = document.createElement('canvas');
-  c.width = c.height = 64;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = '#8b5cf6';
-  ctx.beginPath(); ctx.arc(32,32,32,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 28px serif';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText('RZ', 32, 33);
-  document.getElementById('favicon').href = c.toDataURL();
-
-  // Ocultar splash después de 1.4s
-  setTimeout(() => {
-    const s = document.getElementById('splash');
-    s.style.opacity = '0';
-    setTimeout(() => { s.style.display = 'none'; document.getElementById('loginScreen').style.display = 'flex'; }, 500);
-  }, 1400);
-});
 
 /* ── LOGIN / LOGOUT ── */
 function doLogin() {
