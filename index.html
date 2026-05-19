@@ -379,7 +379,6 @@
       .s-num{font-size:1.6rem}
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -755,9 +754,18 @@ document.addEventListener('click', e => {
 const supabaseUrl = 'https://mvzwipqnzeqvnbkkbshn.supabase.co';
 const supabaseKey = 'sb_publishable_rC_MRTrw45InbL1FcTScKQ_wuR3PiBm';
 let supabase = null;
-try {
-  if (window.supabase) supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-} catch(e) { console.error('Supabase error', e); }
+
+// Cargar el script de Supabase de manera asíncrona para que NO bloquee la página
+const sbScript = document.createElement('script');
+sbScript.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+sbScript.onload = () => {
+  try {
+    if (window.supabase) supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    console.log("Supabase cargado exitosamente.");
+  } catch(e) { console.error('Supabase error', e); }
+};
+sbScript.onerror = () => console.warn("No se pudo cargar Supabase desde el CDN. Revisa tu conexión a internet.");
+document.head.appendChild(sbScript);
 
 /* ── DOCUMENTOS ── */
 let docsCache = [];
