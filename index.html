@@ -751,28 +751,261 @@ document.addEventListener('click', e => {
   if (nav && !nav.contains(e.target) && hbg && !hbg.contains(e.target)) nav.classList.remove('open');
 });
 
-/* ── SUPABASE INICIALIZACIÓN ── */
-const supabaseUrl = 'https://mvzwipqnzeqvnbkkbshn.supabase.co';
-const supabaseKey = 'sb_publishable_rC_MRTrw45InbL1FcTScKQ_wuR3PiBm';
-let supabase = null;
-
-// Cargar el script de Supabase de manera asíncrona para que NO bloquee la página
-const sbScript = document.createElement('script');
-sbScript.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-sbScript.onload = () => {
-  try {
-    if (window.supabase) supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-    console.log("Supabase cargado exitosamente.");
-    // Si ya inició sesión o está en descargas, re-renderizar para traer los archivos de la nube
-    if (document.getElementById('app').style.display === 'block') {
-      renderDocs(true);
-    }
-  } catch(e) { console.error('Supabase error', e); }
+/* ── FIREBASE INICIALIZACIÓN ── */
+// IMPORTANTE: Reemplaza estas credenciales por las tuyas de tu Firebase Console
+const firebaseConfig = {
+  apiKey: "AIzaSyAeoTER5SeErRMOt63MZTQQ2KYCnD8jEMc",
+  authDomain: "portafolio-mos.firebaseapp.com",
+  projectId: "portafolio-mos",
+  storageBucket: "portafolio-mos.firebasestorage.app",
+  messagingSenderId: "447432105162",
+  appId: "1:447432105162:web:b868ea63c40915abde2833",
+  measurementId: "G-TV3K6XFKFN"
 };
-sbScript.onerror = () => console.warn("No se pudo cargar Supabase desde el CDN. Revisa tu conexión a internet.");
-document.head.appendChild(sbScript);
+
+let db = null;
+let storage = null;
+let firebaseInitialized = false;
+
+function loadFirebaseScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+async function initFirebase() {
+  try {
+    // 1. Cargar App SDK
+    await loadFirebaseScript("https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js");
+    // 2. Cargar Firestore y Storage SDKs en paralelo
+    await Promise.all([
+      loadFirebaseScript("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"),
+      loadFirebaseScript("https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js")
+    ]);
+    
+    // 3. Inicializar si la config ha sido ingresada
+    if (window.firebase && firebaseConfig.apiKey !== "TU_API_KEY_AQUI") {
+      window.firebase.initializeApp(firebaseConfig);
+      db = window.firebase.firestore();
+      storage = window.firebase.storage();
+      firebaseInitialized = true;
+      console.log("Firebase cargado e inicializado con éxito.");
+      
+      // Si ya inició sesión o está en descargas, re-renderizar para traer los archivos de la nube
+      if (document.getElementById('app').style.display === 'block') {
+        renderDocs(true);
+      }
+    } else {
+      console.warn("Firebase SDKs listos. Por favor ingresa tus credenciales válidas en firebaseConfig.");
+    }
+  } catch(e) {
+    console.error("Error al cargar Firebase SDKs:", e);
+  }
+}
+
+// Iniciar carga de Firebase en segundo plano
+initFirebase();
 
 /* ── DOCUMENTOS ── */
+const DEFAULT_DOCS = [
+  // Excel Files
+  {
+    id: "d_e1",
+    type: "excel",
+    emoji: "📊",
+    titulo: "Factura Profesional",
+    desc: "Uso profesional de tablas y funciones para facturación automatizada.",
+    autor: "Ricardo Zelaya",
+    file: "archivos excel/FACTURA profesional con tablas y funciones.xlsx",
+    url: "archivos excel/FACTURA profesional con tablas y funciones.xlsx"
+  },
+  {
+    id: "d_e2",
+    type: "excel",
+    emoji: "📊",
+    titulo: "Formulario con Base de Datos",
+    desc: "Diseño de formularios integrados con bases de datos en Excel.",
+    autor: "Ricardo Zelaya",
+    file: "archivos excel/Formulario con Base de Datos.xlsx",
+    url: "archivos excel/Formulario con Base de Datos.xlsx"
+  },
+  {
+    id: "d_e3",
+    type: "excel",
+    emoji: "📊",
+    titulo: "Práctica SUMAR.SI - CONTAR.SI - PROMEDIO.SI",
+    desc: "Dominio de funciones condicionales estadísticas clave.",
+    autor: "Ricardo Zelaya",
+    file: "archivos excel/Práctica SUMAR.SI - CONTAR.SI - PROMEDIO.SI.xlsx",
+    url: "archivos excel/Práctica SUMAR.SI - CONTAR.SI - PROMEDIO.SI.xlsx"
+  },
+  {
+    id: "d_e4",
+    type: "excel",
+    emoji: "📊",
+    titulo: "Sistema de Notas Académicas",
+    desc: "Gestión automatizada de calificaciones y reportes.",
+    autor: "Ricardo Zelaya",
+    file: "archivos excel/Sistema de Notas Académicas.xlsm.xlsx",
+    url: "archivos excel/Sistema de Notas Académicas.xlsm.xlsx"
+  },
+  {
+    id: "d_e5",
+    type: "excel",
+    emoji: "📊",
+    titulo: "Tabla de Ventas y Fórmulas Básicas",
+    desc: "Estructuras de análisis de ventas y fórmulas aritméticas de Excel.",
+    autor: "Ricardo Zelaya",
+    file: "archivos excel/Tabla de Ventas y Fórmulas Básicas.xlsx",
+    url: "archivos excel/Tabla de Ventas y Fórmulas Básicas.xlsx"
+  },
+  {
+    id: "d_e6",
+    type: "excel",
+    emoji: "📊",
+    titulo: "Base de Datos y Funciones",
+    desc: "Gestión masiva de registros utilizando funciones avanzadas de búsqueda.",
+    autor: "Ricardo Zelaya",
+    file: "archivos excel/base de datos y funciones.xlsx",
+    url: "archivos excel/base de datos y funciones.xlsx"
+  },
+  // Word Files
+  {
+    id: "d_w1",
+    type: "word",
+    emoji: "📝",
+    titulo: "Agregar Texto a Elementos Gráficos",
+    desc: "Práctica de inserción de texto y formato en elementos visuales SmartArt.",
+    autor: "Ricardo Zelaya",
+    file: "archivos word/Agregar texto a elementos gráficos y modificar elementos gráficos.docx",
+    url: "archivos word/Agregar texto a elementos gráficos y modificar elementos gráficos.docx"
+  },
+  {
+    id: "d_w2",
+    type: "word",
+    emoji: "📝",
+    titulo: "Agregar y Administrar Comentarios",
+    desc: "Colaboración profesional mediante el control de revisiones y comentarios.",
+    autor: "Ricardo Zelaya",
+    file: "archivos word/Agregar y administrar comentarios..docx",
+    url: "archivos word/Agregar y administrar comentarios..docx"
+  },
+  {
+    id: "d_w3",
+    type: "word",
+    emoji: "📝",
+    titulo: "Crear Tablas",
+    desc: "Construcción y diseño estructurado de tablas profesionales en Word.",
+    autor: "Ricardo Zelaya",
+    file: "archivos word/Crear tablas.docx",
+    url: "archivos word/Crear tablas.docx"
+  },
+  {
+    id: "d_w4",
+    type: "word",
+    emoji: "📝",
+    titulo: "Crear y Modificar Listas",
+    desc: "Organización de información mediante viñetas avanzadas y listas multinivel.",
+    autor: "Ricardo Zelaya",
+    file: "archivos word/Crear y Modificar Listas.docx",
+    url: "archivos word/Crear y Modificar Listas.docx"
+  },
+  {
+    id: "d_w5",
+    type: "word",
+    emoji: "📝",
+    titulo: "Secciones de Documentos",
+    desc: "Configuración avanzada de saltos de sección, encabezados y pies de página.",
+    autor: "Ricardo Zelaya",
+    file: "archivos word/Crear y configurar secciones de documentos en Microsoft Word.docx",
+    url: "archivos word/Crear y configurar secciones de documentos en Microsoft Word.docx"
+  },
+  {
+    id: "d_w6",
+    type: "word",
+    emoji: "📝",
+    titulo: "Importación de Datos a Libros",
+    desc: "Métodos para integrar datos externos dentro de estructuras de texto.",
+    autor: "Ricardo Zelaya",
+    file: "archivos word/Importar datos a libros de trabajo.docx",
+    url: "archivos word/Importar datos a libros de trabajo.docx"
+  },
+  {
+    id: "d_w7",
+    type: "word",
+    emoji: "📝",
+    titulo: "Insertar Texto y Formatear Párrafos",
+    desc: "Estilos de formato, sangrías, espaciados y alineación profesional.",
+    autor: "Ricardo Zelaya",
+    file: "archivos word/Insertar Texto y Formatear Párrafos.docx",
+    url: "archivos word/Insertar Texto y Formatear Párrafos.docx"
+  },
+  {
+    id: "d_w8",
+    type: "word",
+    emoji: "📝",
+    titulo: "Ilustraciones y Cuadros de Texto",
+    desc: "Inserción y formato estético de imágenes, formas y cajas de texto.",
+    autor: "Ricardo Zelaya",
+    file: "archivos word/Insertar ilustraciones y cuadros de texto y dar formato a ilustraciones y cuadros de texto.docx",
+    url: "archivos word/Insertar ilustraciones y cuadros de texto y dar formato a ilustraciones y cuadros de texto.docx"
+  },
+  {
+    id: "d_w9",
+    type: "word",
+    emoji: "📝",
+    titulo: "Navegación en Documentos Word",
+    desc: "Uso del panel de navegación, marcadores e hipervínculos de forma rápida.",
+    autor: "Ricardo Zelaya",
+    file: "archivos word/Navegación en Documentos Word.docx",
+    url: "archivos word/Navegación en Documentos Word.docx"
+  },
+  {
+    id: "d_w10",
+    type: "word",
+    emoji: "📝",
+    titulo: "Saltos de Página en Word",
+    desc: "Uso correcto de saltos de página para mantener la diagramación limpia.",
+    autor: "Ricardo Zelaya",
+    file: "archivos word/Saltos de Página en Microsoft Word..docx",
+    url: "archivos word/Saltos de Página en Microsoft Word..docx"
+  },
+  {
+    id: "d_w11",
+    type: "word",
+    emoji: "📝",
+    titulo: "Uso Profesional de Microsoft Word",
+    desc: "Guía completa de estándares y buenas prácticas para edición de documentos.",
+    autor: "Ricardo Zelaya",
+    file: "archivos word/Uso Profesional de Microsoft Word.docx",
+    url: "archivos word/Uso Profesional de Microsoft Word.docx"
+  },
+  {
+    id: "d_w12",
+    type: "word",
+    emoji: "📝",
+    titulo: "Validación de Datos",
+    desc: "Creación de formularios con campos de texto restringidos y listas desplegables.",
+    autor: "Ricardo Zelaya",
+    file: "archivos word/Validación de Datos.docx",
+    url: "archivos word/Validación de Datos.docx"
+  },
+  {
+    id: "d_w13",
+    type: "word",
+    emoji: "📝",
+    titulo: "Modificar Tablas",
+    desc: "Configuración del diseño de tablas, bordes, rellenos y combinación de celdas.",
+    autor: "Ricardo Zelaya",
+    file: "archivos word/modificar tablas.docx",
+    url: "archivos word/modificar tablas.docx"
+  }
+];
+
 let docsCache = [];
 let currentFilter = 'all';
 let searchQuery   = '';
@@ -783,32 +1016,30 @@ async function fetchDocs() {
     localDocs = JSON.parse(localStorage.getItem('mos_docs_v3')) || [];
   } catch(e) { console.error("Error reading localStorage", e); }
 
-  if (!supabase) {
-    docsCache = localDocs;
-    return docsCache;
+  let dbDocs = [];
+  if (firebaseInitialized) {
+    try {
+      const snapshot = await db.collection("documentos").get();
+      dbDocs = snapshot.docs.map(doc => {
+        const d = doc.data();
+        return {
+          id: doc.id,
+          type: d.tipo,
+          emoji: d.tipo === 'word' ? '📝' : '📊',
+          titulo: d.titulo,
+          desc: d.descripcion || 'Subido por ' + (d.autor || 'Anónimo'),
+          autor: d.autor || 'Anónimo',
+          file: d.archivo_path,
+          url: d.url_archivo
+        };
+      });
+    } catch(err) {
+      console.error("Error cargando base de datos Firebase:", err);
+    }
   }
 
-  try {
-    const { data, error } = await supabase.from('documentos').select('*').order('fecha_subida', { ascending: false });
-    if (error) throw error;
-    
-    const dbDocs = data.map(d => ({
-      id: d.id,
-      type: d.tipo,
-      emoji: d.tipo === 'word' ? '📝' : '📊',
-      titulo: d.titulo,
-      desc: d.descripcion || 'Subido por ' + (d.autor || 'Anónimo'),
-      autor: d.autor || 'Anónimo',
-      file: d.archivo_path,
-      url: d.url_archivo
-    }));
-    
-    // Unir ambos: locales y de la nube
-    docsCache = [...localDocs, ...dbDocs];
-  } catch(err) {
-    console.error("Error cargando base de datos, usando local:", err);
-    docsCache = localDocs;
-  }
+  // Unir todo: archivos por defecto locales + archivos guardados por localStorage + de Firebase
+  docsCache = [...DEFAULT_DOCS, ...localDocs, ...dbDocs];
   return docsCache;
 }
 
@@ -886,6 +1117,11 @@ function filterDl(type, btn) {
 }
 
 async function deleteDoc(id, filePath) {
+  if (String(id).startsWith('d_')) {
+    alert("Los archivos por defecto están incorporados de fábrica en el portafolio y no se pueden eliminar.");
+    return;
+  }
+
   const pwd = prompt("Acceso Administrativo: Ingrese la contraseña para eliminar este documento");
   if (pwd !== "1234") {
     alert("Contraseña incorrecta. Acceso denegado.");
@@ -902,10 +1138,11 @@ async function deleteDoc(id, filePath) {
       localStorage.setItem('mos_docs_v3', JSON.stringify(localDocs));
     } catch(e) { console.error(e); }
   } else {
-    // Eliminar de Supabase
-    if (supabase) {
-      if (filePath) await supabase.storage.from('documentos').remove([filePath]);
-      await supabase.from('documentos').delete().eq('id', id);
+    // Eliminar de Firebase
+    if (firebaseInitialized) {
+      try {
+        await db.collection("documentos").doc(id).delete();
+      } catch(e) { console.error("Error al eliminar de Firebase:", e); }
     }
   }
   
@@ -966,9 +1203,9 @@ async function uploadDoc(){
   const btn = document.querySelector('.btn-upload');
   const oTxt = btn.textContent;
 
-  // Fallback local si Supabase no está disponible o desconectado
-  if (!supabase) {
-    const confirmLocal = confirm('La base de datos en la nube no está disponible en este momento. ¿Deseas subir este archivo de forma local en tu navegador para no perderlo?');
+  // Fallback local si Firebase no está disponible o configurado
+  if (!firebaseInitialized) {
+    const confirmLocal = confirm('La base de datos Firebase en la nube no está configurada o conectada en este momento. ¿Deseas subir este archivo de forma local en tu navegador para no perderlo?');
     if (!confirmLocal) return;
 
     btn.textContent = 'Subiendo local... ⏳';
@@ -1009,30 +1246,37 @@ async function uploadDoc(){
   btn.disabled = true;
 
   try {
-    // 1. Subir a Storage
-    const ext = selectedFile.name.split('.').pop();
-    const filePath = `docs/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
-    
-    const { error: upErr } = await supabase.storage.from('documentos').upload(filePath, selectedFile);
-    if (upErr) throw upErr;
-    
-    // 2. Obtener URL pública
-    const { data: publicUrlData } = supabase.storage.from('documentos').getPublicUrl(filePath);
-    
-    // 3. Guardar en Base de Datos (Tabla 'documentos')
-    const { error: dbErr } = await supabase.from('documentos').insert([{
-      titulo, descripcion: desc, tipo, autor, archivo_path: filePath, url_archivo: publicUrlData.publicUrl
-    }]);
-    if (dbErr) throw dbErr;
-    
-    await renderDocs(true);
-    updateHeroStats();
-    
-    document.getElementById('uploadForm').style.display='none';
-    document.getElementById('uploadOk').style.display='block';
+    const reader = new FileReader();
+    reader.onload = async e => {
+      try {
+        const fileDataUrl = e.target.result;
+        
+        // Guardar directamente en Firestore (Base de Datos) sin usar Storage (100% gratis, sin tarjeta)
+        await db.collection("documentos").add({
+          titulo,
+          descripcion: desc,
+          tipo,
+          autor,
+          archivo_path: selectedFile.name,
+          url_archivo: fileDataUrl, // Guardar el archivo embebido en Base64
+          fecha_subida: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        await renderDocs(true);
+        updateHeroStats();
+        
+        document.getElementById('uploadForm').style.display='none';
+        document.getElementById('uploadOk').style.display='block';
+      } catch(err) {
+        alert('Error al subir a Firestore: ' + err.message);
+      } finally {
+        btn.textContent = oTxt;
+        btn.disabled = false;
+      }
+    };
+    reader.readAsDataURL(selectedFile);
   } catch (err) {
-    alert('Error al subir: ' + err.message);
-  } finally {
+    alert('Error al procesar archivo: ' + err.message);
     btn.textContent = oTxt;
     btn.disabled = false;
   }
