@@ -80,63 +80,67 @@
 }
 .mosbot-tab.active, .mosbot-tab:hover { background: var(--gold); color: white; border-color: var(--gold); }
 
-/* ── MISSIONS GRID ── */
-.mosbot-content { max-width: 1100px; margin: 0 auto; padding: 2rem; }
-.mosbot-missions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+/* ── MISSIONS LAYOUT (Screenshot Style) ── */
+.mosbot-content { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+.mosbot-mission-layout { display: grid; grid-template-columns: 1fr 340px; gap: 2rem; align-items: start; }
 
-.mission-card {
+.mosbot-mission-main {
   background: var(--card); border: 1px solid var(--border); border-radius: var(--r);
-  overflow: hidden; box-shadow: var(--shadow); transition: all .4s cubic-bezier(.4,0,.2,1);
-  display: flex; flex-direction: column;
+  padding: 2.5rem; box-shadow: var(--shadow);
 }
-.mission-card:hover { transform: translateY(-4px); border-color: var(--gold); box-shadow: 0 16px 40px rgba(0,0,0,.6), 0 0 25px rgba(139,92,246,.25); }
-.mission-card.completed { border-color: #22c55e; }
-.mission-card.completed .mission-head { background: linear-gradient(135deg, #166534, #15803d) !important; }
-.mission-card.locked { opacity: .55; pointer-events: none; }
 
-.mission-head {
-  padding: 1rem 1.2rem; display: flex; align-items: center; gap: .75rem; position: relative;
-}
-.mission-head.excel-head { background: linear-gradient(135deg, #1A6B37, #217346); }
-.mission-head.word-head { background: linear-gradient(135deg, #1B5EAB, #2B7CD3); }
-.mission-icon { font-size: 1.8rem; }
-.mission-head-info { flex: 1; }
-.mission-head-info h3 { font-size: .88rem; font-weight: 700; color: #fff; line-height: 1.3; }
-.mission-head-info span { font-size: .68rem; color: rgba(255,255,255,.7); text-transform: uppercase; letter-spacing: .08em; }
-.mission-xp {
-  background: rgba(0,0,0,.3); color: #fbbf24; font-size: .72rem; font-weight: 700;
-  padding: .25rem .7rem; border-radius: 100px; white-space: nowrap;
-}
-.mission-status-icon { position: absolute; top: .6rem; right: .6rem; font-size: 1.2rem; }
+.mission-progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-weight: 700; color: var(--text); }
+.mission-progress-bar { height: 12px; background: rgba(255,255,255,.08); border-radius: 8px; overflow: hidden; margin-bottom: 2rem; position: relative; border: 1px solid rgba(255,255,255,.1); }
+.mission-progress-fill { height: 100%; background: linear-gradient(90deg, #2dd4bf, #0d9488); border-radius: 8px; transition: width .4s ease, background .4s ease; box-shadow: 0 0 10px rgba(45,212,191,.4); }
+.mission-progress-fill.decreasing { background: linear-gradient(90deg, #fb7185, #e11d48); box-shadow: 0 0 10px rgba(225,29,72,.4); }
 
-.mission-body { padding: 1.2rem; flex: 1; display: flex; flex-direction: column; }
-.mission-body p { font-size: .82rem; color: var(--muted); line-height: 1.6; margin-bottom: 1rem; flex: 1; }
+.mission-block-label { color: #2dd4bf; font-size: .8rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: .8rem; display: flex; align-items: center; gap: .5rem; }
 
-.mission-question { background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: var(--rs); padding: 1rem; margin-bottom: 1rem; }
-.mission-question label { display: block; font-size: .82rem; font-weight: 600; color: var(--text); margin-bottom: .6rem; }
-.mission-options { display: flex; flex-direction: column; gap: .4rem; }
+.mission-question-text { font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 2.5rem; line-height: 1.4; }
+
+.mission-options { display: flex; flex-direction: column; gap: 1rem; }
 .mission-opt {
-  display: flex; align-items: center; gap: .5rem; padding: .5rem .75rem;
+  display: flex; align-items: center; padding: 1.2rem 1.5rem;
   background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: var(--rs);
-  cursor: pointer; transition: var(--ease); font-size: .82rem; color: var(--text);
+  cursor: pointer; transition: all .3s ease; font-size: .95rem; color: var(--text);
 }
-.mission-opt:hover { border-color: var(--gold); background: rgba(139,92,246,.08); }
-.mission-opt input[type="radio"] { accent-color: var(--gold); }
+.mission-opt:hover { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.2); transform: translateX(5px); }
+.mission-opt input[type="radio"] { display: none; }
+.mission-opt .opt-letter { font-weight: 700; margin-right: .8rem; font-size: 1.05rem; }
 .mission-opt.correct { border-color: #22c55e; background: rgba(34,197,94,.12); color: #4ade80; }
 .mission-opt.wrong { border-color: #ef4444; background: rgba(239,68,68,.1); color: #f87171; }
+.mission-opt.disabled { pointer-events: none; opacity: 0.6; }
 
-.mission-btn {
-  width: 100%; padding: .6rem; background: var(--gold); color: white; border: none;
-  border-radius: var(--rs); font-family: 'DM Sans', sans-serif; font-size: .85rem;
-  font-weight: 700; cursor: pointer; transition: var(--ease);
+.mosbot-sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
+.sidebar-panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 1.8rem; box-shadow: var(--shadow); }
+.sidebar-panel h3 { font-size: 1.1rem; font-weight: 700; color: #2dd4bf; margin-bottom: 1.2rem; display: flex; align-items: center; gap: .5rem; border-bottom: 1px solid rgba(255,255,255,.05); padding-bottom: .8rem; }
+.sidebar-stats { list-style: none; padding: 0; margin: 0 0 1.5rem 0; font-size: .88rem; color: var(--text); }
+.sidebar-stats li { margin-bottom: .8rem; display: flex; justify-content: space-between; }
+.sidebar-stats li strong { color: #38bdf8; }
+.sidebar-badges-title { font-size: .85rem; font-weight: 700; color: #2dd4bf; margin-bottom: .8rem; }
+.sidebar-badges { display: flex; gap: .5rem; }
+.sidebar-badge { font-size: 1.4rem; opacity: .3; filter: grayscale(1); }
+.sidebar-badge.earned { opacity: 1; filter: none; text-shadow: 0 0 10px rgba(139,92,246,.5); }
+
+.ranking-list { list-style: none; padding: 0; margin: 0; }
+.ranking-list li { display: flex; justify-content: space-between; padding: .8rem 0; border-bottom: 1px solid rgba(255,255,255,.05); font-size: .9rem; }
+.ranking-list li:last-child { border-bottom: none; }
+.ranking-list li .r-name { font-weight: 600; color: var(--text); }
+.ranking-list li .r-xp { font-weight: 700; color: #2dd4bf; }
+
+.mission-feedback { font-size: .95rem; padding: 1rem; border-radius: var(--rs); margin-top: 1.5rem; text-align: center; font-weight: 700; display: none; }
+.mission-feedback.correct-fb { display: block; background: rgba(34,197,94,.15); border: 1px solid rgba(34,197,94,.4); color: #4ade80; animation: badgeUnlock 0.5s ease; }
+.mission-feedback.wrong-fb { display: block; background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.4); color: #f87171; animation: shake 0.4s ease; }
+
+.mosbot-missions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
 }
-.mission-btn:hover { background: var(--gold-lt); transform: translateY(-1px); }
-.mission-btn:disabled { opacity: .5; cursor: default; transform: none; }
-.mission-btn.completed-btn { background: #22c55e; cursor: default; }
-
-.mission-feedback { font-size: .8rem; padding: .5rem .75rem; border-radius: var(--rs); margin-top: .5rem; text-align: center; font-weight: 600; display: none; }
-.mission-feedback.correct-fb { display: block; background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.3); color: #4ade80; }
-.mission-feedback.wrong-fb { display: block; background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3); color: #f87171; }
 
 /* ── BADGES ── */
 .mosbot-badges-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.25rem; }
@@ -247,6 +251,9 @@
 .mosbot-reset-btn:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
 
 /* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .mosbot-mission-layout { grid-template-columns: 1fr; }
+}
 @media (max-width: 768px) {
   .mosbot-welcome-card { padding: 2rem 1.5rem; }
   .mosbot-missions-grid { grid-template-columns: 1fr; }
@@ -257,6 +264,7 @@
   .cert-preview h2 { font-size: 1.4rem; }
   .cert-preview .cert-name { font-size: 1.5rem; }
   .mosbot-toast { right: 1rem; left: 1rem; max-width: none; }
+  .mosbot-mission-main { padding: 1.5rem; }
 }
 @media (max-width: 480px) {
   .mosbot-badges-grid { grid-template-columns: 1fr 1fr; gap: .75rem; }

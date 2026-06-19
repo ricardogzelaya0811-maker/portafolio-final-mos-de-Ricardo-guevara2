@@ -144,59 +144,137 @@ function mosbotRenderContent() {
 }
 
 function mosbotRenderMissions(area) {
-  const html = MOSBOT_MISSIONS.map((m, i) => {
-    const done = mosbotState.completed.includes(m.id);
-    const locked = !done && i > 0 && !mosbotState.completed.includes(MOSBOT_MISSIONS[i - 1].id);
-    const headClass = m.type === 'excel' ? 'excel-head' : 'word-head';
-    const cardClass = done ? 'completed' : (locked ? 'locked' : '');
-    const optsHtml = m.opts.map((o, oi) =>
-      `<label class="mission-opt" id="opt-${m.id}-${oi}"><input type="radio" name="q-${m.id}" value="${oi}" ${done ? 'disabled' : ''}/>${o}</label>`
-    ).join('');
-    return `<div class="mission-card ${cardClass}">
-      <div class="mission-head ${headClass}">
-        <span class="mission-icon">${m.type === 'excel' ? '📊' : '📝'}</span>
-        <div class="mission-head-info"><span>Misión ${i + 1} · ${m.type.toUpperCase()}</span><h3>${m.title}</h3></div>
-        <span class="mission-xp">+100 XP</span>
-        ${done ? '<span class="mission-status-icon">✅</span>' : (locked ? '<span class="mission-status-icon">🔒</span>' : '')}
+  const currentIdx = mosbotState.completed.length;
+  
+  if (currentIdx >= MOSBOT_MISSIONS.length) {
+    area.innerHTML = `
+      <div style="text-align:center; padding: 4rem 2rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--shadow);">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">🎓</div>
+        <h2 style="color: #2dd4bf; margin-bottom: 1rem; font-family: 'Playfair Display', serif;">¡Programa Completado!</h2>
+        <p style="color: var(--muted); margin-bottom: 2rem;">Has superado todas las misiones de MOSBOT Academy Ultimate.</p>
+        <button class="mosbot-start-btn" style="max-width: 250px;" onclick="mosbotSwitchTab('cert', document.querySelectorAll('.mosbot-tab')[4])">Ver Certificado</button>
       </div>
-      <div class="mission-body">
-        <p>${m.desc}</p>
-        <div class="mission-question"><label>${m.q}</label><div class="mission-options">${optsHtml}</div></div>
-        <div class="mission-feedback" id="fb-${m.id}"></div>
-        ${done ? '<button class="mission-btn completed-btn" disabled>✅ Completada</button>' :
-          (locked ? '<button class="mission-btn" disabled>🔒 Bloqueada</button>' :
-            `<button class="mission-btn" id="btn-${m.id}" onclick="mosbotAnswer('${m.id}')">Verificar Respuesta</button>`)}
-      </div>
-    </div>`;
+    `;
+    return;
+  }
+
+  const m = MOSBOT_MISSIONS[currentIdx];
+  const progressPct = Math.round((currentIdx / MOSBOT_MISSIONS.length) * 100);
+  const blockName = m.type === 'word' ? '📄 BLOQUE: WORD' : '📊 BLOQUE: EXCEL';
+  
+  const optionsHtml = m.opts.map((o, oi) => {
+    const letter = ['A', 'B', 'C', 'D'][oi];
+    return `<label class="mission-opt" id="opt-${m.id}-${oi}">
+      <input type="radio" name="q-${m.id}" value="${oi}" onchange="mosbotAnswer('${m.id}')"/>
+      <span class="opt-letter">${letter})</span> ${o}
+    </label>`;
   }).join('');
-  area.innerHTML = '<div class="mosbot-missions-grid">' + html + '</div>';
+
+  const ranking = JSON.parse(localStorage.getItem('mosbot_ranking') || '[]');
+  const rankingHtml = ranking.slice(0, 5).map((r, i) => `
+    <li><span class="r-name">#${i+1} ${r.name}</span> <span class="r-xp">${r.xp} XP</span></li>
+  `).join('') || '<li><span class="r-name" style="color:var(--muted)">Sin registros aún</span></li>';
+
+  const badgesHtml = MOSBOT_BADGES.slice(0, 5).map(b => 
+    `<span class="sidebar-badge ${mosbotState.badges.includes(b.id) ? 'earned' : ''}" title="${b.name}">${b.icon}</span>`
+  ).join('');
+
+  area.innerHTML = `
+    <div class="mosbot-mission-layout">
+      <div class="mosbot-mission-main">
+        <div class="mission-progress-header">
+          <span>Misión ${currentIdx + 1} de ${MOSBOT_MISSIONS.length}</span>
+          <span>${progressPct}%</span>
+        </div>
+        <div class="mission-progress-bar">
+          <div class="mission-progress-fill" id="missionProgressFill" style="width: ${progressPct}%"></div>
+        </div>
+        
+        <div class="mission-block-label">${blockName}</div>
+        
+        <div class="mission-question-text">${currentIdx + 1}. ${m.q}</div>
+        
+        <div class="mission-options">${optionsHtml}</div>
+        
+        <div class="mission-feedback" id="fb-${m.id}"></div>
+      </div>
+      
+      <div class="mosbot-sidebar">
+        <div class="sidebar-panel">
+          <h3>👨‍🏫 Panel del Docente</h3>
+          <ul class="sidebar-stats">
+            <li><span>Estudiantes Registrados:</span> <strong>${Math.max(1, ranking.length)}</strong></li>
+            <li><span>Misiones Realizadas:</span> <strong>${currentIdx}</strong></li>
+            <li><span>Misiones Pendientes:</span> <strong>${MOSBOT_MISSIONS.length - currentIdx}</strong></li>
+            <li><span>Fecha de Realización:</span> <strong>${new Date().toLocaleDateString('es-ES')}</strong></li>
+          </ul>
+          <div class="sidebar-badges-title">Insignias Ganadas:</div>
+          <div class="sidebar-badges">${badgesHtml}</div>
+        </div>
+        
+        <div class="sidebar-panel">
+          <h3>🏆 Ranking General</h3>
+          <ul class="ranking-list">${rankingHtml}</ul>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function mosbotAnswer(missionId) {
   const m = MOSBOT_MISSIONS.find(x => x.id === missionId);
   if (!m || mosbotState.completed.includes(m.id)) return;
   const sel = document.querySelector(`input[name="q-${missionId}"]:checked`);
-  if (!sel) { alert('Selecciona una respuesta'); return; }
+  if (!sel) return;
+  
   const chosen = parseInt(sel.value);
   const fb = document.getElementById('fb-' + missionId);
+  const optEl = document.getElementById('opt-' + missionId + '-' + chosen);
+  
   if (chosen === m.ans) {
     mosbotState.xp += 100;
     mosbotState.completed.push(m.id);
     mosbotState.streak = (mosbotState.streak || 0) + 1;
     mosbotSaveState();
     mosbotPlaySound(true);
+    
     fb.className = 'mission-feedback correct-fb';
-    fb.textContent = '🎉 ¡Correcto! +100 XP';
-    document.getElementById('opt-' + missionId + '-' + chosen).classList.add('correct');
+    fb.innerHTML = '🎉 ¡Respuesta Correcta! <span style="color:#22c55e">+100 XP</span>';
+    optEl.classList.add('correct');
+    
+    // Disable all options
+    document.querySelectorAll(`input[name="q-${missionId}"]`).forEach(inp => {
+      inp.disabled = true;
+      inp.parentElement.classList.add('disabled');
+    });
+    
     mosbotCheckBadges();
-    setTimeout(() => { mosbotRenderDashboard(); }, 1200);
+    setTimeout(() => { 
+      mosbotRenderDashboard(); 
+    }, 1500);
   } else {
     mosbotState.streak = 0;
+    mosbotState.xp = Math.max(0, mosbotState.xp - 20); // Penalty for wrong answer
     mosbotSaveState();
     mosbotPlaySound(false);
+    
     fb.className = 'mission-feedback wrong-fb';
-    fb.textContent = '❌ Incorrecto. ¡Intenta de nuevo!';
-    document.getElementById('opt-' + missionId + '-' + chosen).classList.add('wrong');
+    fb.innerHTML = '❌ Incorrecto. <span style="color:#ef4444">-20 XP</span> ¡Intenta de nuevo!';
+    optEl.classList.add('wrong', 'disabled');
+    sel.disabled = true;
+    sel.checked = false; // allow trying another
+    
+    const fill = document.getElementById('missionProgressFill');
+    if (fill) {
+      fill.classList.add('decreasing');
+      setTimeout(() => fill.classList.remove('decreasing'), 600);
+    }
+    
+    // update dashboard XP without full re-render
+    document.getElementById('mosbotXPValue').innerHTML = '<span>' + mosbotState.xp + '</span> XP';
+    const rank = mosbotGetRank();
+    document.getElementById('mosbotRankBadge').innerHTML = rank.icon + ' ' + rank.name;
+    document.getElementById('mosbotPlayerLabel').textContent = '👤 ' + mosbotState.name;
   }
 }
 
