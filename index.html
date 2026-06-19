@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8"/>
@@ -13,6 +13,7 @@
   <meta name="author" content="Ricardo Zelaya"/>
 
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="mosbot-academy.css"/>
 
   <style>
     /* ══════════════════════════════════════
@@ -451,6 +452,7 @@
       <button class="nav-link active" onclick="showPage('home',this)">Home</button>
       <button class="nav-link" onclick="showPage('descargas',this)">Descargas</button>
       <button class="nav-link" onclick="showPage('subir',this)">Subir</button>
+      <button class="nav-link" onclick="showPage('mosbot',this)">🎓 MOSBOT Academy</button>
       <button class="nav-logout" onclick="doLogout()">Salir 🚪</button>
     </div>
     <button class="hamburger" id="hbg" onclick="toggleNav()" aria-label="Menú">
@@ -626,6 +628,46 @@
       </div>
     </div>
     <footer><p>© 2026 <strong>Ricardo Zelaya</strong> · Portafolio MOS con IA · El Salvador</p></footer>
+  </div>
+
+  <!-- ══ MOSBOT ACADEMY ══ -->
+  <div id="page-mosbot" class="page">
+    <div id="mosbotWelcome" class="mosbot-welcome">
+      <div class="mosbot-welcome-card">
+        <div class="mosbot-logo">🤖</div>
+        <h1>MOSBOT Academy Ultimate</h1>
+        <p>¡Bienvenido al simulador de certificación MOS! Completa 20 misiones de Excel y Word, gana XP, desbloquea insignias y obtén tu certificado digital.</p>
+        <div class="uf">
+          <label>👤 Tu nombre de estudiante</label>
+          <input type="text" id="mosbotNameInput" placeholder="Escribe tu nombre..." onkeydown="if(event.key==='Enter')mosbotStartGame()"/>
+        </div>
+        <button class="mosbot-start-btn" onclick="mosbotStartGame()">🚀 Comenzar Aventura</button>
+      </div>
+    </div>
+    <div id="mosbotDashboard" class="mosbot-dashboard">
+      <div class="mosbot-header">
+        <h1>🤖 MOSBOT Academy <em>Ultimate</em></h1>
+        <div class="mosbot-player-name" id="mosbotPlayerLabel"></div>
+        <div class="mosbot-xp-section">
+          <div class="mosbot-rank-badge" id="mosbotRankBadge"></div>
+          <div class="mosbot-xp-display" id="mosbotXPValue"></div>
+        </div>
+        <div class="mosbot-progress-wrap">
+          <div class="mosbot-progress-label"><span id="mosbotProgressLeft"></span><span id="mosbotProgressRight"></span></div>
+          <div class="mosbot-progress-bar"><div class="mosbot-progress-fill" id="mosbotProgressFill"></div></div>
+        </div>
+      </div>
+      <div class="mosbot-tabs">
+        <button class="mosbot-tab active" onclick="mosbotSwitchTab('missions',this)">🎯 Misiones</button>
+        <button class="mosbot-tab" onclick="mosbotSwitchTab('badges',this)">🏅 Insignias</button>
+        <button class="mosbot-tab" onclick="mosbotSwitchTab('stats',this)">📊 Estadísticas</button>
+        <button class="mosbot-tab" onclick="mosbotSwitchTab('ranking',this)">🏆 Ranking</button>
+        <button class="mosbot-tab" onclick="mosbotSwitchTab('cert',this)">📜 Certificado</button>
+        <button class="mosbot-tab" onclick="mosbotLogout()" style="border-color:rgba(239,68,68,.3);color:#f87171">🚪 Salir</button>
+      </div>
+      <div class="mosbot-content" id="mosbotContentArea"></div>
+    </div>
+    <footer><p>© 2026 <strong>Ricardo Zelaya</strong> · MOSBOT Academy Ultimate · Portafolio MOS con IA</p></footer>
   </div>
 
 </div><!-- fin app -->
@@ -1314,6 +1356,15 @@ function initReveal(){
   const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:.1});
   document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 }
+
+/* ── MOSBOT: Auto-init when tab is shown ── */
+const _origShowPage = showPage;
+showPage = function(id, btn) {
+  _origShowPage(id, btn);
+  if (id === 'mosbot') mosbotInit();
+};
 </script>
+<script src="mosbot-data.js"></script>
+<script src="mosbot-logic.js"></script>
 </body>
 </html>
