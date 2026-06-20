@@ -9,14 +9,27 @@ function mosbotLoadState() {
   return raw ? JSON.parse(raw) : { name, xp: 0, completed: [], streak: 0, badges: [], startDate: new Date().toISOString() };
 }
 
-function mosbotSaveState() {
+async function mosbotSaveState() {
   if (!mosbotState) return;
   localStorage.setItem('mosbot_player', mosbotState.name);
   localStorage.setItem('mosbot_state_' + mosbotState.name, JSON.stringify(mosbotState));
+  
+  if (window.firebaseInitialized && window.db) {
+    try {
+      await db.collection("mosbot_students").doc(mosbotState.name).set({
+        nombre: mosbotState.name,
+        xp: mosbotState.xp,
+        completedMissions: mosbotState.completed,
+        badges: mosbotState.badges,
+        fechaUltimoAcceso: new Date().toISOString()
+      }, { merge: true });
+    } catch(e) { console.error("Error guardando en Firebase:", e); }
+  }
+  
   mosbotUpdateRanking();
 }
 
-function mosbotUpdateRanking() {
+async function mosbotUpdateRanking() {
   if (!mosbotState) return;
   let ranking = JSON.parse(localStorage.getItem('mosbot_ranking') || '[]');
   const idx = ranking.findIndex(r => r.name === mosbotState.name);
@@ -24,6 +37,29 @@ function mosbotUpdateRanking() {
   if (idx >= 0) ranking[idx] = entry; else ranking.push(entry);
   ranking.sort((a, b) => b.xp - a.xp);
   localStorage.setItem('mosbot_ranking', JSON.stringify(ranking));
+
+  if (window.firebaseInitialized && window.db) {
+    try {
+      const snap = await db.collection("mosbot_students").orderBy("xp", "desc").get();
+      ranking = snap.docs.map(doc => {
+        const d = doc.data();
+        return { name: d.nombre, xp: d.xp || 0, completed: d.completedMissions ? d.completedMissions.length : 0 };
+      });
+      localStorage.setItem('mosbot_ranking', JSON.stringify(ranking));
+    } catch(e) { console.error("Error cargando ranking de Firebase:", e); }
+  }
+  
+  if (mosbotCurrentTab === 'missions') {
+    const rankingList = document.querySelector('.ranking-list');
+    if (rankingList) {
+      rankingList.innerHTML = ranking.slice(0, 5).map((r, i) => `
+        <li><span class="r-name">#${i+1} ${r.name}</span> <span class="r-xp">${r.xp} XP</span></li>
+      `).join('') || '<li><span class="r-name" style="color:var(--muted)">Sin registros aún</span></li>';
+    }
+  } else if (mosbotCurrentTab === 'ranking') {
+    const area = document.getElementById('mosbotContentArea');
+    if (area) mosbotRenderRanking(area);
+  }
 }
 
 function mosbotGetRank() {
@@ -92,23 +128,51 @@ function mosbotCheckBadges() {
 }
 
 // ── INIT ──
-function mosbotInit() {
+async function mosbotInit() {
   const saved = mosbotLoadState();
   if (saved && saved.name) {
     mosbotState = saved;
+    if (window.firebaseInitialized && window.db) {
+      try {
+        const doc = await db.collection("mosbot_students").doc(mosbotState.name).get();
+        if (doc.exists) {
+          const d = doc.data();
+          mosbotState.xp = d.xp || 0;
+          mosbotState.completed = d.completedMissions || [];
+          mosbotState.badges = d.badges || [];
+        }
+      } catch(e) {}
+    }
     document.getElementById('mosbotWelcome').style.display = 'none';
     document.getElementById('mosbotDashboard').style.display = 'block';
     mosbotRenderDashboard();
+    mosbotUpdateRanking();
   }
 }
 
-function mosbotStartGame() {
+async function mosbotStartGame() {
   const input = document.getElementById('mosbotNameInput');
   const name = input.value.trim();
   if (!name) { input.style.borderColor = '#ef4444'; return; }
-  const existing = localStorage.getItem('mosbot_state_' + name);
-  mosbotState = existing ? JSON.parse(existing) : { name, xp: 0, completed: [], streak: 0, badges: [], startDate: new Date().toISOString() };
-  mosbotSaveState();
+  
+  mosbotState = { name, xp: 0, completed: [], streak: 0, badges: [], startDate: new Date().toISOString() };
+  
+  if (window.firebaseInitialized && window.db) {
+    try {
+      const doc = await db.collection("mosbot_students").doc(name).get();
+      if (doc.exists) {
+        const d = doc.data();
+        mosbotState.xp = d.xp || 0;
+        mosbotState.completed = d.completedMissions || [];
+        mosbotState.badges = d.badges || [];
+      }
+    } catch(e) {}
+  } else {
+    const existing = localStorage.getItem('mosbot_state_' + name);
+    if (existing) mosbotState = JSON.parse(existing);
+  }
+  
+  await mosbotSaveState();
   document.getElementById('mosbotWelcome').style.display = 'none';
   document.getElementById('mosbotDashboard').style.display = 'block';
   mosbotRenderDashboard();
