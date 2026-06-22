@@ -17,7 +17,7 @@ async function mosbotSaveState() {
   if (window.firebaseInitialized && window.db) {
     try {
       const docId = window.firebaseUserUid || mosbotState.name;
-      await db.collection("mosbot_students").doc(docId).set({
+      await window.db.collection("mosbot_students").doc(docId).set({
         nombre: mosbotState.name,
         uid: window.firebaseUserUid || null,
         xp: mosbotState.xp,
@@ -42,7 +42,7 @@ async function mosbotUpdateRanking() {
 
   if (window.firebaseInitialized && window.db) {
     try {
-      const snap = await db.collection("mosbot_students").orderBy("xp", "desc").get();
+      const snap = await window.db.collection("mosbot_students").orderBy("xp", "desc").get();
       ranking = snap.docs.map(doc => {
         const d = doc.data();
         return { name: d.nombre, xp: d.xp || 0, completed: d.completedMissions ? d.completedMissions.length : 0 };
@@ -137,7 +137,7 @@ async function mosbotInit() {
     if (window.firebaseInitialized && window.db) {
       try {
         const docId = window.firebaseUserUid || mosbotState.name;
-        const doc = await db.collection("mosbot_students").doc(docId).get();
+        const doc = await window.db.collection("mosbot_students").doc(docId).get();
         if (doc.exists) {
           const d = doc.data();
           mosbotState.xp = d.xp || 0;
@@ -164,7 +164,7 @@ async function mosbotStartGame() {
   if (window.firebaseInitialized && window.db) {
     try {
       const docId = window.firebaseUserUid || name;
-      const doc = await db.collection("mosbot_students").doc(docId).get();
+      const doc = await window.db.collection("mosbot_students").doc(docId).get();
       if (doc.exists) {
         const d = doc.data();
         mosbotState.xp = d.xp || 0;

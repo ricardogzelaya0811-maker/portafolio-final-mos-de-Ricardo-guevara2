@@ -794,9 +794,9 @@ document.addEventListener('click', e => {
 });
 
 /* ── FIREBASE INICIALIZACIÓN ── */
-// IMPORTANTE: Reemplaza estas credenciales por las tuyas de tu Firebase Console
+// Credenciales del proyecto Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyAeoTER5SeErRMOt63MZTQQ2KYCnD8jEMc",
+  apiKey: "AIzaSyAeoTeR5SeERrMOt63MZTQQ2KYCnD8jEMc",
   authDomain: "portafolio-mos.firebaseapp.com",
   projectId: "portafolio-mos",
   storageBucket: "portafolio-mos.firebasestorage.app",
@@ -804,53 +804,6 @@ const firebaseConfig = {
   appId: "1:447432105162:web:b868ea63c40915abde2833",
   measurementId: "G-TV3K6XFKFN"
 };
-
-let db = null;
-let storage = null;
-let firebaseInitialized = false;
-
-function loadFirebaseScript(src) {
-  return new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = src;
-    s.onload = resolve;
-    s.onerror = reject;
-    document.head.appendChild(s);
-  });
-}
-
-async function initFirebase() {
-  try {
-    // 1. Cargar App SDK
-    await loadFirebaseScript("https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js");
-    // 2. Cargar Firestore y Storage SDKs en paralelo
-    await Promise.all([
-      loadFirebaseScript("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"),
-      loadFirebaseScript("https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js")
-    ]);
-    
-    // 3. Inicializar si la config ha sido ingresada
-    if (window.firebase && firebaseConfig.apiKey !== "TU_API_KEY_AQUI") {
-      window.firebase.initializeApp(firebaseConfig);
-      db = window.firebase.firestore();
-      storage = window.firebase.storage();
-      firebaseInitialized = true;
-      console.log("Firebase cargado e inicializado con éxito.");
-      
-      // Si ya inició sesión o está en descargas, re-renderizar para traer los archivos de la nube
-      if (document.getElementById('app').style.display === 'block') {
-        renderDocs(true);
-      }
-    } else {
-      console.warn("Firebase SDKs listos. Por favor ingresa tus credenciales válidas en firebaseConfig.");
-    }
-  } catch(e) {
-    console.error("Error al cargar Firebase SDKs:", e);
-  }
-}
-
-// Iniciar carga de Firebase en segundo plano
-initFirebase();
 
 /* ── DOCUMENTOS ── */
 const DEFAULT_DOCS = [
@@ -1059,9 +1012,9 @@ async function fetchDocs() {
   } catch(e) { console.error("Error reading localStorage", e); }
 
   let dbDocs = [];
-  if (firebaseInitialized) {
+  if (window.firebaseInitialized) {
     try {
-      const snapshot = await db.collection("documentos").get();
+      const snapshot = await window.db.collection("documentos").get();
       dbDocs = snapshot.docs.map(doc => {
         const d = doc.data();
         return {
@@ -1181,9 +1134,9 @@ async function deleteDoc(id, filePath) {
     } catch(e) { console.error(e); }
   } else {
     // Eliminar de Firebase
-    if (firebaseInitialized) {
+    if (window.firebaseInitialized) {
       try {
-        await db.collection("documentos").doc(id).delete();
+        await window.db.collection("documentos").doc(id).delete();
       } catch(e) { console.error("Error al eliminar de Firebase:", e); }
     }
   }
@@ -1246,7 +1199,7 @@ async function uploadDoc(){
   const oTxt = btn.textContent;
 
   // Fallback local si Firebase no está disponible o configurado
-  if (!firebaseInitialized) {
+  if (!window.firebaseInitialized) {
     const confirmLocal = confirm('La base de datos Firebase en la nube no está configurada o conectada en este momento. ¿Deseas subir este archivo de forma local en tu navegador para no perderlo?');
     if (!confirmLocal) return;
 
@@ -1294,7 +1247,7 @@ async function uploadDoc(){
         const fileDataUrl = e.target.result;
         
         // Guardar directamente en Firestore (Base de Datos) sin usar Storage (100% gratis, sin tarjeta)
-        await db.collection("documentos").add({
+        await window.db.collection("documentos").add({
           titulo,
           descripcion: desc,
           tipo,
@@ -1364,13 +1317,13 @@ showPage = function(id, btn) {
   if (id === 'mosbot') mosbotInit();
 };
 </script>
-<!-- Firebase (compat v8) - inicialización automática para Firestore y Auth -->
+<!-- Firebase (v8.10.0) - Inicialización automática -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 <script>
-  // Config proporcionada por el usuario
-  var firebaseConfig = {
+  // Configuración de Firebase
+  const firebaseConfig = {
     apiKey: "AIzaSyAeoTeR5SeERrMOt63MZTQQ2KYCnD8jEMc",
     authDomain: "portafolio-mos.firebaseapp.com",
     projectId: "portafolio-mos",
@@ -1385,15 +1338,20 @@ showPage = function(id, btn) {
     window.firebaseInitialized = true;
     window.db = firebase.firestore();
     window.auth = firebase.auth();
+    window.storage = firebase.storage();
 
-    // Intentar login anónimo y guardar uid para usar como docId
-    auth.signInAnonymously().then(() => {
-      window.firebaseUserUid = auth.currentUser ? auth.currentUser.uid : null;
-      console.log('Firebase: signed in anonymously, uid=', window.firebaseUserUid);
+    console.log("✅ Firebase inicializado correctamente");
+
+    // Intentar login anónimo para obtener un UID único
+    firebase.auth().signInAnonymously().then(() => {
+      window.firebaseUserUid = firebase.auth().currentUser ? firebase.auth().currentUser.uid : null;
+      console.log("✅ Firebase: Autenticación anónima completada, uid=", window.firebaseUserUid);
     }).catch(err => {
-      console.warn('Firebase auth failed', err);
+      console.warn("⚠️ Firebase auth fallido:", err);
     });
-  } catch (e) { console.warn('Firebase init error', e); }
+  } catch (e) { 
+    console.error("❌ Error inicializando Firebase:", e); 
+  }
 </script>
 
 <script src="mosbot-data.js"></script>
