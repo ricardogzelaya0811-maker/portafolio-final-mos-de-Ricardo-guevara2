@@ -1364,6 +1364,38 @@ showPage = function(id, btn) {
   if (id === 'mosbot') mosbotInit();
 };
 </script>
+<!-- Firebase (compat v8) - inicialización automática para Firestore y Auth -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script>
+  // Config proporcionada por el usuario
+  var firebaseConfig = {
+    apiKey: "AIzaSyAeoTeR5SeERrMOt63MZTQQ2KYCnD8jEMc",
+    authDomain: "portafolio-mos.firebaseapp.com",
+    projectId: "portafolio-mos",
+    storageBucket: "portafolio-mos.firebasestorage.app",
+    messagingSenderId: "447432105162",
+    appId: "1:447432105162:web:b868ea63c40915abde2833",
+    measurementId: "G-TV3K6XFKFN"
+  };
+
+  try {
+    firebase.initializeApp(firebaseConfig);
+    window.firebaseInitialized = true;
+    window.db = firebase.firestore();
+    window.auth = firebase.auth();
+
+    // Intentar login anónimo y guardar uid para usar como docId
+    auth.signInAnonymously().then(() => {
+      window.firebaseUserUid = auth.currentUser ? auth.currentUser.uid : null;
+      console.log('Firebase: signed in anonymously, uid=', window.firebaseUserUid);
+    }).catch(err => {
+      console.warn('Firebase auth failed', err);
+    });
+  } catch (e) { console.warn('Firebase init error', e); }
+</script>
+
 <script src="mosbot-data.js"></script>
 <script src="mosbot-logic.js"></script>
 </body>

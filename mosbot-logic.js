@@ -16,8 +16,10 @@ async function mosbotSaveState() {
   
   if (window.firebaseInitialized && window.db) {
     try {
-      await db.collection("mosbot_students").doc(mosbotState.name).set({
+      const docId = window.firebaseUserUid || mosbotState.name;
+      await db.collection("mosbot_students").doc(docId).set({
         nombre: mosbotState.name,
+        uid: window.firebaseUserUid || null,
         xp: mosbotState.xp,
         completedMissions: mosbotState.completed,
         badges: mosbotState.badges,
@@ -134,12 +136,14 @@ async function mosbotInit() {
     mosbotState = saved;
     if (window.firebaseInitialized && window.db) {
       try {
-        const doc = await db.collection("mosbot_students").doc(mosbotState.name).get();
+        const docId = window.firebaseUserUid || mosbotState.name;
+        const doc = await db.collection("mosbot_students").doc(docId).get();
         if (doc.exists) {
           const d = doc.data();
           mosbotState.xp = d.xp || 0;
           mosbotState.completed = d.completedMissions || [];
           mosbotState.badges = d.badges || [];
+          mosbotState.name = d.nombre || mosbotState.name;
         }
       } catch(e) {}
     }
@@ -159,12 +163,15 @@ async function mosbotStartGame() {
   
   if (window.firebaseInitialized && window.db) {
     try {
-      const doc = await db.collection("mosbot_students").doc(name).get();
+      const docId = window.firebaseUserUid || name;
+      const doc = await db.collection("mosbot_students").doc(docId).get();
       if (doc.exists) {
         const d = doc.data();
         mosbotState.xp = d.xp || 0;
         mosbotState.completed = d.completedMissions || [];
         mosbotState.badges = d.badges || [];
+        // if the server has a stored name, prefer it
+        mosbotState.name = d.nombre || name;
       }
     } catch(e) {}
   } else {
