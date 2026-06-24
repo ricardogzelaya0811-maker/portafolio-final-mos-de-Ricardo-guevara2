@@ -196,14 +196,25 @@ function mosbotRenderDashboard() {
   const rank = mosbotGetRank();
   const next = mosbotGetNextRank();
   const pct = next ? Math.min(100, ((mosbotState.xp - rank.minXP) / (next.minXP - rank.minXP)) * 100) : 100;
+  const streak = mosbotState.streak || 0;
+  const streakColor = streak === 0 ? '#666' : streak < 3 ? '#f59e0b' : '#ff6b6b';
+  
   document.getElementById('mosbotPlayerLabel').textContent = '👤 ' + mosbotState.name;
   document.getElementById('mosbotRankBadge').innerHTML = rank.icon + ' ' + rank.name;
   document.getElementById('mosbotXPValue').innerHTML = '<span>' + mosbotState.xp + '</span> XP';
   document.getElementById('mosbotProgressFill').style.width = pct + '%';
   document.getElementById('mosbotProgressLeft').textContent = rank.icon + ' ' + rank.name;
   document.getElementById('mosbotProgressRight').textContent = next ? (next.icon + ' ' + next.name + ' (' + next.minXP + ' XP)') : '🏆 ¡Máximo!';
+  
+  // Add streak indicator
+  const streakEl = document.getElementById('mosbotStreakIndicator');
+  if (streakEl) {
+    streakEl.innerHTML = `<div style="color: ${streakColor}; font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">🔥 ${streak}</div>`;
+  }
+  
   mosbotRenderContent();
 }
+
 
 function mosbotRenderContent() {
   const area = document.getElementById('mosbotContentArea');
@@ -310,7 +321,7 @@ function mosbotAnswer(missionId) {
     mosbotPlaySound(true);
     
     fb.className = 'mission-feedback correct-fb';
-    fb.innerHTML = '🎉 ¡Respuesta Correcta! <span style="color:#22c55e">+100 XP</span>';
+    fb.innerHTML = `<div class="feedback-header">🎉 ¡Respuesta Correcta! <span style="color:#22c55e">+100 XP</span></div><div class="feedback-explanation">${m.exp || 'Excelente trabajo.'}</div>`;
     optEl.classList.add('correct');
     
     // Disable all options
@@ -322,18 +333,19 @@ function mosbotAnswer(missionId) {
     mosbotCheckBadges();
     setTimeout(() => { 
       mosbotRenderDashboard(); 
-    }, 1500);
+    }, 2500);
   } else {
     mosbotState.streak = 0;
-    mosbotState.xp = Math.max(0, mosbotState.xp - 20); // Penalty for wrong answer
+    mosbotState.xp = Math.max(0, mosbotState.xp - 20);
     mosbotSaveState();
     mosbotPlaySound(false);
     
+    const correctOpt = m.opts[m.ans];
     fb.className = 'mission-feedback wrong-fb';
-    fb.innerHTML = '❌ Incorrecto. <span style="color:#ef4444">-20 XP</span> ¡Intenta de nuevo!';
+    fb.innerHTML = `<div class="feedback-header">❌ Incorrecto. <span style="color:#ef4444">-20 XP</span></div><div class="feedback-explanation">La respuesta correcta es: <strong>${correctOpt}</strong><br>${m.exp || 'Intenta de nuevo con otra opción.'}</div>`;
     optEl.classList.add('wrong', 'disabled');
     sel.disabled = true;
-    sel.checked = false; // allow trying another
+    sel.checked = false;
     
     const fill = document.getElementById('missionProgressFill');
     if (fill) {
@@ -341,7 +353,6 @@ function mosbotAnswer(missionId) {
       setTimeout(() => fill.classList.remove('decreasing'), 600);
     }
     
-    // update dashboard XP without full re-render
     document.getElementById('mosbotXPValue').innerHTML = '<span>' + mosbotState.xp + '</span> XP';
     const rank = mosbotGetRank();
     document.getElementById('mosbotRankBadge').innerHTML = rank.icon + ' ' + rank.name;
