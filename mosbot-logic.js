@@ -2,11 +2,24 @@
 let mosbotState = null;
 let mosbotCurrentTab = 'missions';
 
+function mosbotMissionCounts() {
+  return {
+    total: MOSBOT_MISSIONS.length,
+    excel: MOSBOT_MISSIONS.filter(m => m.type === 'excel').length,
+    word: MOSBOT_MISSIONS.filter(m => m.type === 'word').length
+  };
+}
+
 function mosbotLoadState() {
   const name = localStorage.getItem('mosbot_player');
   if (!name) return null;
   const raw = localStorage.getItem('mosbot_state_' + name);
-  return raw ? JSON.parse(raw) : { name, xp: 0, completed: [], streak: 0, badges: [], startDate: new Date().toISOString() };
+  if (!raw) return { name, xp: 0, completed: [], streak: 0, badges: [], startDate: new Date().toISOString(), missionVersion: MOSBOT_DATA_VERSION };
+  const parsed = JSON.parse(raw);
+  if (parsed.missionVersion !== MOSBOT_DATA_VERSION) {
+    return { name: parsed.name || name, xp: 0, completed: [], streak: 0, badges: [], startDate: new Date().toISOString(), missionVersion: MOSBOT_DATA_VERSION };
+  }
+  return parsed;
 }
 
 async function mosbotSaveState() {
@@ -23,6 +36,7 @@ async function mosbotSaveState() {
         xp: mosbotState.xp,
         completedMissions: mosbotState.completed,
         badges: mosbotState.badges,
+        missionVersion: MOSBOT_DATA_VERSION,
         fechaUltimoAcceso: new Date().toISOString()
       }, { merge: true });
     } catch(e) { console.error("Error guardando en Firebase:", e); }
@@ -119,6 +133,7 @@ function mosbotCheckBadges() {
     if (typeof b.req === 'number') earned = c >= b.req;
     else if (b.req === 'allExcel') earned = excelDone;
     else if (b.req === 'allWord') earned = wordDone;
+    else if (b.req === 'allMissions') earned = MOSBOT_MISSIONS.every(m => mosbotState.completed.includes(m.id));
     else if (b.req === 'streak3') earned = mosbotState.streak >= 3;
     if (earned) {
       mosbotState.badges.push(b.id);
@@ -144,6 +159,13 @@ async function mosbotInit() {
           mosbotState.completed = d.completedMissions || [];
           mosbotState.badges = d.badges || [];
           mosbotState.name = d.nombre || mosbotState.name;
+          if (d.missionVersion !== MOSBOT_DATA_VERSION) {
+            mosbotState.xp = 0;
+            mosbotState.completed = [];
+            mosbotState.badges = [];
+            mosbotState.streak = 0;
+            mosbotState.missionVersion = MOSBOT_DATA_VERSION;
+          }
         }
       } catch(e) {}
     }
@@ -159,7 +181,7 @@ async function mosbotStartGame() {
   const name = input.value.trim();
   if (!name) { input.style.borderColor = '#ef4444'; return; }
   
-  mosbotState = { name, xp: 0, completed: [], streak: 0, badges: [], startDate: new Date().toISOString() };
+  mosbotState = { name, xp: 0, completed: [], streak: 0, badges: [], startDate: new Date().toISOString(), missionVersion: MOSBOT_DATA_VERSION };
   
   if (window.firebaseInitialized && window.db) {
     try {
@@ -172,11 +194,23 @@ async function mosbotStartGame() {
         mosbotState.badges = d.badges || [];
         // if the server has a stored name, prefer it
         mosbotState.name = d.nombre || name;
+        if (d.missionVersion !== MOSBOT_DATA_VERSION) {
+          mosbotState.xp = 0;
+          mosbotState.completed = [];
+          mosbotState.badges = [];
+          mosbotState.streak = 0;
+          mosbotState.missionVersion = MOSBOT_DATA_VERSION;
+        }
       }
     } catch(e) {}
   } else {
     const existing = localStorage.getItem('mosbot_state_' + name);
-    if (existing) mosbotState = JSON.parse(existing);
+    if (existing) {
+      const parsed = JSON.parse(existing);
+      mosbotState = parsed.missionVersion === MOSBOT_DATA_VERSION
+        ? parsed
+        : { name: parsed.name || name, xp: 0, completed: [], streak: 0, badges: [], startDate: new Date().toISOString(), missionVersion: MOSBOT_DATA_VERSION };
+    }
   }
   
   await mosbotSaveState();
@@ -197,7 +231,8 @@ function mosbotRenderDashboard() {
   const next = mosbotGetNextRank();
   const pct = next ? Math.min(100, ((mosbotState.xp - rank.minXP) / (next.minXP - rank.minXP)) * 100) : 100;
   const streak = mosbotState.streak || 0;
-  const streakColor = streak === 0 ? '#666' : streak < 3 ? '#f59e0b' : '#ff6b6b';
+  const streakColor = streak === 0 ? '#a1a1aa' : streak < 3 ? '#f59e0b' : '#ff6b6b';
+  const streakMsg = streak === 0 ? 'Empieza tu racha' : streak < 3 ? 'Buen ritmo' : 'Racha encendida';
   
   document.getElementById('mosbotPlayerLabel').textContent = '👤 ' + mosbotState.name;
   document.getElementById('mosbotRankBadge').innerHTML = rank.icon + ' ' + rank.name;
@@ -209,7 +244,9 @@ function mosbotRenderDashboard() {
   // Add streak indicator
   const streakEl = document.getElementById('mosbotStreakIndicator');
   if (streakEl) {
-    streakEl.innerHTML = `<div style="color: ${streakColor}; font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">🔥 ${streak}</div>`;
+    streakEl.style.borderColor = streakColor;
+    streakEl.style.background = streak === 0 ? 'rgba(255,255,255,.05)' : 'rgba(255,107,107,.15)';
+    streakEl.innerHTML = `<div class="streak-fire" style="color:${streakColor}">🔥</div><div class="streak-copy"><strong style="color:${streakColor}">${streak} en racha</strong><span>${streakMsg}</span></div>`;
   }
   
   mosbotRenderContent();
@@ -242,7 +279,7 @@ function mosbotRenderMissions(area) {
 
   const m = MOSBOT_MISSIONS[currentIdx];
   const progressPct = Math.round((currentIdx / MOSBOT_MISSIONS.length) * 100);
-  const blockName = m.type === 'word' ? '📄 BLOQUE: WORD' : '📊 BLOQUE: EXCEL';
+  const blockName = m.type === 'word' ? '📄 BLOQUE: WORD - TABLAS' : '📊 BLOQUE: EXCEL';
   
   const optionsHtml = m.opts.map((o, oi) => {
     const letter = ['A', 'B', 'C', 'D'][oi];
@@ -273,6 +310,8 @@ function mosbotRenderMissions(area) {
         </div>
         
         <div class="mission-block-label">${blockName}</div>
+        <h2 class="mission-title">${m.title}</h2>
+        <p class="mission-desc">${m.desc}</p>
         
         <div class="mission-question-text">${currentIdx + 1}. ${m.q}</div>
         
@@ -303,6 +342,39 @@ function mosbotRenderMissions(area) {
   `;
 }
 
+function mosbotShowAnswerScreen(correct, mission, chosen, xpChange) {
+  let overlay = document.getElementById('mosbotAnswerOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'mosbotAnswerOverlay';
+    overlay.className = 'mosbot-answer-overlay';
+    document.body.appendChild(overlay);
+  }
+  const correctOpt = mission.opts[mission.ans];
+  const chosenOpt = mission.opts[chosen];
+  const tip = mission.tip || (correct ? 'Sigue leyendo con calma cada opción antes de responder.' : 'Revisa la explicación y vuelve a intentar sin prisa.');
+  overlay.className = 'mosbot-answer-overlay show ' + (correct ? 'is-correct' : 'is-wrong');
+  overlay.innerHTML = `
+    <div class="answer-card">
+      <div class="answer-burst">${correct ? '🎉' : '💡'}</div>
+      <p class="answer-kicker">${mission.title}</p>
+      <h2>${correct ? '¡Respuesta correcta!' : 'Casi. Revisa este detalle.'}</h2>
+      <div class="answer-xp ${correct ? 'good' : 'bad'}">${xpChange > 0 ? '+' : ''}${xpChange} XP</div>
+      <p class="answer-line"><strong>Tu respuesta:</strong> ${chosenOpt}</p>
+      <p class="answer-line"><strong>Respuesta correcta:</strong> ${correctOpt}</p>
+      <p class="answer-exp">${mission.exp || 'Buen avance en la misión.'}</p>
+      <div class="answer-tip"><strong>Tip:</strong> ${tip}</div>
+      <button class="answer-next-btn" onclick="mosbotCloseAnswerScreen(${correct ? 'true' : 'false'})">${correct ? 'Continuar' : 'Intentar otra opción'}</button>
+    </div>
+  `;
+}
+
+function mosbotCloseAnswerScreen(advance) {
+  const overlay = document.getElementById('mosbotAnswerOverlay');
+  if (overlay) overlay.classList.remove('show');
+  if (advance) mosbotRenderDashboard();
+}
+
 function mosbotAnswer(missionId) {
   const m = MOSBOT_MISSIONS.find(x => x.id === missionId);
   if (!m || mosbotState.completed.includes(m.id)) return;
@@ -331,9 +403,7 @@ function mosbotAnswer(missionId) {
     });
     
     mosbotCheckBadges();
-    setTimeout(() => { 
-      mosbotRenderDashboard(); 
-    }, 2500);
+    mosbotShowAnswerScreen(true, m, chosen, 100);
   } else {
     mosbotState.streak = 0;
     mosbotState.xp = Math.max(0, mosbotState.xp - 20);
@@ -357,6 +427,13 @@ function mosbotAnswer(missionId) {
     const rank = mosbotGetRank();
     document.getElementById('mosbotRankBadge').innerHTML = rank.icon + ' ' + rank.name;
     document.getElementById('mosbotPlayerLabel').textContent = '👤 ' + mosbotState.name;
+    const streakEl = document.getElementById('mosbotStreakIndicator');
+    if (streakEl) {
+      streakEl.style.borderColor = '#a1a1aa';
+      streakEl.style.background = 'rgba(255,255,255,.05)';
+      streakEl.innerHTML = '<div class="streak-fire" style="color:#a1a1aa">🔥</div><div class="streak-copy"><strong style="color:#a1a1aa">0 en racha</strong><span>Vuelve a levantarla</span></div>';
+    }
+    mosbotShowAnswerScreen(false, m, chosen, -20);
   }
 }
 
@@ -373,6 +450,7 @@ function mosbotRenderBadges(area) {
 
 function mosbotRenderStats(area) {
   const total = MOSBOT_MISSIONS.length;
+  const counts = mosbotMissionCounts();
   const done = mosbotState.completed.length;
   const excelDone = mosbotState.completed.filter(id => id.startsWith('ex')).length;
   const wordDone = mosbotState.completed.filter(id => id.startsWith('wd')).length;
@@ -380,8 +458,8 @@ function mosbotRenderStats(area) {
   area.innerHTML = `<div class="mosbot-stats-grid">
     <div class="stat-card"><div class="stat-icon">⚡</div><div class="stat-value">${mosbotState.xp}</div><div class="stat-label">XP Total</div></div>
     <div class="stat-card"><div class="stat-icon">🎯</div><div class="stat-value">${done}/${total}</div><div class="stat-label">Misiones Completadas</div></div>
-    <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-value">${excelDone}/10</div><div class="stat-label">Misiones Excel</div></div>
-    <div class="stat-card"><div class="stat-icon">📝</div><div class="stat-value">${wordDone}/10</div><div class="stat-label">Misiones Word</div></div>
+    <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-value">${excelDone}/${counts.excel}</div><div class="stat-label">Misiones Excel</div></div>
+    <div class="stat-card"><div class="stat-icon">📝</div><div class="stat-value">${wordDone}/${counts.word}</div><div class="stat-label">Misiones Word Tablas</div></div>
     <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-value">${mosbotGetRank().icon} ${mosbotGetRank().name}</div><div class="stat-label">Rango Actual</div></div>
     <div class="stat-card"><div class="stat-icon">🏅</div><div class="stat-value">${mosbotState.badges.length}/${MOSBOT_BADGES.length}</div><div class="stat-label">Insignias</div></div>
     <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-value">${pct}%</div><div class="stat-label">Progreso Total</div></div>
@@ -392,13 +470,14 @@ function mosbotRenderStats(area) {
 
 function mosbotRenderRanking(area) {
   const ranking = JSON.parse(localStorage.getItem('mosbot_ranking') || '[]');
+  const total = MOSBOT_MISSIONS.length;
   if (!ranking.length) { area.innerHTML = '<p style="text-align:center;color:var(--muted);padding:3rem">No hay estudiantes en el ranking aún.</p>'; return; }
   const medals = ['🥇','🥈','🥉'];
   const rows = ranking.map((r, i) => {
     const rank = MOSBOT_RANKS.slice().reverse().find(rk => r.xp >= rk.minXP) || MOSBOT_RANKS[0];
     return `<tr><td><span class="rank-pos">${i + 1}</span> <span class="rank-medal">${medals[i] || ''}</span></td>
       <td>${r.name}</td><td>${rank.icon} ${rank.name}</td><td style="color:var(--gold);font-weight:700">${r.xp} XP</td>
-      <td>${r.completed}/20</td></tr>`;
+      <td>${r.completed}/${total}</td></tr>`;
   }).join('');
   area.innerHTML = `<table class="mosbot-ranking-table"><thead><tr><th>#</th><th>Estudiante</th><th>Rango</th><th>XP</th><th>Misiones</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
@@ -475,6 +554,12 @@ function mosbotGetCertData() {
   return certTypes[rankIndex] || certTypes[5];
 }
 
+function mosbotGetVerificationCode() {
+  const raw = `${mosbotState.name}-${mosbotState.xp}-${mosbotState.startDate}`;
+  const safe = encodeURIComponent(raw);
+  return 'MOS-' + btoa(safe).replace(/[^A-Z0-9]/gi, '').slice(0, 10).toUpperCase();
+}
+
 function mosbotRenderCert(area) {
   const minXP = MOSBOT_RANKS[0].minXP + 300; // 300 XP para desbloquear
   if (mosbotState.xp < minXP) {
@@ -488,6 +573,11 @@ function mosbotRenderCert(area) {
   
   const certData = mosbotGetCertData();
   const rank = mosbotGetRank();
+  const badgeNames = MOSBOT_BADGES.filter(b => mosbotState.badges.includes(b.id)).map(b => b.name);
+  const completedTopics = MOSBOT_MISSIONS
+    .filter(m => mosbotState.completed.includes(m.id))
+    .map(m => m.type === 'word' ? 'Word: ' + m.title : 'Excel: ' + m.title);
+  const verifyCode = mosbotGetVerificationCode();
   const date = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
   const colorHex = `rgb(${certData.accentColor[0]}, ${certData.accentColor[1]}, ${certData.accentColor[2]})`;
   
@@ -500,6 +590,11 @@ function mosbotRenderCert(area) {
       <div class="cert-name">${mosbotState.name}</div>
       <p>${certData.description}</p>
       <p>XP Total: <strong style="color: ${colorHex}">${mosbotState.xp}</strong> · Rango: <strong style="color: ${colorHex}">${rank.icon} ${rank.name}</strong></p>
+      <div class="cert-detail-grid">
+        <div><strong>Insignias</strong><span>${badgeNames.length ? badgeNames.join(', ') : 'Aún sin insignias'}</span></div>
+        <div><strong>Temas completados</strong><span>${completedTopics.length ? completedTopics.slice(0, 6).join(', ') + (completedTopics.length > 6 ? '...' : '') : 'En progreso'}</span></div>
+        <div><strong>Verificación</strong><span>${verifyCode}</span></div>
+      </div>
       <p class="cert-date">📅 ${date}</p>
     </div>
     <button class="cert-download-btn" onclick="mosbotDownloadCert()">📥 Descargar Certificado PDF</button>
@@ -513,6 +608,11 @@ function mosbotDownloadCert() {
     const { jsPDF } = window.jspdf;
     const certData = mosbotGetCertData();
     const rank = mosbotGetRank();
+    const badgeNames = MOSBOT_BADGES.filter(b => mosbotState.badges.includes(b.id)).map(b => b.name);
+    const completedTopics = MOSBOT_MISSIONS
+      .filter(m => mosbotState.completed.includes(m.id))
+      .map(m => m.type === 'word' ? 'Word: ' + m.title : 'Excel: ' + m.title);
+    const verifyCode = mosbotGetVerificationCode();
     const doc = new jsPDF('landscape', 'mm', 'a4');
     const w = 297, h = 210;
     
@@ -558,13 +658,20 @@ function mosbotDownloadCert() {
     // Stats
     doc.setFontSize(12); doc.setFont('helvetica', 'bold');
     doc.setTextColor(certData.accentColor[0], certData.accentColor[1], certData.accentColor[2]);
-    doc.text('XP Total: ' + mosbotState.xp + '  ·  Rango: ' + rank.name, w / 2, 155, { align: 'center' });
+    doc.text('XP Total: ' + mosbotState.xp + '  ·  Rango: ' + rank.name, w / 2, 150, { align: 'center' });
+    
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+    doc.setTextColor(certData.textColor[0], certData.textColor[1], certData.textColor[2]);
+    const badgeText = 'Insignias: ' + (badgeNames.length ? badgeNames.join(', ') : 'Aún sin insignias');
+    const topicText = 'Temas completados: ' + (completedTopics.length ? completedTopics.slice(0, 8).join(', ') + (completedTopics.length > 8 ? '...' : '') : 'En progreso');
+    doc.text(doc.splitTextToSize(badgeText, 250), w / 2, 160, { align: 'center' });
+    doc.text(doc.splitTextToSize(topicText, 250), w / 2, 168, { align: 'center' });
     
     // Date
     const dateStr = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
     doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
     doc.setTextColor(certData.textColor[0] * 0.7, certData.textColor[1] * 0.7, certData.textColor[2] * 0.7);
-    doc.text(dateStr, w / 2, 175, { align: 'center' });
+    doc.text(dateStr + '  ·  Código: ' + verifyCode, w / 2, 182, { align: 'center' });
     
     // Footer
     doc.setFontSize(9);
@@ -582,7 +689,7 @@ function mosbotReset() {
   let ranking = JSON.parse(localStorage.getItem('mosbot_ranking') || '[]');
   ranking = ranking.filter(r => r.name !== name);
   localStorage.setItem('mosbot_ranking', JSON.stringify(ranking));
-  mosbotState = { name, xp: 0, completed: [], streak: 0, badges: [], startDate: new Date().toISOString() };
+  mosbotState = { name, xp: 0, completed: [], streak: 0, badges: [], startDate: new Date().toISOString(), missionVersion: MOSBOT_DATA_VERSION };
   mosbotSaveState();
   mosbotRenderDashboard();
 }

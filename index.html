@@ -636,7 +636,12 @@
       <div class="mosbot-welcome-card">
         <div class="mosbot-logo">🤖</div>
         <h1>MOSBOT Academy Ultimate</h1>
-        <p>¡Bienvenido al simulador de certificación MOS! Completa 20 misiones de Excel y Word, gana XP, desbloquea insignias y obtén tu certificado digital.</p>
+        <p>¡Bienvenido al simulador de certificación MOS! Completa misiones de Excel y Word, gana XP, desbloquea insignias y obtén tu certificado digital.</p>
+        <div class="mosbot-onboarding">
+          <div><strong>1</strong><span>Responde la misión activa.</span></div>
+          <div><strong>2</strong><span>Lee la explicación y el tip.</span></div>
+          <div><strong>3</strong><span>Sube tu XP y conserva la racha.</span></div>
+        </div>
         <div class="uf">
           <label>👤 Tu nombre de estudiante</label>
           <input type="text" id="mosbotNameInput" placeholder="Escribe tu nombre..." onkeydown="if(event.key==='Enter')mosbotStartGame()"/>
@@ -651,7 +656,7 @@
         <div class="mosbot-xp-section">
           <div class="mosbot-rank-badge" id="mosbotRankBadge"></div>
           <div class="mosbot-xp-display" id="mosbotXPValue"></div>
-          <div class="mosbot-streak-display" id="mosbotStreakIndicator" style="padding: 0.45rem 1.1rem; background: rgba(255,107,107,.15); border: 1px solid rgba(255,107,107,.4); border-radius: 100px; display: flex; align-items: center;"></div>
+          <div class="mosbot-streak-display" id="mosbotStreakIndicator"></div>
         </div>
         <div class="mosbot-progress-wrap">
           <div class="mosbot-progress-label"><span id="mosbotProgressLeft"></span><span id="mosbotProgressRight"></span></div>
