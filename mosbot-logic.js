@@ -392,26 +392,103 @@ function mosbotRenderRanking(area) {
   area.innerHTML = `<table class="mosbot-ranking-table"><thead><tr><th>#</th><th>Estudiante</th><th>Rango</th><th>XP</th><th>Misiones</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
+function mosbotGetCertData() {
+  const rank = mosbotGetRank();
+  const certTypes = {
+    0: { // Practicante
+      title: 'CERTIFICADO DE INICIACIÓN',
+      subtitle: 'MOSBOT Academy Básico',
+      bgColor: [76, 175, 80], // Verde
+      accentColor: [139, 195, 74],
+      textColor: [255, 255, 255],
+      borderColor: [139, 195, 74],
+      logo: '🌱',
+      description: 'Ha iniciado su jornada en el programa MOSBOT Academy demostrando compromiso con el aprendizaje de Microsoft Office.'
+    },
+    1: { // Aprendiz
+      title: 'CERTIFICADO DE APRENDIZ',
+      subtitle: 'MOSBOT Academy Aprendizaje',
+      bgColor: [33, 150, 243], // Azul
+      accentColor: [100, 181, 246],
+      textColor: [255, 255, 255],
+      borderColor: [100, 181, 246],
+      logo: '📘',
+      description: 'Ha completado satisfactoriamente el nivel de Aprendiz del programa MOSBOT Academy demostrando conocimientos en Microsoft Excel y Word.'
+    },
+    2: { // Técnico
+      title: 'CERTIFICADO TÉCNICO',
+      subtitle: 'MOSBOT Academy Técnico Digital',
+      bgColor: [158, 158, 158], // Gris
+      accentColor: [189, 189, 189],
+      textColor: [255, 255, 255],
+      borderColor: [189, 189, 189],
+      logo: '💻',
+      description: 'Ha alcanzado el nivel de Técnico Digital en MOSBOT Academy demostrando competencia avanzada en herramientas de Microsoft Office.'
+    },
+    3: { // Especialista
+      title: 'CERTIFICADO DE ESPECIALISTA',
+      subtitle: 'MOSBOT Academy Especialista',
+      bgColor: [255, 193, 7], // Dorado
+      accentColor: [255, 213, 79],
+      textColor: [33, 33, 33],
+      borderColor: [255, 193, 7],
+      logo: '⭐',
+      description: 'Ha conseguido el rango de Especialista en MOSBOT Academy demostrando dominio experto en Excel y Word.'
+    },
+    4: { // Experto
+      title: 'CERTIFICADO DE EXPERTO',
+      subtitle: 'MOSBOT Academy Experto Office',
+      bgColor: [192, 192, 192], // Plateado
+      accentColor: [224, 224, 224],
+      textColor: [33, 33, 33],
+      borderColor: [255, 215, 0],
+      logo: '🏆',
+      description: 'Ha obtenido el rango de Experto en MOSBOT Academy demostrando maestría profesional en todas las herramientas de Microsoft Office.'
+    },
+    5: { // Master
+      title: 'CERTIFICADO DE EXCELENCIA',
+      subtitle: 'MOSBOT Academy Master',
+      bgColor: [26, 16, 58], // Morado oscuro
+      accentColor: [139, 92, 246],
+      textColor: [244, 244, 245],
+      borderColor: [139, 92, 246],
+      logo: '👑',
+      description: 'Ha alcanzado el máximo rango de Office Master en MOSBOT Academy demostrando dominio completo y excelencia en Microsoft Excel, Word y todas las competencias del programa.'
+    }
+  };
+  
+  let rankIndex = 0;
+  for (let i = 0; i < MOSBOT_RANKS.length; i++) {
+    if (mosbotState.xp >= MOSBOT_RANKS[i].minXP) rankIndex = i;
+  }
+  return certTypes[rankIndex] || certTypes[5];
+}
+
 function mosbotRenderCert(area) {
-  const allDone = mosbotState.completed.length >= MOSBOT_MISSIONS.length;
-  if (!allDone) {
+  const minXP = MOSBOT_RANKS[0].minXP + 300; // 300 XP para desbloquear
+  if (mosbotState.xp < minXP) {
+    const nextRank = mosbotGetNextRank();
+    const xpNeeded = nextRank ? nextRank.minXP - mosbotState.xp : 300 - mosbotState.xp;
     area.innerHTML = `<div class="mosbot-cert-section"><div class="cert-locked"><div class="big">🔒</div>
-      <p>Completa las <strong>20 misiones</strong> para desbloquear tu certificado digital.<br>
-      Progreso: <strong>${mosbotState.completed.length}/20</strong></p></div></div>`;
+      <p>Alcanza <strong>300 XP</strong> para desbloquear tu certificado digital.<br>
+      Progreso: <strong>${mosbotState.xp}/300 XP</strong> · Faltan <strong>${xpNeeded} XP</strong></p></div></div>`;
     return;
   }
+  
+  const certData = mosbotGetCertData();
+  const rank = mosbotGetRank();
   const date = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+  const colorHex = `rgb(${certData.accentColor[0]}, ${certData.accentColor[1]}, ${certData.accentColor[2]})`;
+  
   area.innerHTML = `<div class="mosbot-cert-section">
-    <div class="cert-preview" id="certPreview">
-      <div class="cert-logo">🎓</div>
-      <h2>CERTIFICADO DE EXCELENCIA</h2>
-      <h3>MOSBOT Academy Ultimate</h3>
+    <div class="cert-preview" id="certPreview" style="border-color: ${colorHex};">
+      <div class="cert-logo">${certData.logo}</div>
+      <h2 style="color: ${colorHex};">${certData.title}</h2>
+      <h3 style="color: ${colorHex};">${certData.subtitle}</h3>
       <p>Se certifica que</p>
       <div class="cert-name">${mosbotState.name}</div>
-      <p>Ha completado satisfactoriamente las 20 misiones del programa<br>
-      <strong>MOSBOT Academy Ultimate</strong> demostrando dominio en<br>
-      Microsoft Excel y Microsoft Word.</p>
-      <p>XP Total: <strong style="color:var(--gold)">${mosbotState.xp}</strong> · Rango: <strong style="color:var(--gold)">${mosbotGetRank().icon} ${mosbotGetRank().name}</strong></p>
+      <p>${certData.description}</p>
+      <p>XP Total: <strong style="color: ${colorHex}">${mosbotState.xp}</strong> · Rango: <strong style="color: ${colorHex}">${rank.icon} ${rank.name}</strong></p>
       <p class="cert-date">📅 ${date}</p>
     </div>
     <button class="cert-download-btn" onclick="mosbotDownloadCert()">📥 Descargar Certificado PDF</button>
@@ -423,43 +500,65 @@ function mosbotDownloadCert() {
   script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
   script.onload = () => {
     const { jsPDF } = window.jspdf;
+    const certData = mosbotGetCertData();
+    const rank = mosbotGetRank();
     const doc = new jsPDF('landscape', 'mm', 'a4');
     const w = 297, h = 210;
+    
     // Background
-    doc.setFillColor(26, 16, 58); doc.rect(0, 0, w, h, 'F');
+    doc.setFillColor(certData.bgColor[0], certData.bgColor[1], certData.bgColor[2]);
+    doc.rect(0, 0, w, h, 'F');
+    
     // Border
-    doc.setDrawColor(139, 92, 246); doc.setLineWidth(2); doc.rect(8, 8, w - 16, h - 16);
-    doc.setDrawColor(139, 92, 246); doc.setLineWidth(0.5); doc.rect(12, 12, w - 24, h - 24);
+    doc.setDrawColor(certData.borderColor[0], certData.borderColor[1], certData.borderColor[2]);
+    doc.setLineWidth(2); doc.rect(8, 8, w - 16, h - 16);
+    doc.setLineWidth(0.5); doc.rect(12, 12, w - 24, h - 24);
+    
     // Title
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(32); doc.setTextColor(251, 191, 36);
-    doc.text('CERTIFICADO DE EXCELENCIA', w / 2, 45, { align: 'center' });
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(32);
+    doc.setTextColor(certData.accentColor[0], certData.accentColor[1], certData.accentColor[2]);
+    doc.text(certData.title, w / 2, 45, { align: 'center' });
+    
     // Subtitle
-    doc.setFontSize(18); doc.setTextColor(167, 139, 250);
-    doc.text('MOSBOT Academy Ultimate', w / 2, 58, { align: 'center' });
+    doc.setFontSize(18);
+    doc.text(certData.subtitle, w / 2, 58, { align: 'center' });
+    
     // Body
-    doc.setFontSize(14); doc.setTextColor(244, 244, 245);
+    doc.setFontSize(14); doc.setTextColor(certData.textColor[0], certData.textColor[1], certData.textColor[2]);
     doc.text('Se certifica que', w / 2, 78, { align: 'center' });
+    
     // Name
-    doc.setFontSize(28); doc.setTextColor(167, 139, 250);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(28);
+    doc.setTextColor(certData.accentColor[0], certData.accentColor[1], certData.accentColor[2]);
     doc.text(mosbotState.name, w / 2, 95, { align: 'center' });
+    
     // Line
-    doc.setDrawColor(139, 92, 246); doc.setLineWidth(1);
+    doc.setDrawColor(certData.borderColor[0], certData.borderColor[1], certData.borderColor[2]);
+    doc.setLineWidth(1);
     const nameW = doc.getTextWidth(mosbotState.name);
     doc.line(w / 2 - nameW / 2, 98, w / 2 + nameW / 2, 98);
+    
     // Desc
-    doc.setFontSize(12); doc.setTextColor(200, 200, 210);
-    doc.text('Ha completado satisfactoriamente las 20 misiones del programa', w / 2, 115, { align: 'center' });
-    doc.text('MOSBOT Academy Ultimate demostrando dominio en', w / 2, 123, { align: 'center' });
-    doc.text('Microsoft Excel y Microsoft Word.', w / 2, 131, { align: 'center' });
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(11);
+    doc.setTextColor(certData.textColor[0], certData.textColor[1], certData.textColor[2]);
+    const descLines = doc.splitTextToSize(certData.description, 250);
+    doc.text(descLines, w / 2, 115, { align: 'center' });
+    
     // Stats
-    doc.setFontSize(13); doc.setTextColor(139, 92, 246);
-    doc.text('XP Total: ' + mosbotState.xp + '  ·  Rango: ' + mosbotGetRank().name, w / 2, 150, { align: 'center' });
+    doc.setFontSize(12); doc.setFont('helvetica', 'bold');
+    doc.setTextColor(certData.accentColor[0], certData.accentColor[1], certData.accentColor[2]);
+    doc.text('XP Total: ' + mosbotState.xp + '  ·  Rango: ' + rank.name, w / 2, 155, { align: 'center' });
+    
     // Date
     const dateStr = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
-    doc.setFontSize(10); doc.setTextColor(161, 161, 170);
-    doc.text(dateStr, w / 2, 170, { align: 'center' });
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+    doc.setTextColor(certData.textColor[0] * 0.7, certData.textColor[1] * 0.7, certData.textColor[2] * 0.7);
+    doc.text(dateStr, w / 2, 175, { align: 'center' });
+    
     // Footer
-    doc.setFontSize(9); doc.text('Ricardo Zelaya - Portal MOS 2026', w / 2, 190, { align: 'center' });
+    doc.setFontSize(9);
+    doc.text('Ricardo Zelaya - Portal MOS 2026', w / 2, 195, { align: 'center' });
+    
     doc.save('Certificado_MOSBOT_' + mosbotState.name + '.pdf');
   };
   document.head.appendChild(script);
