@@ -1,12 +1,26 @@
 // MOSBOT Academy - Main Logic
 let mosbotState = null;
 let mosbotCurrentTab = 'missions';
+const MOSBOT_CERT_MIN_XP = 1600;
 
 function mosbotMissionCounts() {
   return {
     total: MOSBOT_MISSIONS.length,
-    excel: MOSBOT_MISSIONS.filter(m => m.type === 'excel').length,
     word: MOSBOT_MISSIONS.filter(m => m.type === 'word').length
+  };
+}
+
+function mosbotCreateInitialState(name) {
+  return { name, xp: 0, completed: [], streak: 0, mistakes: 0, badges: [], startDate: new Date().toISOString(), missionVersion: MOSBOT_DATA_VERSION };
+}
+
+function mosbotNormalizeState(state) {
+  return {
+    ...state,
+    completed: Array.isArray(state.completed) ? state.completed : [],
+    badges: Array.isArray(state.badges) ? state.badges : [],
+    streak: state.streak || 0,
+    mistakes: state.mistakes || 0
   };
 }
 
@@ -14,12 +28,12 @@ function mosbotLoadState() {
   const name = localStorage.getItem('mosbot_player');
   if (!name) return null;
   const raw = localStorage.getItem('mosbot_state_' + name);
-  if (!raw) return { name, xp: 0, completed: [], streak: 0, badges: [], startDate: new Date().toISOString(), missionVersion: MOSBOT_DATA_VERSION };
+  if (!raw) return mosbotCreateInitialState(name);
   const parsed = JSON.parse(raw);
   if (parsed.missionVersion !== MOSBOT_DATA_VERSION) {
-    return { name: parsed.name || name, xp: 0, completed: [], streak: 0, badges: [], startDate: new Date().toISOString(), missionVersion: MOSBOT_DATA_VERSION };
+    return mosbotCreateInitialState(parsed.name || name);
   }
-  return parsed;
+  return mosbotNormalizeState(parsed);
 }
 
 async function mosbotSaveState() {
@@ -35,6 +49,7 @@ async function mosbotSaveState() {
         uid: window.firebaseUserUid || null,
         xp: mosbotState.xp,
         completedMissions: mosbotState.completed,
+        mistakes: mosbotState.mistakes || 0,
         badges: mosbotState.badges,
         missionVersion: MOSBOT_DATA_VERSION,
         fechaUltimoAcceso: new Date().toISOString()
@@ -125,13 +140,11 @@ function mosbotShowToast(icon, title, text) {
 function mosbotCheckBadges() {
   if (!mosbotState) return;
   const c = mosbotState.completed.length;
-  const excelDone = MOSBOT_MISSIONS.filter(m => m.type === 'excel').every(m => mosbotState.completed.includes(m.id));
   const wordDone = MOSBOT_MISSIONS.filter(m => m.type === 'word').every(m => mosbotState.completed.includes(m.id));
   MOSBOT_BADGES.forEach(b => {
     if (mosbotState.badges.includes(b.id)) return;
     let earned = false;
     if (typeof b.req === 'number') earned = c >= b.req;
-    else if (b.req === 'allExcel') earned = excelDone;
     else if (b.req === 'allWord') earned = wordDone;
     else if (b.req === 'allMissions') earned = MOSBOT_MISSIONS.every(m => mosbotState.completed.includes(m.id));
     else if (b.req === 'streak3') earned = mosbotState.streak >= 3;
@@ -157,14 +170,11 @@ async function mosbotInit() {
           const d = doc.data();
           mosbotState.xp = d.xp || 0;
           mosbotState.completed = d.completedMissions || [];
+          mosbotState.mistakes = d.mistakes || 0;
           mosbotState.badges = d.badges || [];
           mosbotState.name = d.nombre || mosbotState.name;
           if (d.missionVersion !== MOSBOT_DATA_VERSION) {
-            mosbotState.xp = 0;
-            mosbotState.completed = [];
-            mosbotState.badges = [];
-            mosbotState.streak = 0;
-            mosbotState.missionVersion = MOSBOT_DATA_VERSION;
+            mosbotState = mosbotCreateInitialState(mosbotState.name);
           }
         }
       } catch(e) {}
@@ -181,7 +191,7 @@ async function mosbotStartGame() {
   const name = input.value.trim();
   if (!name) { input.style.borderColor = '#ef4444'; return; }
   
-  mosbotState = { name, xp: 0, completed: [], streak: 0, badges: [], startDate: new Date().toISOString(), missionVersion: MOSBOT_DATA_VERSION };
+  mosbotState = mosbotCreateInitialState(name);
   
   if (window.firebaseInitialized && window.db) {
     try {
@@ -191,15 +201,12 @@ async function mosbotStartGame() {
         const d = doc.data();
         mosbotState.xp = d.xp || 0;
         mosbotState.completed = d.completedMissions || [];
+        mosbotState.mistakes = d.mistakes || 0;
         mosbotState.badges = d.badges || [];
         // if the server has a stored name, prefer it
         mosbotState.name = d.nombre || name;
         if (d.missionVersion !== MOSBOT_DATA_VERSION) {
-          mosbotState.xp = 0;
-          mosbotState.completed = [];
-          mosbotState.badges = [];
-          mosbotState.streak = 0;
-          mosbotState.missionVersion = MOSBOT_DATA_VERSION;
+          mosbotState = mosbotCreateInitialState(mosbotState.name);
         }
       }
     } catch(e) {}
@@ -208,8 +215,8 @@ async function mosbotStartGame() {
     if (existing) {
       const parsed = JSON.parse(existing);
       mosbotState = parsed.missionVersion === MOSBOT_DATA_VERSION
-        ? parsed
-        : { name: parsed.name || name, xp: 0, completed: [], streak: 0, badges: [], startDate: new Date().toISOString(), missionVersion: MOSBOT_DATA_VERSION };
+        ? mosbotNormalizeState(parsed)
+        : mosbotCreateInitialState(parsed.name || name);
     }
   }
   
@@ -266,11 +273,28 @@ function mosbotRenderMissions(area) {
   const currentIdx = mosbotState.completed.length;
   
   if (currentIdx >= MOSBOT_MISSIONS.length) {
+    const passed = mosbotState.xp >= MOSBOT_CERT_MIN_XP;
+    if (!passed) {
+      area.innerHTML = `
+        <div class="cert-failed-card">
+          <div class="cert-failed-icon">↻</div>
+          <h2>Inténtalo de nuevo</h2>
+          <p>No alcanzaste el XP mínimo para desbloquear el certificado de Word.</p>
+          <div class="cert-failed-stats">
+            <div><strong>${mosbotState.xp}/${MOSBOT_CERT_MIN_XP}</strong><span>XP requerido</span></div>
+            <div><strong>${mosbotState.mistakes || 0}</strong><span>Errores cometidos</span></div>
+            <div><strong>${MOSBOT_MISSIONS.length}</strong><span>Misiones Word</span></div>
+          </div>
+          <button class="mosbot-start-btn" style="max-width: 260px;" onclick="mosbotReset()">Reintentar misiones</button>
+        </div>
+      `;
+      return;
+    }
     area.innerHTML = `
       <div style="text-align:center; padding: 4rem 2rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--shadow);">
         <div style="font-size: 4rem; margin-bottom: 1rem;">🎓</div>
-        <h2 style="color: #2dd4bf; margin-bottom: 1rem; font-family: 'Playfair Display', serif;">¡Programa Completado!</h2>
-        <p style="color: var(--muted); margin-bottom: 2rem;">Has superado todas las misiones de MOSBOT Academy Ultimate.</p>
+        <h2 style="color: #2dd4bf; margin-bottom: 1rem; font-family: 'Playfair Display', serif;">¡Certificación desbloqueada!</h2>
+        <p style="color: var(--muted); margin-bottom: 2rem;">Completaste las 20 misiones de Word y alcanzaste ${mosbotState.xp} XP.</p>
         <button class="mosbot-start-btn" style="max-width: 250px;" onclick="mosbotSwitchTab('cert', document.querySelectorAll('.mosbot-tab')[4])">Ver Certificado</button>
       </div>
     `;
@@ -279,7 +303,7 @@ function mosbotRenderMissions(area) {
 
   const m = MOSBOT_MISSIONS[currentIdx];
   const progressPct = Math.round((currentIdx / MOSBOT_MISSIONS.length) * 100);
-  const blockName = m.type === 'word' ? '📄 BLOQUE: WORD - TABLAS' : '📊 BLOQUE: EXCEL';
+  const blockName = '📄 BLOQUE: WORD - TABLAS';
   
   const optionsHtml = m.opts.map((o, oi) => {
     const letter = ['A', 'B', 'C', 'D'][oi];
@@ -406,6 +430,7 @@ function mosbotAnswer(missionId) {
     mosbotShowAnswerScreen(true, m, chosen, 100);
   } else {
     mosbotState.streak = 0;
+    mosbotState.mistakes = (mosbotState.mistakes || 0) + 1;
     mosbotState.xp = Math.max(0, mosbotState.xp - 20);
     mosbotSaveState();
     mosbotPlaySound(false);
@@ -452,14 +477,14 @@ function mosbotRenderStats(area) {
   const total = MOSBOT_MISSIONS.length;
   const counts = mosbotMissionCounts();
   const done = mosbotState.completed.length;
-  const excelDone = mosbotState.completed.filter(id => id.startsWith('ex')).length;
   const wordDone = mosbotState.completed.filter(id => id.startsWith('wd')).length;
   const pct = Math.round((done / total) * 100);
   area.innerHTML = `<div class="mosbot-stats-grid">
     <div class="stat-card"><div class="stat-icon">⚡</div><div class="stat-value">${mosbotState.xp}</div><div class="stat-label">XP Total</div></div>
     <div class="stat-card"><div class="stat-icon">🎯</div><div class="stat-value">${done}/${total}</div><div class="stat-label">Misiones Completadas</div></div>
-    <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-value">${excelDone}/${counts.excel}</div><div class="stat-label">Misiones Excel</div></div>
     <div class="stat-card"><div class="stat-icon">📝</div><div class="stat-value">${wordDone}/${counts.word}</div><div class="stat-label">Misiones Word Tablas</div></div>
+    <div class="stat-card"><div class="stat-icon">✕</div><div class="stat-value">${mosbotState.mistakes || 0}</div><div class="stat-label">Errores</div></div>
+    <div class="stat-card"><div class="stat-icon">📜</div><div class="stat-value">${MOSBOT_CERT_MIN_XP}</div><div class="stat-label">XP para Certificado</div></div>
     <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-value">${mosbotGetRank().icon} ${mosbotGetRank().name}</div><div class="stat-label">Rango Actual</div></div>
     <div class="stat-card"><div class="stat-icon">🏅</div><div class="stat-value">${mosbotState.badges.length}/${MOSBOT_BADGES.length}</div><div class="stat-label">Insignias</div></div>
     <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-value">${pct}%</div><div class="stat-label">Progreso Total</div></div>
@@ -503,7 +528,7 @@ function mosbotGetCertData() {
       textColor: [255, 255, 255],
       borderColor: [100, 181, 246],
       logo: '📘',
-      description: 'Ha completado satisfactoriamente el nivel de Aprendiz del programa MOSBOT Academy demostrando conocimientos en Microsoft Excel y Word.'
+      description: 'Ha completado satisfactoriamente el nivel de Aprendiz del programa MOSBOT Academy demostrando conocimientos en diseño y manipulación de tablas en Word.'
     },
     2: { // Técnico
       title: 'CERTIFICADO TÉCNICO',
@@ -523,7 +548,7 @@ function mosbotGetCertData() {
       textColor: [33, 33, 33],
       borderColor: [255, 193, 7],
       logo: '⭐',
-      description: 'Ha conseguido el rango de Especialista en MOSBOT Academy demostrando dominio experto en Excel y Word.'
+      description: 'Ha conseguido el rango de Especialista en MOSBOT Academy demostrando dominio experto en tablas de Microsoft Word.'
     },
     4: { // Experto
       title: 'CERTIFICADO DE EXPERTO',
@@ -543,7 +568,7 @@ function mosbotGetCertData() {
       textColor: [244, 244, 245],
       borderColor: [139, 92, 246],
       logo: '👑',
-      description: 'Ha alcanzado el máximo rango de Office Master en MOSBOT Academy demostrando dominio completo y excelencia en Microsoft Excel, Word y todas las competencias del programa.'
+      description: 'Ha alcanzado el máximo rango de Office Master en MOSBOT Academy demostrando dominio completo y excelencia en diseño y manipulación de tablas en Word.'
     }
   };
   
@@ -561,13 +586,16 @@ function mosbotGetVerificationCode() {
 }
 
 function mosbotRenderCert(area) {
-  const minXP = MOSBOT_RANKS[0].minXP + 300; // 300 XP para desbloquear
-  if (mosbotState.xp < minXP) {
-    const nextRank = mosbotGetNextRank();
-    const xpNeeded = nextRank ? nextRank.minXP - mosbotState.xp : 300 - mosbotState.xp;
+  const completedAll = mosbotState.completed.length >= MOSBOT_MISSIONS.length;
+  const passed = completedAll && mosbotState.xp >= MOSBOT_CERT_MIN_XP;
+  if (!passed) {
+    const xpNeeded = Math.max(0, MOSBOT_CERT_MIN_XP - mosbotState.xp);
     area.innerHTML = `<div class="mosbot-cert-section"><div class="cert-locked"><div class="big">🔒</div>
-      <p>Alcanza <strong>300 XP</strong> para desbloquear tu certificado digital.<br>
-      Progreso: <strong>${mosbotState.xp}/300 XP</strong> · Faltan <strong>${xpNeeded} XP</strong></p></div></div>`;
+      <h2>Certificado bloqueado</h2>
+      <p>Para desbloquearlo debes completar las <strong>${MOSBOT_MISSIONS.length} misiones de Word</strong> y alcanzar <strong>${MOSBOT_CERT_MIN_XP} XP</strong>.<br>
+      Progreso: <strong>${mosbotState.completed.length}/${MOSBOT_MISSIONS.length} misiones</strong> · <strong>${mosbotState.xp}/${MOSBOT_CERT_MIN_XP} XP</strong> · Errores: <strong>${mosbotState.mistakes || 0}</strong></p>
+      ${completedAll ? `<p class="cert-retry-msg">Inténtalo de nuevo. Te faltaron <strong>${xpNeeded} XP</strong> para certificarte.</p><button class="mosbot-start-btn" style="max-width:260px;margin-top:1rem" onclick="mosbotReset()">Reintentar misiones</button>` : ''}
+      </div></div>`;
     return;
   }
   
@@ -576,7 +604,7 @@ function mosbotRenderCert(area) {
   const badgeNames = MOSBOT_BADGES.filter(b => mosbotState.badges.includes(b.id)).map(b => b.name);
   const completedTopics = MOSBOT_MISSIONS
     .filter(m => mosbotState.completed.includes(m.id))
-    .map(m => m.type === 'word' ? 'Word: ' + m.title : 'Excel: ' + m.title);
+    .map(m => 'Word: ' + m.title);
   const verifyCode = mosbotGetVerificationCode();
   const date = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
   const colorHex = `rgb(${certData.accentColor[0]}, ${certData.accentColor[1]}, ${certData.accentColor[2]})`;
@@ -632,7 +660,7 @@ function mosbotDownloadCert() {
     const badgeNames = MOSBOT_BADGES.filter(b => mosbotState.badges.includes(b.id)).map(b => b.name);
     const completedTopics = MOSBOT_MISSIONS
       .filter(m => mosbotState.completed.includes(m.id))
-      .map(m => m.type === 'word' ? 'Word: ' + m.title : 'Excel: ' + m.title);
+      .map(m => 'Word: ' + m.title);
     const verifyCode = mosbotGetVerificationCode();
     const doc = new jsPDF('landscape', 'mm', 'a4');
     const w = 297, h = 210;
@@ -793,7 +821,7 @@ function mosbotReset() {
   let ranking = JSON.parse(localStorage.getItem('mosbot_ranking') || '[]');
   ranking = ranking.filter(r => r.name !== name);
   localStorage.setItem('mosbot_ranking', JSON.stringify(ranking));
-  mosbotState = { name, xp: 0, completed: [], streak: 0, badges: [], startDate: new Date().toISOString(), missionVersion: MOSBOT_DATA_VERSION };
+  mosbotState = mosbotCreateInitialState(name);
   mosbotSaveState();
   mosbotRenderDashboard();
 }

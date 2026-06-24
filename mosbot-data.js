@@ -1,37 +1,6 @@
 // MOSBOT Academy - Mission Data
-const MOSBOT_DATA_VERSION = 'word-tables-2026-01';
+const MOSBOT_DATA_VERSION = 'word-tables-only-2026-02';
 const MOSBOT_MISSIONS = [
-  // ── EXCEL MISSIONS (10) ──
-  {id:'ex1',type:'excel',title:'Fórmulas Básicas',desc:'Suma, resta, multiplicación y división en Excel.',
-   q:'¿Cuál es el símbolo para iniciar una fórmula en Excel?',opts:['#','$','=','@'],ans:2,
-   exp:'El signo "=" es obligatorio para iniciar cualquier fórmula en Excel. Sin él, Excel interpreta el contenido como texto.'},
-  {id:'ex2',type:'excel',title:'BUSCARV (VLOOKUP)',desc:'Búsqueda vertical en tablas de datos.',
-   q:'¿Qué función permite buscar un valor en la primera columna de una tabla?',opts:['BUSCARH','BUSCARV','BUSCAR','ÍNDICE'],ans:1,
-   exp:'BUSCARV busca un valor en la primera columna de una tabla y devuelve un valor de la misma fila en otra columna. BUSCARH es para búsqueda horizontal.'},
-  {id:'ex3',type:'excel',title:'SUMAR.SI (SUMIF)',desc:'Suma condicional de rangos.',
-   q:'¿Cuál es la sintaxis correcta de SUMAR.SI?',opts:['=SUMAR.SI(rango, criterio, suma_rango)','=SUMAR(SI(criterio))','=SUM.IF(range, value)','=SUMIF(range)'],ans:0,
-   exp:'La sintaxis es =SUMAR.SI(rango, criterio, suma_rango). Suma los valores que cumplen con el criterio especificado.'},
-  {id:'ex4',type:'excel',title:'Formato Condicional',desc:'Resaltar celdas según reglas.',
-   q:'¿En qué pestaña se encuentra el Formato Condicional en Excel?',opts:['Inicio','Insertar','Datos','Fórmulas'],ans:0,
-   exp:'El Formato Condicional está en la pestaña Inicio, en el grupo Estilos. Permite aplicar formato automáticamente según criterios.'},
-  {id:'ex5',type:'excel',title:'Tablas Dinámicas',desc:'Análisis y resumen de grandes volúmenes de datos.',
-   q:'¿Cómo crear una tabla dinámica en Excel?',opts:['Insertar > Tabla dinámica','Datos > Tabla dinámica','Análisis > Tabla dinámica','Vista > Tabla dinámica'],ans:0,
-   exp:'Las tablas dinámicas se crean desde Insertar > Tabla dinámica. Permiten resumir y analizar grandes volúmenes de datos rápidamente.'},
-  {id:'ex6',type:'excel',title:'Gráficos en Excel',desc:'Visualización de datos con gráficos.',
-   q:'¿Cuál es el primer paso para crear un gráfico?',opts:['Seleccionar datos','Elegir tipo de gráfico','Insertar > Gráfico','Formato > Estilos'],ans:0,
-   exp:'Siempre debes seleccionar los datos primero antes de crear un gráfico. Los datos incluyen etiquetas y valores a visualizar.'},
-  {id:'ex7',type:'excel',title:'Función SI (IF)',desc:'Evalúa condiciones lógicas.',
-   q:'¿Cuál es la estructura correcta de la función SI?',opts:['=SI(condición; si_verdadero; si_falso)','=IF(condition, true, false)','=IF(true, false, condition)','=SI(true, false)'],ans:0,
-   exp:'La estructura es =SI(condición; si_verdadero; si_falso). Evalúa si la condición es verdadera o falsa y devuelve el resultado correspondiente.'},
-  {id:'ex8',type:'excel',title:'CONTAR.SI (COUNTIF)',desc:'Cuenta celdas que cumplen un criterio.',
-   q:'¿Qué hace la función CONTAR.SI?',opts:['Suma valores','Cuenta celdas que cumplen un criterio','Promedia valores','Busca un valor'],ans:1,
-   exp:'CONTAR.SI cuenta el número de celdas que cumplen con un criterio específico. Es diferente de SUMAR.SI que suma valores.'},
-  {id:'ex9',type:'excel',title:'Validación de Datos',desc:'Restringir entradas en celdas.',
-   q:'¿Dónde está la opción Validación de Datos en Excel?',opts:['Datos > Validación','Inicio > Validación','Insertar > Validación','Fórmulas > Validación'],ans:0,
-   exp:'Validación de Datos está en la pestaña Datos. Permite restringir el tipo de datos que se pueden ingresar en una celda.'},
-  {id:'ex10',type:'excel',title:'Proteger Hojas',desc:'Seguridad y protección de hojas de cálculo.',
-   q:'¿Cuál es el beneficio principal de proteger una hoja de Excel?',opts:['Aumentar velocidad','Evitar cambios no autorizados','Comprimir el archivo','Crear copias de seguridad'],ans:1,
-   exp:'Proteger una hoja impide que otros usuarios realicen cambios no autorizados. Puedes restringir ediciones, inserción de filas, etc.'},
   // ── WORD MISSIONS (20): DISEÑO Y MANIPULACIÓN DE TABLAS ──
   {id:'wd1',type:'word',title:'Crear Tablas en Word',desc:'Insertar tablas con filas y columnas.',
     q:'¿Desde qué pestaña se inserta una tabla en Microsoft Word?',opts:['Insertar > Tabla','Diseño > Tabla','Referencias > Tabla','Vista > Tabla'],ans:0,
@@ -107,7 +76,7 @@ const MOSBOT_RANKS = [
 const MOSBOT_BADGES = [
   {id:'b1',name:'Primera Misión',desc:'Completa tu primera misión',icon:'🎯',req:1},
   {id:'b2',name:'Racha de 5',desc:'Completa 5 misiones',icon:'🔥',req:5},
-  {id:'b3',name:'Excel Warrior',desc:'Completa todas las misiones Excel',icon:'📊',req:'allExcel'},
+  {id:'b3',name:'Dominio de Tablas',desc:'Completa 10 misiones de tablas Word',icon:'📋',req:10},
   {id:'b4',name:'Word Master',desc:'Completa todas las misiones Word',icon:'📝',req:'allWord'},
   {id:'b5',name:'Medio Camino',desc:'Completa 10 misiones',icon:'⚡',req:10},
   {id:'b6',name:'Casi Perfecto',desc:'Completa 15 misiones',icon:'💎',req:15},
