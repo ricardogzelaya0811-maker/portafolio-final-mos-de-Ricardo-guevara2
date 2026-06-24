@@ -580,22 +580,43 @@ function mosbotRenderCert(area) {
   const verifyCode = mosbotGetVerificationCode();
   const date = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
   const colorHex = `rgb(${certData.accentColor[0]}, ${certData.accentColor[1]}, ${certData.accentColor[2]})`;
+  const badgePreview = badgeNames.length ? badgeNames.slice(0, 4).join(' • ') : 'Aún sin insignias';
+  const topicPreview = completedTopics.length ? completedTopics.slice(0, 5).join(' • ') + (completedTopics.length > 5 ? ' • ...' : '') : 'En progreso';
   
   area.innerHTML = `<div class="mosbot-cert-section">
-    <div class="cert-preview" id="certPreview" style="border-color: ${colorHex};">
-      <div class="cert-logo">${certData.logo}</div>
-      <h2 style="color: ${colorHex};">${certData.title}</h2>
-      <h3 style="color: ${colorHex};">${certData.subtitle}</h3>
-      <p>Se certifica que</p>
-      <div class="cert-name">${mosbotState.name}</div>
-      <p>${certData.description}</p>
-      <p>XP Total: <strong style="color: ${colorHex}">${mosbotState.xp}</strong> · Rango: <strong style="color: ${colorHex}">${rank.icon} ${rank.name}</strong></p>
-      <div class="cert-detail-grid">
-        <div><strong>Insignias</strong><span>${badgeNames.length ? badgeNames.join(', ') : 'Aún sin insignias'}</span></div>
-        <div><strong>Temas completados</strong><span>${completedTopics.length ? completedTopics.slice(0, 6).join(', ') + (completedTopics.length > 6 ? '...' : '') : 'En progreso'}</span></div>
-        <div><strong>Verificación</strong><span>${verifyCode}</span></div>
+    <div class="cert-preview" id="certPreview" style="--cert-accent:${colorHex};">
+      <div class="cert-corner cert-corner-tl"></div>
+      <div class="cert-corner cert-corner-tr"></div>
+      <div class="cert-corner cert-corner-bl"></div>
+      <div class="cert-corner cert-corner-br"></div>
+      <div class="cert-watermark">MOS</div>
+      <div class="cert-ribbon">MOSBOT Academy Ultimate</div>
+      <div class="cert-inner">
+        <div class="cert-topline">
+          <span>Portal MOS 2026</span>
+          <span>Código ${verifyCode}</span>
+        </div>
+        <div class="cert-seal" aria-hidden="true"><span>${certData.logo}</span></div>
+        <p class="cert-kicker">Certificado digital de logro</p>
+        <h2>${certData.title}</h2>
+        <h3>${certData.subtitle}</h3>
+        <p class="cert-awarded">Se otorga a</p>
+        <div class="cert-name">${mosbotState.name}</div>
+        <p class="cert-desc">${certData.description}</p>
+        <div class="cert-metrics">
+          <div><strong>${mosbotState.xp}</strong><span>XP total</span></div>
+          <div><strong>${rank.icon} ${rank.name}</strong><span>Rango alcanzado</span></div>
+          <div><strong>${mosbotState.completed.length}/${MOSBOT_MISSIONS.length}</strong><span>Misiones</span></div>
+        </div>
+        <div class="cert-detail-grid">
+          <div><strong>Insignias ganadas</strong><span>${badgePreview}</span></div>
+          <div><strong>Temas completados</strong><span>${topicPreview}</span></div>
+        </div>
+        <div class="cert-signatures">
+          <div><span>Ricardo Zelaya</span><small>Instructor MOS</small></div>
+          <div><span>${date}</span><small>Fecha de emisión</small></div>
+        </div>
       </div>
-      <p class="cert-date">📅 ${date}</p>
     </div>
     <button class="cert-download-btn" onclick="mosbotDownloadCert()">📥 Descargar Certificado PDF</button>
   </div>`;
@@ -615,67 +636,150 @@ function mosbotDownloadCert() {
     const verifyCode = mosbotGetVerificationCode();
     const doc = new jsPDF('landscape', 'mm', 'a4');
     const w = 297, h = 210;
+    const gold = [192, 147, 57];
+    const goldDark = [123, 85, 32];
+    const navy = [23, 32, 51];
+    const ink = [28, 36, 54];
+    const muted = [92, 101, 120];
+    const paper = [248, 241, 223];
     
-    // Background
-    doc.setFillColor(certData.bgColor[0], certData.bgColor[1], certData.bgColor[2]);
+    // Premium paper background
+    doc.setFillColor(paper[0], paper[1], paper[2]);
     doc.rect(0, 0, w, h, 'F');
+    doc.setFillColor(255, 251, 240);
+    doc.rect(10, 10, w - 20, h - 20, 'F');
     
-    // Border
-    doc.setDrawColor(certData.borderColor[0], certData.borderColor[1], certData.borderColor[2]);
-    doc.setLineWidth(2); doc.rect(8, 8, w - 16, h - 16);
-    doc.setLineWidth(0.5); doc.rect(12, 12, w - 24, h - 24);
+    // Decorative frame
+    doc.setDrawColor(gold[0], gold[1], gold[2]);
+    doc.setLineWidth(3);
+    doc.rect(8, 8, w - 16, h - 16);
+    doc.setLineWidth(0.6);
+    doc.rect(14, 14, w - 28, h - 28);
+    doc.setDrawColor(goldDark[0], goldDark[1], goldDark[2]);
+    doc.setLineWidth(0.35);
+    doc.rect(18, 18, w - 36, h - 36);
+    
+    // Corner accents
+    doc.setLineWidth(1.2);
+    [[21, 21, 36, 21, 21, 36], [276, 21, 261, 21, 276, 36], [21, 189, 36, 189, 21, 174], [276, 189, 261, 189, 276, 174]].forEach(c => {
+      doc.line(c[0], c[1], c[2], c[3]);
+      doc.line(c[0], c[1], c[4], c[5]);
+    });
+    
+    // Header ribbon
+    doc.setFillColor(navy[0], navy[1], navy[2]);
+    doc.roundedRect(88, 14, 121, 14, 2, 2, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(248, 231, 173);
+    doc.text('MOSBOT ACADEMY ULTIMATE', w / 2, 23, { align: 'center' });
+    
+    // Top metadata
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.setTextColor(109, 90, 53);
+    doc.text('PORTAL MOS 2026', 24, 32);
+    doc.text('CODIGO ' + verifyCode, w - 24, 32, { align: 'right' });
+    
+    // Watermark
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(72);
+    doc.setTextColor(235, 220, 184);
+    doc.text('MOS', w / 2, 120, { align: 'center' });
+    
+    // Seal
+    doc.setFillColor(211, 168, 79);
+    doc.circle(w / 2, 47, 15, 'F');
+    doc.setFillColor(255, 246, 215);
+    doc.circle(w / 2, 47, 11, 'F');
+    doc.setDrawColor(goldDark[0], goldDark[1], goldDark[2]);
+    doc.setLineWidth(0.8);
+    doc.circle(w / 2, 47, 15, 'S');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.setTextColor(navy[0], navy[1], navy[2]);
+    doc.text('MOS', w / 2, 50, { align: 'center' });
     
     // Title
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(32);
-    doc.setTextColor(certData.accentColor[0], certData.accentColor[1], certData.accentColor[2]);
-    doc.text(certData.title, w / 2, 45, { align: 'center' });
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(30);
+    doc.setTextColor(ink[0], ink[1], ink[2]);
+    doc.text(certData.title, w / 2, 72, { align: 'center' });
     
     // Subtitle
-    doc.setFontSize(18);
-    doc.text(certData.subtitle, w / 2, 58, { align: 'center' });
+    doc.setFontSize(10);
+    doc.setTextColor(goldDark[0], goldDark[1], goldDark[2]);
+    doc.text(certData.subtitle.toUpperCase(), w / 2, 82, { align: 'center' });
     
     // Body
-    doc.setFontSize(14); doc.setTextColor(certData.textColor[0], certData.textColor[1], certData.textColor[2]);
-    doc.text('Se certifica que', w / 2, 78, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(muted[0], muted[1], muted[2]);
+    doc.text('Se otorga a', w / 2, 96, { align: 'center' });
     
     // Name
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(28);
-    doc.setTextColor(certData.accentColor[0], certData.accentColor[1], certData.accentColor[2]);
-    doc.text(mosbotState.name, w / 2, 95, { align: 'center' });
+    doc.setFont('times', 'bold'); doc.setFontSize(32);
+    doc.setTextColor(16, 24, 40);
+    doc.text(mosbotState.name, w / 2, 111, { align: 'center' });
     
     // Line
-    doc.setDrawColor(certData.borderColor[0], certData.borderColor[1], certData.borderColor[2]);
+    doc.setDrawColor(gold[0], gold[1], gold[2]);
     doc.setLineWidth(1);
     const nameW = doc.getTextWidth(mosbotState.name);
-    doc.line(w / 2 - nameW / 2, 98, w / 2 + nameW / 2, 98);
+    doc.line(Math.max(74, w / 2 - nameW / 2), 116, Math.min(223, w / 2 + nameW / 2), 116);
     
     // Desc
     doc.setFont('helvetica', 'normal'); doc.setFontSize(11);
-    doc.setTextColor(certData.textColor[0], certData.textColor[1], certData.textColor[2]);
-    const descLines = doc.splitTextToSize(certData.description, 250);
-    doc.text(descLines, w / 2, 115, { align: 'center' });
+    doc.setTextColor(77, 86, 104);
+    const descLines = doc.splitTextToSize(certData.description, 210);
+    doc.text(descLines, w / 2, 128, { align: 'center' });
     
-    // Stats
-    doc.setFontSize(12); doc.setFont('helvetica', 'bold');
-    doc.setTextColor(certData.accentColor[0], certData.accentColor[1], certData.accentColor[2]);
-    doc.text('XP Total: ' + mosbotState.xp + '  ·  Rango: ' + rank.name, w / 2, 150, { align: 'center' });
+    // Metrics
+    const metricY = 148;
+    const metricW = 58;
+    const metricX = [58, 119.5, 181];
+    const metricValues = [String(mosbotState.xp), rank.name, mosbotState.completed.length + '/' + MOSBOT_MISSIONS.length];
+    const metricLabels = ['XP TOTAL', 'RANGO ALCANZADO', 'MISIONES'];
+    metricX.forEach((x, i) => {
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(x, metricY, metricW, 18, 2, 2, 'F');
+      doc.setDrawColor(214, 176, 94);
+      doc.roundedRect(x, metricY, metricW, 18, 2, 2, 'S');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(i === 1 ? 8 : 12);
+      doc.setTextColor(23, 32, 51);
+      doc.text(metricValues[i], x + metricW / 2, metricY + 7, { align: 'center' });
+      doc.setFontSize(6.5);
+      doc.setTextColor(123, 107, 75);
+      doc.text(metricLabels[i], x + metricW / 2, metricY + 14, { align: 'center' });
+    });
     
     doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
-    doc.setTextColor(certData.textColor[0], certData.textColor[1], certData.textColor[2]);
+    doc.setTextColor(63, 71, 88);
     const badgeText = 'Insignias: ' + (badgeNames.length ? badgeNames.join(', ') : 'Aún sin insignias');
     const topicText = 'Temas completados: ' + (completedTopics.length ? completedTopics.slice(0, 8).join(', ') + (completedTopics.length > 8 ? '...' : '') : 'En progreso');
-    doc.text(doc.splitTextToSize(badgeText, 250), w / 2, 160, { align: 'center' });
-    doc.text(doc.splitTextToSize(topicText, 250), w / 2, 168, { align: 'center' });
+    doc.text(doc.splitTextToSize(badgeText, 230), w / 2, 176, { align: 'center' });
+    doc.text(doc.splitTextToSize(topicText, 230), w / 2, 184, { align: 'center' });
     
-    // Date
+    // Signatures and date
     const dateStr = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
-    doc.setTextColor(certData.textColor[0] * 0.7, certData.textColor[1] * 0.7, certData.textColor[2] * 0.7);
-    doc.text(dateStr + '  ·  Código: ' + verifyCode, w / 2, 182, { align: 'center' });
+    doc.setDrawColor(23, 32, 51);
+    doc.setLineWidth(0.35);
+    doc.line(62, 193, 122, 193);
+    doc.line(175, 193, 235, 193);
+    doc.setFont('times', 'bold'); doc.setFontSize(11);
+    doc.setTextColor(23, 32, 51);
+    doc.text('Ricardo Zelaya', 92, 198, { align: 'center' });
+    doc.text(dateStr, 205, 198, { align: 'center' });
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5);
+    doc.setTextColor(118, 106, 85);
+    doc.text('INSTRUCTOR MOS', 92, 202, { align: 'center' });
+    doc.text('FECHA DE EMISION', 205, 202, { align: 'center' });
     
     // Footer
-    doc.setFontSize(9);
-    doc.text('Ricardo Zelaya - Portal MOS 2026', w / 2, 195, { align: 'center' });
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.setTextColor(109, 90, 53);
+    doc.text('Verificacion: ' + verifyCode + '  |  Ricardo Zelaya - Portal MOS 2026', w / 2, 207, { align: 'center' });
     
     doc.save('Certificado_MOSBOT_' + mosbotState.name + '.pdf');
   };
