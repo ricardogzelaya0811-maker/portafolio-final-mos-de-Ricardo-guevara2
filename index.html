@@ -223,6 +223,41 @@
     /* Contacto */
     .contact-bg{background:var(--navy)}
     .contact-grid{display:grid;grid-template-columns:1fr 1.5fr;gap:4rem;align-items:start}
+
+    /* Podcast */
+    .podcast-hero{
+      min-height:calc(100vh - 68px);
+      background:radial-gradient(ellipse at top right, rgba(139,92,246,0.22), transparent 60%),
+                 radial-gradient(ellipse at bottom left, rgba(34,211,238,0.16), transparent 60%);
+      display:flex;align-items:center;justify-content:center;
+      padding:2rem 1rem 3rem;
+    }
+    .podcast-shell{
+      width:100%;max-width:1400px;
+      display:grid;gap:1.75rem;
+    }
+    .podcast-copy{
+      background:rgba(255,255,255,.04);border:1px solid var(--border);
+      border-radius:var(--r);padding:2rem 2.2rem 1.8rem;box-shadow:var(--shadow);
+    }
+    .podcast-eyebrow{display:inline-block;background:rgba(139,92,246,.16);border:1px solid rgba(139,92,246,.4);color:var(--gold-lt);font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:.4rem 1rem;border-radius:100px;margin-bottom:1rem}
+    .podcast-copy h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3rem);font-weight:900;color:#fff;margin-bottom:1rem}
+    .podcast-copy h1 span{color:var(--gold-lt)}
+    .podcast-copy p{color:var(--muted);font-size:.95rem;line-height:1.8;margin-bottom:1.4rem}
+    .podcast-tags{display:flex;flex-wrap:wrap;gap:.6rem}
+    .podcast-tags span{padding:.4rem .8rem;border-radius:100px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text);font-size:.75rem;font-weight:600}
+    .podcast-video-card{background:transparent;border:none;padding:0;margin:0;}
+    .podcast-video-container{width:100%;border-radius:28px;overflow:hidden;box-shadow:0 28px 80px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);}
+    .podcast-video{width:100%;height:auto;background:#000;display:block;}
+    .podcast-track-meta{padding:1.5rem 1.75rem 1.25rem;background:rgba(10,10,18,.9);border:1px solid rgba(255,255,255,.08);border-radius:0 0 24px 24px;box-shadow:0 24px 70px rgba(0,0,0,.3);}
+    .podcast-track-meta h3{font-family:'Playfair Display',serif;font-size:1.35rem;color:#fff;margin-bottom:.45rem}
+    .podcast-track-meta p{font-size:.95rem;color:var(--muted);line-height:1.7;margin-bottom:0}
+    .podcast-body{max-width:1100px;margin:0 auto;padding:0 2rem 4rem}
+    .podcast-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+    .podcast-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.6rem;box-shadow:var(--shadow)}
+    .podcast-panel h3{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--gold-lt);margin-bottom:.9rem}
+    .podcast-panel p,.podcast-panel li{font-size:.9rem;color:var(--muted);line-height:1.7}
+    .podcast-panel ul{padding-left:1.1rem;display:grid;gap:.45rem}
     .ci h3{font-family:'Playfair Display',serif;color:var(--gold);margin-bottom:1rem}
     .ci p{color:rgba(255,255,255,.6);font-size:.88rem;line-height:1.7;margin-bottom:1.75rem}
     .ci-item{display:flex;align-items:center;gap:.75rem;margin-bottom:.9rem;font-size:.85rem;color:rgba(255,255,255,.65)}
@@ -453,6 +488,7 @@
       <button class="nav-link" onclick="showPage('descargas',this)">Descargas</button>
       <button class="nav-link" onclick="showPage('subir',this)">Subir</button>
       <button class="nav-link" onclick="showPage('mosbot',this)">🎓 MOSBOT Academy</button>
+      <button class="nav-link" onclick="showPage('podcast',this)">🎙️ CTR+Z Podcast</button>
       <button class="nav-logout" onclick="doLogout()">Salir 🚪</button>
     </div>
     <button class="hamburger" id="hbg" onclick="toggleNav()" aria-label="Menú">
@@ -676,6 +712,54 @@
     <footer><p>© 2026 <strong>Ricardo Zelaya</strong> · MOSBOT Academy Ultimate · Portafolio MOS con IA</p></footer>
   </div>
 
+  <!-- ══ CTR+Z PODCAST ══ -->
+  <div id="page-podcast" class="page">
+    <section class="podcast-hero">
+      <div class="podcast-shell">
+        <div class="podcast-copy">
+          <span class="podcast-eyebrow">� CTR+Z Podcast</span>
+          <h1>Reproductor Premium</h1>
+          <p>Aquí se verá el episodio como si fuese un video en tu laptop, con el ancho completo de la ventana y controles nativos para pausar, avanzar y retroceder.</p>
+          <div class="podcast-tags">
+            <span>Video player</span>
+            <span>Reproducción completa</span>
+            <span>Diseño profesional</span>
+          </div>
+        </div>
+        <div class="podcast-video-card">
+          <div class="podcast-video-container">
+            <audio id="podcastAudio" class="podcast-video" controls preload="metadata" style="width:100%;background:#000;border-radius:28px;display:block;">
+              <source src="podcast%20mos/podcast%20mos.mp3" type="audio/mpeg">
+              Tu navegador no soporta este reproductor.
+            </audio>
+          </div>
+          <div class="podcast-track-meta">
+            <h3>CTR+Z Podcast</h3>
+            <p>Episodio disponible. Usa los controles nativos para reproducir, pausar, avanzar y retroceder tu contenido de audio.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="podcast-body">
+      <div class="podcast-grid">
+        <div class="podcast-panel">
+          <h3>🎯 Qué encontrarás aquí</h3>
+          <ul>
+            <li>Capítulos breves y claros sobre temas de productividad.</li>
+            <li>Reflexiones sobre Microsoft Office, IA y aprendizaje.</li>
+            <li>Un formato visual elegante para presentar tu contenido.</li>
+          </ul>
+        </div>
+        <div class="podcast-panel">
+          <h3>📝 Próximo paso</h3>
+          <p>Cuando me compartas el audio terminado, solo reemplazo el archivo en este bloque y la página quedará lista para reproducirse de forma profesional.</p>
+        </div>
+      </div>
+    </div>
+    <footer><p>© 2026 <strong>Ricardo Zelaya</strong> · CTR+Z Podcast · Portafolio MOS con IA</p></footer>
+  </div>
+
 </div><!-- fin app -->
 
 <!-- MODAL VISTA PREVIA -->
@@ -695,6 +779,78 @@
 </div>
 
 <script>
+/* ── PODCAST CONTROLS ── */
+function togglePodcast() {
+  const audio = document.getElementById('podcastAudio');
+  const btn = document.getElementById('podcastPlayBtn');
+  if (!audio) return;
+  if (!audio.src || audio.src === window.location.href) {
+    btn.textContent = '⏸';
+    return;
+  }
+  if (audio.paused) {
+    audio.play().catch(() => {});
+    btn.textContent = '⏸';
+  } else {
+    audio.pause();
+    btn.textContent = '▶';
+  }
+}
+
+function rewindPodcast() {
+  const audio = document.getElementById('podcastAudio');
+  if (audio) audio.currentTime = Math.max(0, audio.currentTime - 10);
+}
+
+function forwardPodcast() {
+  const audio = document.getElementById('podcastAudio');
+  if (audio) audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 10);
+}
+
+function seekPodcast(event) {
+  const audio = document.getElementById('podcastAudio');
+  const progress = document.getElementById('podcastProgress');
+  if (!audio || !progress) return;
+  const rect = progress.getBoundingClientRect();
+  const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+  audio.currentTime = ratio * (audio.duration || 0);
+}
+
+function updatePodcastUI() {
+  const audio = document.getElementById('podcastAudio');
+  const btn = document.getElementById('podcastPlayBtn');
+  const bar = document.getElementById('podcastProgressBar');
+  const cur = document.getElementById('podcastCurrentTime');
+  const dur = document.getElementById('podcastDuration');
+  if (!audio || !bar || !cur || !dur) return;
+
+  const current = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+  const total = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0;
+  const pct = total > 0 ? (current / total) * 100 : 0;
+  bar.style.width = pct + '%';
+  cur.textContent = formatPodcastTime(current);
+  dur.textContent = formatPodcastTime(total);
+  if (btn) btn.textContent = audio.paused ? '▶' : '⏸';
+}
+
+function formatPodcastTime(seconds) {
+  if (!Number.isFinite(seconds) || seconds < 0) return '00:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const audio = document.getElementById('podcastAudio');
+  if (audio) {
+    audio.addEventListener('timeupdate', updatePodcastUI);
+    audio.addEventListener('loadedmetadata', updatePodcastUI);
+    audio.addEventListener('play', updatePodcastUI);
+    audio.addEventListener('pause', updatePodcastUI);
+  }
+  updatePodcastUI();
+});
+
 /* ── SPLASH (Prioridad Alta) ── */
 window.addEventListener('DOMContentLoaded', () => {
   try {
