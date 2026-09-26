@@ -547,12 +547,13 @@
     .doc-thumb{height:110px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative;cursor:pointer}
     .doc-thumb.word{background:linear-gradient(135deg,#1B5EAB,#2B7CD3)}
     .doc-thumb.excel{background:linear-gradient(135deg,#1A6B37,#217346)}
+    .doc-thumb.powerpoint{background:linear-gradient(135deg,#a32618,#e85d04)}
     .doc-thumb-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:var(--ease);font-size:.8rem;color:#fff;font-weight:600;gap:.3rem}
     .doc-thumb:hover .doc-thumb-overlay{opacity:1}
     .doc-num{position:absolute;bottom:6px;right:8px;font-size:.62rem;color:rgba(255,255,255,.38);font-weight:700}
     .doc-body{padding:1rem 1.1rem;flex:1;display:flex;flex-direction:column}
     .doc-tag{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;display:block}
-    .doc-tag.word{color:#60a5fa} .doc-tag.excel{color:#4ade80}
+    .doc-tag.word{color:#60a5fa} .doc-tag.excel{color:#4ade80} .doc-tag.powerpoint{color:#fb923c}
     .doc-title{font-weight:600;font-size:.88rem;color:var(--text);margin-bottom:.3rem;line-height:1.3}
     .doc-desc{font-size:.78rem;color:var(--muted);line-height:1.5;flex:1}
     .doc-author{font-size:.7rem;color:var(--gold-lt);margin-top:.5rem}
@@ -873,7 +874,7 @@
   <div id="page-descargas" class="page">
     <div class="dl-hero">
       <h1>Mis Documentos</h1>
-      <p>Colección de proyectos técnicos desarrollados con Microsoft Word y Excel.</p>
+      <p>Colección de proyectos técnicos desarrollados con Microsoft Word, Excel y PowerPoint.</p>
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
         <input type="text" id="searchInput" placeholder="Buscar documento…" oninput="searchDocs()"/>
@@ -884,6 +885,7 @@
         <button class="dl-tab active" onclick="filterDl('all',this)">Todos (<span id="dlAll">0</span>)</button>
         <button class="dl-tab" onclick="filterDl('word',this)">📄 Word (<span id="dlWord">0</span>)</button>
         <button class="dl-tab" onclick="filterDl('excel',this)">📊 Excel (<span id="dlExcel">0</span>)</button>
+        <button class="dl-tab" onclick="filterDl('powerpoint',this)">📽️ PowerPoint (<span id="dlPowerpoint">0</span>)</button>
       </div>
       <div class="dl-grid" id="dlGrid">
         <div class="dl-empty"><div class="big">📂</div><p>Aún no hay documentos.<br>¡Sube el primero!</p><button onclick="showPage('subir',null)">Subir archivo →</button></div>
@@ -1482,6 +1484,13 @@ const DEFAULT_DOCS = [
     file: "archivos excel/base de datos y funciones.xlsx",
     url: "archivos excel/base de datos y funciones.xlsx"
   },
+  // PowerPoint Files
+  { id:"d_p1", type:"powerpoint", emoji:"📽️", titulo:"Excel Games", desc:"Juego interactivo desarrollado en PowerPoint con temática de Microsoft Excel.", autor:"Ricardo Zelaya", file:"archivos powerpoint/excel games.pptm", url:"archivos powerpoint/excel games.pptm" },
+  { id:"d_p2", type:"powerpoint", emoji:"📽️", titulo:"FIFA World Cup 2026 — Patrón de diapositivas", desc:"Diseño de presentación y patrón de diapositivas inspirado en la Copa Mundial 2026.", autor:"Ricardo Zelaya", file:"archivos powerpoint/FIFA world cup 2026 patron de diapositivas.pptx", url:"archivos powerpoint/FIFA world cup 2026 patron de diapositivas.pptx" },
+  { id:"d_p3", type:"powerpoint", emoji:"📽️", titulo:"Infografía: Mitología Griega", desc:"Infografía visual sobre los dioses griegos creada en PowerPoint.", autor:"Ricardo Zelaya", file:"archivos powerpoint/Infografía Mitología Griega Dioses Griegos I (1).pptx", url:"archivos powerpoint/Infografía Mitología Griega Dioses Griegos I (1).pptx" },
+  { id:"d_p4", type:"powerpoint", emoji:"📽️", titulo:"Venta de Producto y Patrón de Notas", desc:"Presentación comercial con diseño de patrón de notas y estructura profesional.", autor:"Ricardo Zelaya", file:"archivos powerpoint/mansate venta de producto y patron de notas.pptx", url:"archivos powerpoint/mansate venta de producto y patron de notas.pptx" },
+  { id:"d_p5", type:"powerpoint", emoji:"📽️", titulo:"Word Game", desc:"Juego interactivo en PowerPoint enfocado en herramientas de Microsoft Word.", autor:"Ricardo Zelaya", file:"archivos powerpoint/Word Game.pptm", url:"archivos powerpoint/Word Game.pptm" },
+  { id:"d_p6", type:"powerpoint", emoji:"📽️", titulo:"MOS Math Game", desc:"Juego educativo de matemáticas desarrollado para práctica de habilidades MOS.", autor:"Ricardo Zelaya", file:"archivos powerpoint/juego mos math game (1).pptm", url:"archivos powerpoint/juego mos math game (1).pptm" },
   // Word Files
   {
     id: "d_w1",
@@ -1675,9 +1684,11 @@ async function renderDocs(refetch = true) {
   let docs = docsCache;
   const w = docs.filter(d=>d.type==='word').length;
   const e = docs.filter(d=>d.type==='excel').length;
+  const p = docs.filter(d=>d.type==='powerpoint').length;
   document.getElementById('dlAll').textContent   = docs.length;
   document.getElementById('dlWord').textContent  = w;
   document.getElementById('dlExcel').textContent = e;
+  document.getElementById('dlPowerpoint').textContent = p;
 
   if (currentFilter !== 'all') docs = docs.filter(d=>d.type===currentFilter);
   if (searchQuery) docs = docs.filter(d =>
@@ -1701,10 +1712,10 @@ async function renderDocs(refetch = true) {
       <div class="doc-thumb ${d.type}" onclick="previewDoc('${d.id}','${escHtml(d.titulo)}','${d.type}','${d.url}')">
         <span>${d.emoji}</span>
         <div class="doc-thumb-overlay">👁️ Vista previa</div>
-        <span class="doc-num">${d.type==='word'?'W':'E'}${String(i+1).padStart(2,'0')}</span>
+        <span class="doc-num">${d.type==='word'?'W':d.type==='excel'?'E':'P'}${String(i+1).padStart(2,'0')}</span>
       </div>
       <div class="doc-body">
-        <span class="doc-tag ${d.type}">${d.type==='word'?'● Microsoft Word':'● Microsoft Excel'}</span>
+        <span class="doc-tag ${d.type}">${d.type==='word'?'● Microsoft Word':d.type==='excel'?'● Microsoft Excel':'● Microsoft PowerPoint'}</span>
         <p class="doc-title">${d.titulo}</p>
         <p class="doc-desc">${d.desc}</p>
         <div class="doc-author">👤 ${d.autor}</div>
@@ -1767,7 +1778,7 @@ function previewDoc(id, titulo, tipo, url) {
   else {
     body.innerHTML = `
       <div class="modal-info">
-        <div class="big">${tipo==='word'?'📄':'📊'}</div>
+        <div class="big">${tipo==='word'?'📄':tipo==='excel'?'📊':'📽️'}</div>
         <p><strong>${titulo}</strong></p>
         <p style="margin:.5rem 0 1.5rem">Para ver el contenido completo,<br>descarga el archivo.</p>
         <a href="${url}" download style="display:inline-flex;align-items:center;gap:.4rem;padding:.7rem 1.5rem;background:var(--gold);color:white;border-radius:8px;font-weight:600;text-decoration:none;font-size:.9rem">↓ Descargar ahora</a>
