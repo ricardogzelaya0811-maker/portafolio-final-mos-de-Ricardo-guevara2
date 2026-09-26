@@ -753,6 +753,7 @@
       <button class="nav-link" onclick="showPage('descargas',this)">Descargas</button>
       <button class="nav-link" onclick="showPage('subir',this)">Subir</button>
       <button class="nav-link" onclick="showPage('postgresql',this)">🐘 PostgreSQL</button>
+      <button class="nav-link" onclick="showPage('windows-office',this)">🪟 Windows + Office</button>
       <button class="nav-link" onclick="showPage('mosbot',this)">🎓 MOSBOT Academy</button>
       <button class="nav-link" onclick="showPage('podcast',this)">🎙️ CTR+Z Podcast</button>
       <button class="nav-logout" onclick="doLogout()">Salir 🚪</button>
@@ -1130,6 +1131,14 @@
     <footer><p>© 2026 <strong>Ricardo Zelaya</strong> · Proyecto PostgreSQL · Portafolio MOS con IA</p></footer>
   </div>
 
+  <div id="page-windows-office" class="page">
+    <section class="pg-hero"><div class="pg-hero-grid"><div><span class="pg-kicker">🪟 Proyecto técnico · Sistemas y productividad</span><h1>Instalación de <em>Windows y Microsoft Office.</em></h1><p>Guía visual completa desde la instalación de Windows hasta la comprobación final de Microsoft Office.</p><div class="pg-chip-row"><span class="pg-chip">Windows 10</span><span class="pg-chip">Microsoft Office</span><span class="pg-chip">Configuración</span></div></div><div class="pg-orbit" aria-hidden="true"><div class="pg-elephant">🪟</div></div></div></section>
+    <section class="wrap"><p class="s-lbl-top" style="text-align:center">Bitácora del proyecto</p><h2 class="s-title" style="text-align:center">De Windows a Office, paso a paso</h2><div class="s-line" style="margin:0 auto 2rem"></div><p class="pg-intro">Las capturas muestran el proceso completo: configuración de Windows, ajustes iniciales y la instalación de las aplicaciones de Office.</p></section>
+    <section class="wrap pg-ordered-wrap"><div class="pg-timeline" id="woTimeline"></div></section>
+    <section class="pg-end"><div class="pg-end-inner"><h2>Windows y Office listos para trabajar</h2><p>Resultado final: sistema operativo configurado y herramientas de Microsoft Office instaladas correctamente.</p></div></section>
+    <footer><p>© 2026 <strong>Ricardo Zelaya</strong> · Proyecto Windows + Office · Portafolio MOS con IA</p></footer>
+  </div>
+
   <div id="page-podcast" class="page">
     <section class="podcast-hero">
       <div class="podcast-shell">
@@ -1354,7 +1363,7 @@ function doLogin() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     e.style.display = 'none';
-    renderDocs(); updateHeroStats(); initReveal();
+    renderDocs(); updateHeroStats(); renderWindowsOfficeGuide(); initReveal();
   } else {
     e.style.display = 'block';
     document.getElementById('loginPass').value = '';
@@ -1910,6 +1919,19 @@ async function sendContact(e) {
 }
 
 /* ── REVEAL ── */
+function renderWindowsOfficeGuide(){
+  const steps = [
+    ['Idioma y teclado','Configuré el idioma, formato regional y método de entrada.','image1.png'],['Instalar ahora','Inicié el asistente de instalación de Windows.','image2.png'],['Preparar el programa','Esperé mientras se cargaba el instalador.','image3.png'],['Activar Windows','Ingresé la clave o seleccioné activarlo después.','image4.png'],['Elegir edición','Seleccioné la edición de Windows que instalaría.','image5.png'],['Aceptar licencia','Acepté los términos de licencia de Microsoft.','image6.png'],['Instalación personalizada','Elegí configurar manualmente el destino de Windows.','image7.png'],['Seleccionar unidad','Definí el espacio del disco para la instalación.','image8.png'],['Instalando Windows','El instalador copió y preparó los archivos.','image9.png'],['Primer inicio','Windows se preparó para su configuración inicial.','image10.png'],['Bienvenida','Comencé el asistente de bienvenida de Windows.','image11.png'],['Región','Seleccioné el país o región correspondiente.','image12.png'],['Teclado','Confirmé la distribución de teclado.','image13.png'],['Red','Windows aplicó los servicios de red.','image14.png'],['Cuenta Microsoft','Configuré el inicio de sesión de Microsoft.','image15.png'],['Crear un PIN','Establecí un PIN para un acceso seguro.','image16.png'],['OneDrive','Revisé la opción de respaldo de archivos.','image17.png'],['Ajustes finales','Esperé los últimos ajustes del perfil.','image18.png'],['Windows listo','Verifiqué el escritorio y el sistema instalado.','image19.png'],['Medio de Office','Detecté la unidad de instalación de Office.','image20.png'],['Abrir la unidad','Accedí a los archivos del medio de Office.','image21.png'],['Ejecutar setup','Localicé el instalador setup.exe.','image22.png'],['Iniciar instalación','Ejecuté el instalador de Microsoft Office.','image23.png'],['Permitir cambios','Autoricé a Microsoft Setup desde el control de cuentas.','image24.png'],['Licencia de Office','Acepté los términos del software de Office.','image25.png'],['Instalar Office','Seleccioné Instalar ahora para iniciar el proceso.','image26.png'],['Progreso de Office','Esperé la instalación de las aplicaciones.','image27.png'],['Finalizar','Cerré el asistente tras completar la instalación.','image28.png'],['Verificar aplicaciones','Comprobé que Office apareciera en el menú Inicio.','image29.png'],['Comprobación final','Confirmé que Microsoft Office quedó instalado.','image30.png']
+  ];
+  const target = document.getElementById('woTimeline');
+  if (!target) return;
+  target.innerHTML = steps.map((step, index) => {
+    const n = String(index + 1).padStart(2,'0');
+    const stage = index < 19 ? 'Instalación de Windows' : 'Microsoft Office';
+    return `<article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso ${n} · ${stage}</p><h3>${step[0]}</h3><p>${step[1]}</p></div><div class="pg-marker">${n}</div><figure class="pg-shot"><img src="assets/windows-office/${step[2]}" alt="${step[0]}" loading="lazy"><figcaption>${stage} · ${step[0]}</figcaption></figure></article>`;
+  }).join('');
+}
+
 function initReveal(){
   const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:.1});
   document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
