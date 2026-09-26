@@ -1714,7 +1714,7 @@ async function renderDocs(refetch = true) {
   grid.innerHTML = docs.map((d,i) => `
     <div class="doc-card">
       <div class="doc-thumb ${d.type}" onclick="previewDoc('${d.id}','${escHtml(d.titulo)}','${d.type}','${d.url}')">
-        <span>${d.emoji}</span>
+        <span>${d.type==='excel' ? '<img class="office-logo" src="assets/office-logos/excel-removebg-preview.png" alt="Microsoft Excel">' : d.type==='powerpoint' ? '<img class="office-logo" src="assets/office-logos/powerpoint-removebg-preview.png" alt="Microsoft PowerPoint">' : d.emoji}</span>
         <div class="doc-thumb-overlay">👁️ Vista previa</div>
         <span class="doc-num">${d.type==='word'?'W':d.type==='excel'?'E':'P'}${String(i+1).padStart(2,'0')}</span>
       </div>
@@ -1782,7 +1782,7 @@ function previewDoc(id, titulo, tipo, url) {
   else {
     body.innerHTML = `
       <div class="modal-info">
-        <div class="big">${tipo==='word'?'📄':tipo==='excel'?'📊':'📽️'}</div>
+        <div class="big">${tipo==='excel' ? '<img class="modal-office-logo" src="assets/office-logos/excel-removebg-preview.png" alt="Microsoft Excel">' : tipo==='powerpoint' ? '<img class="modal-office-logo" src="assets/office-logos/powerpoint-removebg-preview.png" alt="Microsoft PowerPoint">' : '📄'}</div>
         <p><strong>${titulo}</strong></p>
         <p style="margin:.5rem 0 1.5rem">Para ver el contenido completo,<br>descarga el archivo.</p>
         <a href="${url}" download style="display:inline-flex;align-items:center;gap:.4rem;padding:.7rem 1.5rem;background:var(--gold);color:white;border-radius:8px;font-weight:600;text-decoration:none;font-size:.9rem">↓ Descargar ahora</a>
