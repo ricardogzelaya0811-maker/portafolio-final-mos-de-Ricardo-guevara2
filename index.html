@@ -578,6 +578,9 @@
     .modal-body{flex:1;overflow:auto;padding:1.5rem;display:flex;align-items:center;justify-content:center;min-height:300px}
     .modal-info{text-align:center;color:var(--muted);font-size:.9rem;line-height:1.8}
     .modal-info .big{font-size:4rem;margin-bottom:1rem}
+    .preview-loading{display:flex;flex-direction:column;align-items:center;gap:.8rem;color:var(--muted);font-size:.9rem}
+    .preview-spinner{width:38px;height:38px;border:4px solid rgba(139,92,246,.2);border-top-color:var(--gold);border-radius:50%;animation:previewSpin .8s linear infinite}
+    @keyframes previewSpin{to{transform:rotate(360deg)}}
 
     /* ══════════════════════════════════════
        SUBIR
@@ -1819,7 +1822,7 @@ async function previewDoc(id, titulo, tipo) {
   const body = document.getElementById('modalBody');
   if (!url) { body.innerHTML='<div class="modal-info"><div class="big">📄</div><p>Sin vista previa disponible.</p></div>'; }
   else if (!previewUrl && doc) {
-    body.innerHTML='<div class="modal-info"><div class="big">⏳</div><p>Preparando vista previa en Google Drive...</p></div>';
+    body.innerHTML='<div class="preview-loading"><div class="preview-spinner" aria-hidden="true"></div><p>Cargando vista previa...</p><small>Preparando el archivo en Google Drive</small></div>';
     try {
       const result = await migrateDocToDrive(doc);
       previewUrl = result.previewUrl;
