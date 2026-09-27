@@ -1632,6 +1632,12 @@ let docsCache = [];
 let currentFilter = 'all';
 let searchQuery   = '';
 
+function getDrivePreviewUrl(data) {
+  if (data.preview_url) return data.preview_url;
+  if (data.drive_file_id) return 'https://drive.google.com/file/d/' + data.drive_file_id + '/preview';
+  return '';
+}
+
 async function fetchDocs() {
   let localDocs = [];
   try {
@@ -1653,7 +1659,7 @@ async function fetchDocs() {
           autor: d.autor || 'Anónimo',
           file: d.archivo_path,
           url: d.url_archivo,
-          previewUrl: d.preview_url || d.url_archivo
+          previewUrl: getDrivePreviewUrl(d)
         };
       });
     } catch(err) {
