@@ -908,10 +908,10 @@
           <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
             <div class="drop-icon">⬆️</div>
             <p class="drop-main">Arrastra tu archivo aquí o haz clic para buscar</p>
-            <p class="drop-sub">Soporta Word (.docx) y Excel (.xlsx) hasta 20MB</p>
+            <p class="drop-sub">Soporta Word, Excel y PowerPoint hasta 20MB</p>
             <span class="drop-fname" id="dropName"></span>
           </div>
-          <input type="file" id="fileInput" accept=".docx,.xlsx" onchange="handleFile(this)"/>
+          <input type="file" id="fileInput" accept=".docx,.xlsx,.xlsm,.pptx,.pptm" onchange="handleFile(this)"/>
           <div class="up-row">
             <div class="uf"><label>Autor *</label><input type="text" id="upAutor" placeholder="Tu nombre"/></div>
             <div class="uf"><label>Tipo *</label>
@@ -1652,7 +1652,8 @@ async function fetchDocs() {
           desc: d.descripcion || 'Subido por ' + (d.autor || 'Anónimo'),
           autor: d.autor || 'Anónimo',
           file: d.archivo_path,
-          url: d.url_archivo
+          url: d.url_archivo,
+          previewUrl: d.preview_url || d.url_archivo
         };
       });
     } catch(err) {
@@ -1713,7 +1714,7 @@ async function renderDocs(refetch = true) {
 
   grid.innerHTML = docs.map((d,i) => `
     <div class="doc-card">
-      <div class="doc-thumb ${d.type}" onclick="previewDoc('${d.id}','${escHtml(d.titulo)}','${d.type}','${d.url}')">
+      <div class="doc-thumb ${d.type}" onclick="previewDoc('${d.id}','${escHtml(d.titulo)}','${d.type}','${d.url}','${d.previewUrl || ''}')">
         <span>${d.type==='excel' ? '<img class="office-logo" src="assets/office-logos/excel-removebg-preview.png" alt="Microsoft Excel">' : d.type==='powerpoint' ? '<img class="office-logo" src="assets/office-logos/powerpoint-removebg-preview.png" alt="Microsoft PowerPoint">' : d.type==='word' ? '<img class="office-logo" src="assets/office-logos/word_2-removebg-preview.png" alt="Microsoft Word">' : d.emoji}</span>
         <div class="doc-thumb-overlay">👁️ Vista previa</div>
         <span class="doc-num">${d.type==='word'?'W':d.type==='excel'?'E':'P'}${String(i+1).padStart(2,'0')}</span>
@@ -1775,11 +1776,13 @@ async function deleteDoc(id, filePath) {
 }
 
 /* ── VISTA PREVIA ── */
-function previewDoc(id, titulo, tipo, url) {
+function previewDoc(id, titulo, tipo, url, previewUrl) {
   document.getElementById('modalTitle').textContent = titulo;
   const body = document.getElementById('modalBody');
   if (!url) { body.innerHTML='<div class="modal-info"><div class="big">📄</div><p>Sin vista previa disponible.</p></div>'; }
-  else {
+  else if (previewUrl && previewUrl.includes('/preview')) {
+    body.innerHTML = `<iframe src="${previewUrl}" style="width:100%;height:70vh;border:0" title="Vista previa de ${titulo}"></iframe>`;
+  } else {
     body.innerHTML = `
       <div class="modal-info">
         <div class="big">${tipo==='excel' ? '<img class="modal-office-logo" src="assets/office-logos/excel-removebg-preview.png" alt="Microsoft Excel">' : tipo==='powerpoint' ? '<img class="modal-office-logo" src="assets/office-logos/powerpoint-removebg-preview.png" alt="Microsoft PowerPoint">' : '<img class="modal-office-logo" src="assets/office-logos/word_2-removebg-preview.png" alt="Microsoft Word">'}</div>
@@ -1804,14 +1807,26 @@ dropZone.addEventListener('drop', e=>{
   if(e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
 });
 function handleFile(input){if(input.files[0])setFile(input.files[0])}
+const GOOGLE_DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbybvpkq36mKFEwPXXh5m07Nmvdic7eh0ANJXvoGA-J9dg75kAOUzBMdTSBU_T83ZpW7/exec';
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(',')[1]);
+    reader.onerror = () => reject(reader.error || new Error('No se pudo leer el archivo'));
+    reader.readAsDataURL(file);
+  });
+}
+
 function setFile(f){
-  if(!f.name.match(/\.(docx|xlsx)$/i)){alert('Solo se aceptan .docx o .xlsx');return}
+  if(!f.name.match(/\.(docx|xlsx|xlsm|pptx|pptm)$/i)){alert('Solo se aceptan archivos de Word, Excel o PowerPoint');return}
   if(f.size>20*1024*1024){alert('El archivo supera los 20MB');return}
   selectedFile=f;
   const n=document.getElementById('dropName');
   n.textContent='📎 '+f.name; n.style.display='inline-block';
-  if(f.name.endsWith('.docx')) document.getElementById('upTipo').value='word';
-  if(f.name.endsWith('.xlsx')) document.getElementById('upTipo').value='excel';
+  if(/\.docx$/i.test(f.name)) document.getElementById('upTipo').value='word';
+  if(/\.(xlsx|xlsm)$/i.test(f.name)) document.getElementById('upTipo').value='excel';
+  if(/\.(pptx|pptm)$/i.test(f.name)) document.getElementById('upTipo').value='powerpoint';
 }
 
 async function uploadDoc(){
@@ -1866,41 +1881,41 @@ async function uploadDoc(){
     return;
   }
   
-  btn.textContent = 'Subiendo... ⏳';
+  btn.textContent = 'Subiendo a Google Drive... ⏳';
   btn.disabled = true;
 
   try {
-    const reader = new FileReader();
-    reader.onload = async e => {
-      try {
-        const fileDataUrl = e.target.result;
-        
-        // Guardar directamente en Firestore (Base de Datos) sin usar Storage (100% gratis, sin tarjeta)
-        await window.db.collection("documentos").add({
-          titulo,
-          descripcion: desc,
-          tipo,
-          autor,
-          archivo_path: selectedFile.name,
-          url_archivo: fileDataUrl, // Guardar el archivo embebido en Base64
-          fecha_subida: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        await renderDocs(true);
-        updateHeroStats();
-        
-        document.getElementById('uploadForm').style.display='none';
-        document.getElementById('uploadOk').style.display='block';
-      } catch(err) {
-        alert('Error al subir a Firestore: ' + err.message);
-      } finally {
-        btn.textContent = oTxt;
-        btn.disabled = false;
-      }
-    };
-    reader.readAsDataURL(selectedFile);
+    const base64 = await fileToBase64(selectedFile);
+    const response = await fetch(GOOGLE_DRIVE_UPLOAD_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify({
+        base64,
+        fileName: selectedFile.name,
+        mimeType: selectedFile.type || 'application/octet-stream'
+      })
+    });
+    const result = await response.json();
+    if (!result.ok) throw new Error(result.error || 'Google Drive rechazo el archivo');
+
+    await window.db.collection("documentos").add({
+      titulo,
+      descripcion: desc,
+      tipo,
+      autor,
+      archivo_path: selectedFile.name,
+      url_archivo: result.downloadUrl,
+      preview_url: result.previewUrl,
+      drive_file_id: result.id,
+      fecha_subida: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    await renderDocs(true);
+    updateHeroStats();
+    document.getElementById('uploadForm').style.display='none';
+    document.getElementById('uploadOk').style.display='block';
   } catch (err) {
-    alert('Error al procesar archivo: ' + err.message);
+    alert('Error al subir a Google Drive: ' + err.message);
     btn.textContent = oTxt;
     btn.disabled = false;
   }
