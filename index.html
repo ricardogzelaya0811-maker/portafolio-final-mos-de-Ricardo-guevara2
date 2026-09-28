@@ -13,7 +13,7 @@
   <meta name="author" content="Ricardo Zelaya"/>
 
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="mosbot-academy.css"/>
+  <link rel="stylesheet" href="assistant.css"/>
   <link rel="stylesheet" href="academic-portal.css"/>
 
   <style>
@@ -764,7 +764,7 @@
       <button class="nav-link" onclick="showPage('postgresql',this)">🐘 PostgreSQL</button>
       <button class="nav-link" onclick="showPage('windows-office',this)">🪟 Windows + Office</button>
       <button class="nav-link" onclick="showPage('academico',this)">🎓 Sistema académico</button>
-      <button class="nav-link" onclick="showPage('mosbot',this)">🎓 MOSBOT Academy</button>
+      <button class="nav-link" onclick="showPage('mosbot',this)">🤖 MOSBOT Access</button>
       <button class="nav-link" onclick="showPage('podcast',this)">🎙️ CTR+Z Podcast</button>
       <button class="nav-logout" onclick="doLogout()">Salir 🚪</button>
     </div>
@@ -1014,50 +1014,47 @@
     <footer><p>© 2026 <strong>Ricardo Zelaya</strong> · Portafolio MOS con IA · El Salvador</p></footer>
   </div>
 
-  <!-- ══ MOSBOT ACADEMY ══ -->
+  <!-- ══ MOSBOT ACCESS ══ -->
   <div id="page-mosbot" class="page">
-    <div id="mosbotWelcome" class="mosbot-welcome">
-      <div class="mosbot-welcome-card">
-        <div class="mosbot-logo">🤖</div>
-        <h1>MOSBOT Academy Ultimate</h1>
-        <p>¡Bienvenido al simulador de certificación MOS! Completa 20 misiones de Word sobre diseño y manipulación de tablas, gana XP y desbloquea tu certificado digital.</p>
-        <div class="mosbot-onboarding">
-          <div><strong>1</strong><span>Responde la misión activa.</span></div>
-          <div><strong>2</strong><span>Lee la explicación y el tip.</span></div>
-          <div><strong>3</strong><span>Sube tu XP y conserva la racha.</span></div>
+    <section class="assistant-hero">
+      <div class="assistant-hero-inner">
+        <div>
+          <p class="assistant-eyebrow">Asistente de conocimiento · sisMos2.accdb</p>
+          <h1>MOSBOT <em>Access</em></h1>
+          <p>Pregunta sobre las tablas, consultas, relaciones y formularios del sistema académico.</p>
         </div>
-        <div class="uf">
-          <label>👤 Tu nombre de estudiante</label>
-          <input type="text" id="mosbotNameInput" placeholder="Escribe tu nombre..." onkeydown="if(event.key==='Enter')mosbotStartGame()"/>
-        </div>
-        <button class="mosbot-start-btn" onclick="mosbotStartGame()">🚀 Comenzar Aventura</button>
+        <div class="assistant-db-stamp" aria-hidden="true">ACCDB</div>
       </div>
-    </div>
-    <div id="mosbotDashboard" class="mosbot-dashboard">
-      <div class="mosbot-header">
-        <h1>🤖 MOSBOT Academy <em>Ultimate</em></h1>
-        <div class="mosbot-player-name" id="mosbotPlayerLabel"></div>
-        <div class="mosbot-xp-section">
-          <div class="mosbot-rank-badge" id="mosbotRankBadge"></div>
-          <div class="mosbot-xp-display" id="mosbotXPValue"></div>
-          <div class="mosbot-streak-display" id="mosbotStreakIndicator"></div>
+    </section>
+    <main class="assistant-main">
+      <p class="assistant-scope"><span aria-hidden="true">i</span> Respondo sobre la estructura y el funcionamiento del sistema. No consulto ni muestro registros personales de alumnos.</p>
+      <section class="assistant-chat" aria-label="Chat MOSBOT Access">
+        <header class="assistant-chat-header">
+          <div class="assistant-avatar" aria-hidden="true">M</div>
+          <div><h2>Consulta MOSBOT</h2><p>Base de conocimiento de sisMos2.accdb</p></div>
+          <button class="assistant-clear" id="assistantClear" type="button" title="Limpiar conversación" aria-label="Limpiar conversación">↻</button>
+        </header>
+        <div class="assistant-suggestions" aria-label="Preguntas sugeridas">
+          <button type="button" data-question="¿Qué tablas tiene el sistema?">Tablas del sistema</button>
+          <button type="button" data-question="¿Qué consulta muestra el historial de notas?">Historial de notas</button>
+          <button type="button" data-question="¿Cómo se registran las notas?">Registro de notas</button>
+          <button type="button" data-question="¿Cómo se relacionan los pagos con la matrícula?">Pagos y matrícula</button>
         </div>
-        <div class="mosbot-progress-wrap">
-          <div class="mosbot-progress-label"><span id="mosbotProgressLeft"></span><span id="mosbotProgressRight"></span></div>
-          <div class="mosbot-progress-bar"><div class="mosbot-progress-fill" id="mosbotProgressFill"></div></div>
+        <div class="assistant-messages" id="assistantMessages" aria-live="polite" aria-relevant="additions">
+          <article class="assistant-message assistant-message-bot">
+            <span class="assistant-message-label">MOSBOT</span>
+            <p>¡Hola! Soy MOSBOT, tu asistente sobre la base de datos académica sisMos2. Puedes preguntarme por tablas, campos, consultas, formularios y relaciones.</p>
+          </article>
         </div>
-      </div>
-      <div class="mosbot-tabs">
-        <button class="mosbot-tab active" onclick="mosbotSwitchTab('missions',this)">🎯 Misiones</button>
-        <button class="mosbot-tab" onclick="mosbotSwitchTab('badges',this)">🏅 Insignias</button>
-        <button class="mosbot-tab" onclick="mosbotSwitchTab('stats',this)">📊 Estadísticas</button>
-        <button class="mosbot-tab" onclick="mosbotSwitchTab('ranking',this)">🏆 Ranking</button>
-        <button class="mosbot-tab" onclick="mosbotSwitchTab('cert',this)">📜 Certificado</button>
-        <button class="mosbot-tab" onclick="mosbotLogout()" style="border-color:rgba(239,68,68,.3);color:#f87171">🚪 Salir</button>
-      </div>
-      <div class="mosbot-content" id="mosbotContentArea"></div>
-    </div>
-    <footer><p>© 2026 <strong>Ricardo Zelaya</strong> · MOSBOT Academy Ultimate · Portafolio MOS con IA</p></footer>
+        <form class="assistant-compose" id="assistantForm">
+          <label class="assistant-visually-hidden" for="assistantQuestion">Escribe tu pregunta sobre sisMos2</label>
+          <input id="assistantQuestion" name="pregunta" type="text" maxlength="400" autocomplete="off" placeholder="Pregunta sobre la base de datos..." required>
+          <button type="submit">Enviar <span aria-hidden="true">↑</span></button>
+        </form>
+        <p class="assistant-footnote">Las respuestas se generan localmente a partir del esquema de sisMos2.accdb.</p>
+      </section>
+    </main>
+    <footer><p>© 2026 <strong>Ricardo Zelaya</strong> · MOSBOT Access · Sistema académico</p></footer>
   </div>
 
   <!-- ══ CTR+Z PODCAST ══ -->
@@ -2093,11 +2090,11 @@ function initReveal(){
   document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 }
 
-/* ── MOSBOT: Auto-init when tab is shown ── */
+/* ── ACADEMIC PORTAL: Auto-init when tab is shown ── */
 const _origShowPage = showPage;
 showPage = function(id, btn) {
   _origShowPage(id, btn);
-  if (id === 'mosbot') mosbotInit();
+  if (id === 'mosbot') initAssistantChat();
   if (id === 'academico') initAcademicModule();
 };
 </script>
@@ -2137,8 +2134,7 @@ showPage = function(id, btn) {
   }
 </script>
 
-<script src="mosbot-data.js"></script>
-<script src="mosbot-logic.js"></script>
+<script src="asistente.js"></script>
 <script src="academic-portal.js"></script>
 </body>
 </html>

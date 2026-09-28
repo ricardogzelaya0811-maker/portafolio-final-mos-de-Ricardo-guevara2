@@ -1,0 +1,218 @@
+.assistant-hero {
+  padding: 3.25rem 2rem;
+  background: linear-gradient(112deg, #073b37 0%, #0b292e 56%, #172d33 100%);
+  border-bottom: 1px solid var(--border);
+}
+.assistant-hero-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+.assistant-eyebrow {
+  color: #9ee8c1;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: .75rem;
+}
+.assistant-hero h1 {
+  color: #fff;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.25rem, 4vw, 3.4rem);
+  line-height: 1.08;
+  margin-bottom: .75rem;
+}
+.assistant-hero h1 em { color: #83e1b3; font-style: normal; }
+.assistant-hero-inner > div:first-child > p:last-child { color: rgba(255,255,255,.72); max-width: 620px; }
+.assistant-db-stamp {
+  display: grid;
+  place-items: center;
+  width: 106px;
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+  border: 1px solid rgba(131,225,179,.48);
+  border-radius: 24px 6px 24px 6px;
+  background: rgba(131,225,179,.08);
+  color: #c5f5db;
+  font: 700 .8rem 'DM Sans', sans-serif;
+  letter-spacing: .08em;
+  transform: rotate(3deg);
+}
+.assistant-main { max-width: 920px; margin: 0 auto; padding: 1.5rem 2rem 3.5rem; }
+.assistant-scope {
+  display: flex;
+  align-items: flex-start;
+  gap: .65rem;
+  color: var(--muted);
+  font-size: .78rem;
+  line-height: 1.55;
+  margin-bottom: 1rem;
+}
+.assistant-scope span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 18px;
+  height: 18px;
+  border: 1px solid #4ade80;
+  border-radius: 50%;
+  color: #86efac;
+  font-size: .68rem;
+  font-weight: 700;
+}
+.assistant-chat {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(18,18,30,.96);
+  box-shadow: 0 18px 55px rgba(0,0,0,.27);
+}
+.assistant-chat-header {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,.025);
+}
+.assistant-avatar {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 12px 4px 12px 4px;
+  background: #126b54;
+  color: #d1fae5;
+  font: 700 1.25rem 'Playfair Display', serif;
+}
+.assistant-chat-header h2 { color: var(--text); font-size: .98rem; font-weight: 700; }
+.assistant-chat-header p { color: var(--muted); font-size: .72rem; margin-top: .12rem; }
+.assistant-clear {
+  width: 38px;
+  height: 38px;
+  margin-left: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+.assistant-clear:hover { border-color: #6ee7b7; color: #a7f3d0; }
+.assistant-suggestions {
+  display: flex;
+  gap: .5rem;
+  overflow-x: auto;
+  padding: .85rem 1rem;
+  border-bottom: 1px solid var(--border);
+  scrollbar-width: thin;
+}
+.assistant-suggestions button {
+  flex: 0 0 auto;
+  border: 1px solid rgba(110,231,183,.25);
+  border-radius: 100px;
+  background: rgba(16,185,129,.07);
+  color: #b6ead0;
+  padding: .42rem .72rem;
+  font: 500 .7rem 'DM Sans', sans-serif;
+  cursor: pointer;
+}
+.assistant-suggestions button:hover { border-color: #6ee7b7; background: rgba(16,185,129,.15); }
+.assistant-messages {
+  display: flex;
+  flex-direction: column;
+  gap: .9rem;
+  height: min(48vh, 420px);
+  min-height: 290px;
+  overflow-y: auto;
+  padding: 1.15rem;
+  scroll-behavior: smooth;
+}
+.assistant-message {
+  max-width: min(84%, 650px);
+  padding: .75rem .9rem;
+  border: 1px solid var(--border);
+  border-radius: 3px 12px 12px 12px;
+  animation: assistant-message-in .18s ease-out both;
+}
+.assistant-message-bot { align-self: flex-start; background: rgba(255,255,255,.045); }
+.assistant-message-user {
+  align-self: flex-end;
+  border-color: rgba(110,231,183,.22);
+  border-radius: 12px 3px 12px 12px;
+  background: rgba(16,185,129,.1);
+}
+.assistant-message-label {
+  display: block;
+  color: #86efac;
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  margin-bottom: .28rem;
+}
+.assistant-message-user .assistant-message-label { color: #67e8f9; text-align: right; }
+.assistant-message p { color: var(--text); font-size: .82rem; line-height: 1.65; overflow-wrap: anywhere; }
+.assistant-compose {
+  display: flex;
+  gap: .6rem;
+  padding: .85rem 1rem;
+  border-top: 1px solid var(--border);
+  background: rgba(0,0,0,.12);
+}
+.assistant-compose input {
+  min-width: 0;
+  min-height: 46px;
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  outline: none;
+  background: rgba(255,255,255,.05);
+  color: var(--text);
+  padding: .7rem .85rem;
+  font: .84rem 'DM Sans', sans-serif;
+}
+.assistant-compose input:focus { border-color: #34d399; }
+.assistant-compose input::placeholder { color: #8b93a0; }
+.assistant-compose button {
+  min-width: 100px;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  border: 0;
+  border-radius: 6px;
+  background: #08785a;
+  color: white;
+  font: 600 .8rem 'DM Sans', sans-serif;
+  cursor: pointer;
+}
+.assistant-compose button:hover { background: #059669; }
+.assistant-compose button span { font-size: 1.1rem; }
+.assistant-footnote { padding: 0 1rem 1rem; color: var(--muted); font-size: .68rem; }
+.assistant-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+@keyframes assistant-message-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 640px) {
+  .assistant-hero { padding: 2.5rem 1.25rem; }
+  .assistant-db-stamp { width: 64px; border-radius: 15px 4px 15px 4px; font-size: .62rem; }
+  .assistant-main { padding: 1rem 1rem 2.5rem; }
+  .assistant-suggestions { margin-right: 0; }
+  .assistant-messages { height: 46vh; min-height: 250px; padding: .9rem; }
+  .assistant-message { max-width: 94%; }
+  .assistant-compose { padding: .7rem; }
+  .assistant-compose button { min-width: 78px; }
+}
