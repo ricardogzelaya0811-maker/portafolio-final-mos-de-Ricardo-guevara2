@@ -17,6 +17,7 @@ $env:ACCESS_DB_PATH = 'C:\ruta\sistema-escolar.accdb'
 $env:ACCESS_PROVIDER = 'Microsoft.ACE.OLEDB.16.0'
 $env:FRONTEND_ORIGIN = 'http://localhost:5500'
 $env:MAX_GRADE = '100'
+$env:ABSENCE_STATES = 'FALTA,AUSENTE,INASISTENCIA,INASISTENTE,NO ASISTIO'
 dotnet run
 ```
 
@@ -27,21 +28,24 @@ El `FRONTEND_ORIGIN` debe coincidir con el origen del servidor estático (por ej
 - `GET /api/health`: comprueba la conexión OLE DB.
 - `GET /api/catalogos`: devuelve grados, materias y períodos.
 - `GET /api/alumnos`: devuelve `IDAlumno`, `Nombres` y `Apellidos`.
+- `GET /api/alumnos/estadisticas?nombre=Ana%20Lopez`: devuelve promedio y faltas registradas para una coincidencia única. Ante nombres ambiguos devuelve las coincidencias para que se pueda precisar el alumno.
 - `GET /api/calificaciones?alumno=&gradoId=&materiaId=&periodoId=`: consulta `qryHistorialNotas`.
 - `POST /api/notas`: inserta en `tblCalificaciones`.
 - `PUT /api/notas/{id}`: actualiza una fila por `IDCalificacion`.
 
-## Contrato asumido para Access
+## Contrato Access verificado
 
-La información compartida confirma algunos campos, pero todavía no confirma todos los nombres físicos ni el tipo de nota. Este primer mapeo espera:
+El esquema de `sisMos2.accdb` confirma:
 
 - `tblGrados`: `IDGrado`, `NombreGrado`.
 - `tblMaterias`: `IDMateria`, `NombreMateria`.
 - `tblPeriodos`: `IDPeriodo`, `NombrePeriodo`.
 - `tblAlumnos`: `IDAlumno`, `Nombres`, `Apellidos`.
-- `tblCalificaciones`: `IDCalificacion`, `IDAlumno`, `IDMateria`, `IDPeriodo`, `Nota`, `FechaRegistro`.
-- `qryHistorialNotas` expone las columnas `IDCalificacion`, `IDAlumno`, `Nombres`, `Apellidos`, `IDGrado`, `NombreGrado`, `IDMateria`, `NombreMateria`, `IDPeriodo`, `NombrePeriodo`, `Nota`, `FechaRegistro`.
+- `tblCalificaciones`: `IDCalificacion`, `IDAlumno`, `IDMateria`, `Periodo`, `Nota`, `FechaRegistro`.
+- `tblAsistencia`: `IDAsistencia`, `IDMatricula`, `Estado`, `Fecha`, `Observacion`.
+- `qryHistorialNotas` expone `IDAlumno`, `Nombres`, `Apellidos`, `NombreGrado`, `NombreMateria`, `Periodo`, `Nota` y `FechaRegistro`.
+- `tblCalificaciones.Periodo` se relaciona con `tblPeriodos.IDPeriodo`; `tblAsistencia.IDMatricula` se conecta con el alumno mediante `tblMatriculas`.
 
-OLE DB usa parámetros posicionales (`?`). El filtro de nombre usa comodines Access `*`. Si la consulta guardada usa alias diferentes, actualiza el `SELECT` del endpoint o ajusta la consulta guardada para exponer esos alias. La escala de calificación se configura con `MAX_GRADE` (por defecto 100).
+El promedio es la media aritmética de todas las notas no nulas del alumno. Las faltas se cuentan desde `tblAsistencia`, siguiendo la relación de matrícula. `ABSENCE_STATES` acepta etiquetas separadas por coma; por defecto reconoce `FALTA`, `AUSENTE`, `INASISTENCIA`, `INASISTENTE` y `NO ASISTIO`. Si la base usa otra etiqueta, agrega su valor exacto a esa variable. Cuando hay asistencias pero ninguna etiqueta reconocible, la API devuelve faltas sin clasificar en vez de reportar cero. OLE DB usa parámetros posicionales (`?`). La escala se configura con `MAX_GRADE` (por defecto 100).
 
 El POST siempre crea un registro; el PUT actualiza el `IDCalificacion` seleccionado. Esta API no intenta deduplicar notas porque la regla de unicidad por alumno/materia/período no está especificada.

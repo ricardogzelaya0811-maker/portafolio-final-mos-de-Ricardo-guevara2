@@ -12,6 +12,66 @@ const conocimiento = [
     respuesta: "Una consulta en Access permite seleccionar, filtrar, modificar y analizar datos provenientes de una o varias tablas de forma dinámica."
   },
   {
+    categoria: "Access",
+    pregunta: "¿Qué es una base de datos?",
+    keywords: ["base de datos", "basedatos", "informacion", "organizar", "almacenar", "access"],
+    respuesta: "Una base de datos es una colección organizada de información relacionada. En Microsoft Access, esa información puede guardarse en tablas y consultarse o administrarse mediante consultas, formularios e informes. sisMos2.accdb es la base que organiza la información del sistema académico."
+  },
+  {
+    categoria: "Access",
+    pregunta: "¿Qué es un campo en Access?",
+    keywords: ["campo", "columna", "dato", "tipo de dato", "access", "tblalumnos"],
+    respuesta: "Un campo es una columna de una tabla y representa un tipo de dato para cada registro, por ejemplo Nombres o FechaNacimiento en tblAlumnos. Cada campo tiene un nombre y un tipo de dato, como texto, número o fecha."
+  },
+  {
+    categoria: "Access",
+    pregunta: "¿Qué es un registro en Access?",
+    keywords: ["registro", "fila", "fila de datos", "alumno", "tabla"],
+    respuesta: "Un registro es una fila de una tabla que reúne los valores de sus campos para una entidad. Por ejemplo, una fila de tblAlumnos reúne el IDAlumno, nombres, apellidos, grado y fecha de nacimiento de un alumno."
+  },
+  {
+    categoria: "Access",
+    pregunta: "¿Qué es Microsoft Access?",
+    keywords: ["microsoft access", "access", "programa", "gestionar", "base de datos"],
+    respuesta: "Microsoft Access es un sistema de gestión de bases de datos que permite crear tablas, relaciones, consultas, formularios e informes. sisMos2.accdb está creada para administrar información académica con esos objetos."
+  },
+  {
+    categoria: "Access",
+    pregunta: "¿Qué es un formulario en Access?",
+    keywords: ["formulario", "form", "capturar", "interfaz", "datos", "access"],
+    respuesta: "Un formulario es una interfaz para introducir, editar o consultar datos de una tabla o consulta. En sisMos2, frm_RegistroAlumnos gestiona alumnos y frm_IngresoNotas permite trabajar con calificaciones."
+  },
+  {
+    categoria: "Access",
+    pregunta: "¿Qué es una relación entre tablas?",
+    keywords: ["relacion", "tablas", "conectar", "clave foranea", "id alumno", "access"],
+    respuesta: "Una relación conecta tablas mediante campos relacionados, normalmente una clave primaria y una clave foránea. En sisMos2, IDAlumno conecta tblAlumnos con tblCalificaciones, y también aparece en tblMatriculas."
+  },
+  {
+    categoria: "Access",
+    pregunta: "¿Qué es una clave foránea?",
+    keywords: ["clave foranea", "clave externa", "foreign key", "relacion", "idmateria", "idgrado"],
+    respuesta: "Una clave foránea es un campo que apunta a la clave primaria de otra tabla y permite relacionar registros. En sisMos2, tblCalificaciones.IDAlumno se relaciona con tblAlumnos.IDAlumno; tblCalificaciones.Periodo corresponde a tblPeriodos.IDPeriodo."
+  },
+  {
+    categoria: "Access",
+    pregunta: "¿Qué tipos de datos se usan en Access?",
+    keywords: ["tipo de dato", "tipos", "texto", "numero", "fecha", "access"],
+    respuesta: "Access ofrece tipos como texto corto, número, fecha y hora, moneda, sí/no y autonumeración. En sisMos2, campos como Nombres son texto; Nota es numérico; FechaRegistro es fecha y hora; y los identificadores ID son numéricos."
+  },
+  {
+    categoria: "Calificaciones",
+    pregunta: "¿Qué es el promedio de calificaciones?",
+    keywords: ["promedio", "media", "calificaciones", "notas", "calcular"],
+    respuesta: "El promedio simple es la suma de las calificaciones dividida entre la cantidad de calificaciones. Para un alumno, MOSBOT puede calcularlo con sus notas de tblCalificaciones cuando la API local está activa."
+  },
+  {
+    categoria: "Asistencia",
+    pregunta: "¿Qué es una falta de asistencia?",
+    keywords: ["falta", "asistencia", "ausencia", "inasistencia", "estado"],
+    respuesta: "Una falta es un registro de asistencia cuyo estado indica que el alumno estuvo ausente. En sisMos2, la asistencia se guarda en tblAsistencia vinculada a la matrícula; las etiquetas exactas de Estado definen qué registros se cuentan como falta."
+  },
+  {
     categoria: "Tablas",
     pregunta: "¿Cuáles son las tablas del sistema?",
     keywords: ["tablas", "listado", "sistema", "tblalumnos", "tblcalificaciones", "tblgrados"],
@@ -151,9 +211,9 @@ const conocimiento = [
   },
   {
     categoria: "Alcance",
-    pregunta: "¿MOSBOT puede mostrar datos personales o notas de un alumno?",
-    keywords: ["datos personales", "registro individual", "nombre completo alumno", "nota de un alumno", "buscar alumno", "mostrar alumno"],
-    respuesta: "No. Este chat responde preguntas sobre la estructura y el funcionamiento de sisMos2; no se conecta a la base ni consulta nombres, notas u otros registros personales."
+    pregunta: "¿Qué información puede consultar MOSBOT de un alumno?",
+    keywords: ["alcance", "privacidad", "datos alumno", "notas alumno", "faltas alumno", "promedio alumno"],
+    respuesta: "Con la API local activa, MOSBOT puede buscar un alumno y consultar su promedio simple de calificaciones y las faltas registradas. No muestra otros datos personales."
   },
   {
     categoria: "MOSBOT",
@@ -162,6 +222,8 @@ const conocimiento = [
     respuesta: "¡Hola! Soy MOSBOT, tu asistente de conocimiento para resolver preguntas sobre tablas, consultas, formularios y relaciones de sisMos2.accdb."
   }
 ];
+
+const ASSISTANT_API_BASE = (window.ACADEMIC_API_BASE || "http://localhost:5080/api").replace(/\/$/, "");
 
 function normalizarTexto(texto) {
   return texto
@@ -206,13 +268,6 @@ function calcularPuntuacion(preguntaUsuario, itemBase) {
 
 function procesarPregunta(pregunta) {
   if (!pregunta || pregunta.trim() === "") return null;
-  const preguntaNormalizada = normalizarTexto(pregunta);
-  const solicitaRegistro = /\b(mostrar|muestrame|ver|consultar|buscar|dime|dame|ensena|obtener)\b/.test(preguntaNormalizada);
-  const mencionaDatosPersonales = /\b(alumno|estudiante|persona|nombre|dato|registro|nota|notas|calificacion|calificaciones)\b/.test(preguntaNormalizada);
-  if (solicitaRegistro && mencionaDatosPersonales) {
-    return "Este MOSBOT no se conecta a los registros de sisMos2 ni puede mostrar nombres o calificaciones individuales. Sí puedo explicarte qué tablas y consultas utiliza el sistema.";
-  }
-
   let mejorRespuesta = null;
   let mayorPuntuacion = 0;
 
@@ -242,11 +297,77 @@ function agregarMensaje(texto, tipo) {
   articulo.append(etiqueta, parrafo);
   mensajes.appendChild(articulo);
   mensajes.scrollTop = mensajes.scrollHeight;
+  return articulo;
 }
 
-function responderPregunta(pregunta) {
+function detectarConsultaAlumno(pregunta) {
+  const texto = normalizarTexto(pregunta);
+  if (/^(que es|que significa|define|explica|concepto)\b/.test(texto)) return null;
+  const consultaPromedio = /\b(promedio|media)\b/.test(texto);
+  const consultaFaltas = /\b(faltas?|ausencias?|inasistencias?)\b/.test(texto);
+  if (!consultaPromedio && !consultaFaltas) return null;
+
+  const nombreMatch = consultaPromedio
+    ? texto.match(/\b(?:promedio|media)\s+(?:de|del|para|tiene|a)\s+(.+)$/)
+    : texto.match(/\b(?:faltas?|ausencias?|inasistencias?)\b.*?\b(?:tiene|de|del|para|a)\s+(.+)$/);
+  const nombre = (nombreMatch?.[1] || "")
+    .replace(/\b(?:el|la|los|las|un|una|del|de|alumno|alumna|estudiante)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return { consultaPromedio, consultaFaltas, nombre };
+}
+
+async function responderConsultaAlumno(consulta, mensaje) {
+  if (!consulta.nombre) {
+    mensaje.querySelector('p').textContent = "Dime el nombre del alumno. Por ejemplo: ¿Cuál es el promedio de Ana López?";
+    return;
+  }
+
+  try {
+    const response = await fetch(`${ASSISTANT_API_BASE}/alumnos/estadisticas?nombre=${encodeURIComponent(consulta.nombre)}`);
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 409 && data.coincidencias?.length) {
+      const options = data.coincidencias.map(student => `${student.nombreCompleto} (ID ${student.idAlumno})`).join('; ');
+      mensaje.querySelector('p').textContent = `Encontré varios alumnos con ese nombre. Indica el nombre completo o el ID: ${options}.`;
+      return;
+    }
+    if (response.status === 404) {
+      mensaje.querySelector('p').textContent = `No encontré un alumno llamado "${consulta.nombre}". Revisa el nombre e inténtalo otra vez.`;
+      return;
+    }
+    if (!response.ok) throw new Error(data.error || `Error HTTP ${response.status}`);
+
+    const answer = [];
+    if (consulta.consultaFaltas) {
+      if (data.faltas === null || data.estadoAsistencia === 'sin-clasificar') {
+        answer.push(`Encontré ${data.totalAsistencias} registros de asistencia de ${data.alumno}, pero no pude identificar cuáles estados significan falta. Hay que configurar esos estados en el API.`);
+      } else {
+        answer.push(`${data.alumno} tiene ${data.faltas} ${data.faltas === 1 ? 'falta' : 'faltas'} registradas.`);
+      }
+    }
+    if (consulta.consultaPromedio) {
+      if (data.promedio === null) {
+        answer.push(`${data.alumno} todavía no tiene calificaciones registradas.`);
+      } else {
+        const average = new Intl.NumberFormat('es-SV', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(data.promedio);
+        answer.push(`El promedio simple de ${data.alumno} es ${average}, calculado sobre ${data.calificaciones} ${data.calificaciones === 1 ? 'calificación' : 'calificaciones'}.`);
+      }
+    }
+    mensaje.querySelector('p').textContent = answer.join(' ');
+  } catch (error) {
+    mensaje.querySelector('p').textContent = `No pude consultar los datos reales. Verifica que la API local esté iniciada y conectada a sisMos2.accdb. (${error.message})`;
+  }
+}
+
+async function responderPregunta(pregunta) {
   agregarMensaje(pregunta, 'user');
-  agregarMensaje(procesarPregunta(pregunta), 'bot');
+  const consulta = detectarConsultaAlumno(pregunta);
+  if (!consulta) {
+    agregarMensaje(procesarPregunta(pregunta), 'bot');
+    return;
+  }
+  const mensaje = agregarMensaje('Consultando los registros académicos...', 'bot');
+  await responderConsultaAlumno(consulta, mensaje);
 }
 
 function initAssistantChat() {

@@ -1,6 +1,7 @@
 using System.Data;
 using System.Data.OleDb;
 using System.Globalization;
+using AcademicApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var frontendOrigin = builder.Configuration["FRONTEND_ORIGIN"] ?? "http://localhost:5500";
@@ -12,6 +13,7 @@ var maximumGrade = decimal.TryParse(builder.Configuration["MAX_GRADE"], CultureI
 
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
     policy.WithOrigins(frontendOrigin).AllowAnyHeader().AllowAnyMethod()));
+builder.Services.AddScoped<IAcademicAnalyticsService, AcademicAnalyticsService>();
 
 var app = builder.Build();
 app.UseCors();
@@ -94,40 +96,67 @@ app.MapGet("/api/alumnos", async () =>
     return Results.Ok(await ReadRows(command));
 });
 
+app.MapGet("/api/alumnos/estadisticas", async Task<Results<
+    Ok<StudentAcademicStatsResponse>,
+    BadRequest<ApiErrorResponse>,
+    NotFound<ApiErrorResponse>,
+    Conflict<StudentCandidatesResponse>>> (
+        string? nombre,
+        IAcademicAnalyticsService analytics,
+        CancellationToken cancellationToken) =>
+{
+    if (string.IsNullOrWhiteSpace(nombre) || nombre.Trim().Length < 3)
+        return TypedResults.BadRequest(new ApiErrorResponse("Escribe al menos 3 caracteres del nombre del alumno."));
+
+    var result = await analytics.GetStudentStatsAsync(nombre.Trim(), cancellationToken);
+    if (result.Kind == StudentStatsLookupKind.NotFound)
+        return TypedResults.NotFound(new ApiErrorResponse("No encontré un alumno con ese nombre."));
+    if (result.Kind == StudentStatsLookupKind.Ambiguous)
+        return TypedResults.Conflict(new StudentCandidatesResponse(result.Candidates));
+
+    return TypedResults.Ok(result.Statistics!);
+})
+    .WithName("GetStudentAcademicStats")
+    .WithSummary("Consultar promedio y faltas registradas de un alumno")
+    .WithDescription("Busca un alumno por nombre y devuelve el promedio de calificaciones y el conteo de estados de asistencia clasificados como falta.");
+
 app.MapGet("/api/calificaciones", async (HttpRequest request) =>
 {
     await using var connection = await OpenConnection();
-    var sql = "SELECT IDCalificacion, IDAlumno, Nombres, Apellidos, IDGrado, NombreGrado, " +
-              "IDMateria, NombreMateria, IDPeriodo, NombrePeriodo, Nota, FechaRegistro " +
-              "FROM qryHistorialNotas";
+    var sql = "SELECT C.IDCalificacion, A.IDAlumno, A.Nombres, A.Apellidos, G.IDGrado, G.NombreGrado, " +
+              "M.IDMateria, M.NombreMateria, P.IDPeriodo, P.NombrePeriodo, C.Nota, C.FechaRegistro " +
+              "FROM (((tblCalificaciones AS C INNER JOIN tblAlumnos AS A ON C.IDAlumno = A.IDAlumno) " +
+              "INNER JOIN tblGrados AS G ON A.IDGrado = G.IDGrado) " +
+              "INNER JOIN tblMaterias AS M ON C.IDMateria = M.IDMateria) " +
+              "INNER JOIN tblPeriodos AS P ON C.Periodo = P.IDPeriodo";
     var filters = new List<string>();
     using var command = new OleDbCommand { Connection = connection };
 
     if (int.TryParse(request.Query["gradoId"], out var gradeId))
     {
-        filters.Add("IDGrado = ?");
+        filters.Add("G.IDGrado = ?");
         AddInteger(command, gradeId);
     }
     if (int.TryParse(request.Query["materiaId"], out var subjectId))
     {
-        filters.Add("IDMateria = ?");
+        filters.Add("M.IDMateria = ?");
         AddInteger(command, subjectId);
     }
     if (int.TryParse(request.Query["periodoId"], out var periodId))
     {
-        filters.Add("IDPeriodo = ?");
+        filters.Add("P.IDPeriodo = ?");
         AddInteger(command, periodId);
     }
     var student = request.Query["alumno"].ToString().Trim();
     if (student.Length > 0)
     {
-        filters.Add("(Nombres LIKE ? OR Apellidos LIKE ?)");
+        filters.Add("(A.Nombres LIKE ? OR A.Apellidos LIKE ?)");
         command.Parameters.Add("?", OleDbType.VarWChar, 255).Value = $"*{student}*";
         command.Parameters.Add("?", OleDbType.VarWChar, 255).Value = $"*{student}*";
     }
 
     if (filters.Count > 0) sql += " WHERE " + string.Join(" AND ", filters);
-    sql += " ORDER BY Apellidos, Nombres, NombreMateria, NombrePeriodo";
+    sql += " ORDER BY A.Apellidos, A.Nombres, M.NombreMateria, P.NombrePeriodo";
     command.CommandText = sql;
     return Results.Ok(await ReadRows(command));
 });
@@ -139,7 +168,7 @@ app.MapPost("/api/notas", async (GradeInput input) =>
 
     await using var connection = await OpenConnection();
     using var command = new OleDbCommand(
-        "INSERT INTO tblCalificaciones (IDAlumno, IDMateria, IDPeriodo, Nota, FechaRegistro) VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO tblCalificaciones (IDAlumno, IDMateria, Periodo, Nota, FechaRegistro) VALUES (?, ?, ?, ?, ?)",
         connection);
     AddInteger(command, input.IdAlumno);
     AddInteger(command, input.IdMateria);
@@ -157,7 +186,7 @@ app.MapPut("/api/notas/{id:int}", async (int id, GradeInput input) =>
 
     await using var connection = await OpenConnection();
     using var command = new OleDbCommand(
-        "UPDATE tblCalificaciones SET IDAlumno = ?, IDMateria = ?, IDPeriodo = ?, Nota = ?, FechaRegistro = ? WHERE IDCalificacion = ?",
+        "UPDATE tblCalificaciones SET IDAlumno = ?, IDMateria = ?, Periodo = ?, Nota = ?, FechaRegistro = ? WHERE IDCalificacion = ?",
         connection);
     AddInteger(command, input.IdAlumno);
     AddInteger(command, input.IdMateria);

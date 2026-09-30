@@ -1027,7 +1027,7 @@
       </div>
     </section>
     <main class="assistant-main">
-      <p class="assistant-scope"><span aria-hidden="true">i</span> Respondo sobre la estructura y el funcionamiento del sistema. No consulto ni muestro registros personales de alumnos.</p>
+      <p class="assistant-scope"><span aria-hidden="true">i</span> Además de explicar el sistema, puedo consultar el promedio y las faltas registradas de un alumno cuando la API local está activa.</p>
       <section class="assistant-chat" aria-label="Chat MOSBOT Access">
         <header class="assistant-chat-header">
           <div class="assistant-avatar" aria-hidden="true">M</div>
@@ -1051,7 +1051,7 @@
           <input id="assistantQuestion" name="pregunta" type="text" maxlength="400" autocomplete="off" placeholder="Pregunta sobre la base de datos..." required>
           <button type="submit">Enviar <span aria-hidden="true">↑</span></button>
         </form>
-        <p class="assistant-footnote">Las respuestas se generan localmente a partir del esquema de sisMos2.accdb.</p>
+        <p class="assistant-footnote">Conceptos desde la guía local; faltas y promedios desde la API conectada a sisMos2.accdb.</p>
       </section>
     </main>
     <footer><p>© 2026 <strong>Ricardo Zelaya</strong> · MOSBOT Access · Sistema académico</p></footer>
@@ -1076,65 +1076,8 @@
       <h2 class="s-title" style="text-align:center">Instalación y creación paso a paso</h2>
       <div class="s-line" style="margin:0 auto 2rem"></div>
       <p class="pg-intro">Cada captura pertenece al proceso realizado. Desplázate para recorrer la instalación, la configuración inicial y la consulta de los datos creados.</p>
-
-      <div class="pg-timeline" style="display:none">
-        <article class="pg-step reveal">
-          <div class="pg-copy"><p class="pg-step-label">Paso 01 · Descarga</p><h3>Ingresar al sitio oficial</h3><p>Comencé en <code>postgresql.org</code> y seleccioné la opción de descarga para Windows. Es importante elegir el instalador oficial para contar con el servidor y las herramientas necesarias.</p></div>
-          <div class="pg-marker">01</div>
-          <figure class="pg-shot"><img src="assets/postgresql/image3.png" alt="Página oficial de PostgreSQL" loading="lazy"><figcaption>Sitio oficial de PostgreSQL</figcaption></figure>
-        </article>
-        <article class="pg-step reveal">
-          <div class="pg-copy"><p class="pg-step-label">Paso 02 · Instalador</p><h3>Descargar y ejecutar PostgreSQL</h3><p>Desde la página de instaladores para Windows descargué el ejecutable de EDB. Al abrirlo, el asistente guía toda la instalación de forma clara.</p></div>
-          <div class="pg-marker">02</div>
-          <figure class="pg-shot"><img src="assets/postgresql/image11.png" alt="Descarga del instalador PostgreSQL"><figcaption>Descarga del instalador para Windows</figcaption></figure>
-        </article>
-        <article class="pg-step reveal">
-          <div class="pg-copy"><p class="pg-step-label">Paso 03 · Configuración</p><h3>Definir ubicación y opciones</h3><p>Durante el asistente confirmé el directorio de datos y la configuración regional. Estos valores permiten que PostgreSQL prepare correctamente su entorno de trabajo.</p></div>
-          <div class="pg-marker">03</div>
-          <figure class="pg-shot"><img src="assets/postgresql/image21.png" alt="Configuración del directorio de datos"><figcaption>Selección del directorio de datos</figcaption></figure>
-        </article>
-        <article class="pg-step reveal">
-          <div class="pg-copy"><p class="pg-step-label">Paso 04 · pgAdmin</p><h3>Abrir el panel de administración</h3><p>Al finalizar, busqué <code>pgAdmin 4</code> desde el menú Inicio. Esta aplicación brinda una interfaz gráfica para administrar servidores, bases de datos y consultas SQL.</p></div>
-          <div class="pg-marker">04</div>
-          <figure class="pg-shot"><img src="assets/postgresql/image37.png" alt="Búsqueda de pgAdmin 4 en Windows"><figcaption>Acceso a pgAdmin 4</figcaption></figure>
-        </article>
-        <article class="pg-step reveal">
-          <div class="pg-copy"><p class="pg-step-label">Paso 05 · Base de datos</p><h3>Crear la estructura del proyecto</h3><p>En pgAdmin creé la base <code>rica_colegio</code>. Luego preparé la tabla <code>estudiantes</code>, con campos para identificación, nombre, grado, correo y nota final.</p></div>
-          <div class="pg-marker">05</div>
-          <figure class="pg-shot"><img src="assets/postgresql/image53.png" alt="Base de datos rica colegio en pgAdmin"><figcaption>Base de datos y tabla estudiantes</figcaption></figure>
-        </article>
-        <article class="pg-step reveal">
-          <div class="pg-copy"><p class="pg-step-label">Paso 06 · SQL</p><h3>Insertar y consultar datos</h3><p>Finalmente ejecuté instrucciones <code>CREATE TABLE</code> e <code>INSERT INTO</code> para registrar estudiantes. La consulta permitió comprobar que la información quedó almacenada correctamente.</p></div>
-          <div class="pg-marker">06</div>
-          <figure class="pg-shot"><img src="assets/postgresql/image55.png" alt="Consulta SQL ejecutada en pgAdmin"><figcaption>Creación e inserción de registros con SQL</figcaption></figure>
-        </article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 07 · Descargas</p><h3>Elegir la plataforma</h3><p>En el centro de descargas seleccioné Windows para obtener el instalador compatible con mi equipo.</p></div><div class="pg-marker">07</div><figure class="pg-shot"><img src="assets/postgresql/image4.png" alt="Página de descargas PostgreSQL" loading="lazy"><figcaption>Selección de plataforma</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 08 · Versión</p><h3>Seleccionar el instalador correcto</h3><p>En EDB confirmé la versión de PostgreSQL y el instalador de 64 bits para Windows.</p></div><div class="pg-marker">08</div><figure class="pg-shot"><img src="assets/postgresql/image7.png" alt="Instaladores PostgreSQL para Windows" loading="lazy"><figcaption>Versión para Windows</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 09 · Archivo</p><h3>Localizar el ejecutable</h3><p>Una vez terminada la descarga, ubiqué el archivo ejecutable para iniciar la instalación.</p></div><div class="pg-marker">09</div><figure class="pg-shot"><img src="assets/postgresql/image9.png" alt="Descarga desde EDB" loading="lazy"><figcaption>Archivo descargado</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 10 · Descarga</p><h3>Esperar la descarga completa</h3><p>Verifiqué el progreso de la descarga antes de ejecutar el instalador de PostgreSQL.</p></div><div class="pg-marker">10</div><figure class="pg-shot"><img src="assets/postgresql/image11.png" alt="Progreso de descarga PostgreSQL" loading="lazy"><figcaption>Descarga en progreso</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 11 · Ejecución</p><h3>Abrir el instalador</h3><p>Con el archivo listo, ejecuté el instalador para comenzar la configuración del servidor y pgAdmin.</p></div><div class="pg-marker">11</div><figure class="pg-shot"><img src="assets/postgresql/image13.png" alt="Ejecutable de PostgreSQL" loading="lazy"><figcaption>Archivo instalador preparado</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 12 · Bienvenida</p><h3>Iniciar el asistente</h3><p>El asistente de PostgreSQL muestra la pantalla inicial; desde aquí avancé con la instalación guiada.</p></div><div class="pg-marker">12</div><figure class="pg-shot"><img src="assets/postgresql/image15.png" alt="Bienvenida al instalador" loading="lazy"><figcaption>Asistente de instalación</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 13 · Ubicación</p><h3>Elegir directorio de instalación</h3><p>Definí la carpeta donde se instalarían los archivos principales del programa.</p></div><div class="pg-marker">13</div><figure class="pg-shot"><img src="assets/postgresql/image17.png" alt="Directorio de instalación" loading="lazy"><figcaption>Ubicación del programa</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 14 · Herramientas</p><h3>Confirmar los componentes</h3><p>Mantuve seleccionados PostgreSQL Server, pgAdmin 4 y las herramientas de línea de comandos.</p></div><div class="pg-marker">14</div><figure class="pg-shot"><img src="assets/postgresql/image19.png" alt="Componentes de PostgreSQL" loading="lazy"><figcaption>Componentes seleccionados</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 15 · Datos</p><h3>Guardar los datos del servidor</h3><p>Seleccioné el directorio destinado a almacenar las bases de datos creadas en PostgreSQL.</p></div><div class="pg-marker">15</div><figure class="pg-shot"><img src="assets/postgresql/image21.png" alt="Directorio de datos" loading="lazy"><figcaption>Carpeta de datos</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 16 · Seguridad</p><h3>Establecer la contraseña</h3><p>Configuré y confirmé una contraseña para el usuario administrador <code>postgres</code>.</p></div><div class="pg-marker">16</div><figure class="pg-shot"><img src="assets/postgresql/image25.png" alt="Contraseña de PostgreSQL" loading="lazy"><figcaption>Contraseña del superusuario</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 17 · Conexión</p><h3>Confirmar el puerto</h3><p>Conservé el puerto predeterminado <code>5432</code>, utilizado para conectar aplicaciones con PostgreSQL.</p></div><div class="pg-marker">17</div><figure class="pg-shot"><img src="assets/postgresql/image27.png" alt="Puerto 5432 de PostgreSQL" loading="lazy"><figcaption>Puerto del servidor</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 18 · Región</p><h3>Definir la configuración regional</h3><p>Confirmé la configuración regional predeterminada para finalizar los ajustes previos.</p></div><div class="pg-marker">18</div><figure class="pg-shot"><img src="assets/postgresql/image29.png" alt="Configuración regional" loading="lazy"><figcaption>Opciones regionales</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 19 · Resumen</p><h3>Revisar la configuración</h3><p>Antes de instalar revisé el resumen: rutas, puerto, usuario y componentes seleccionados.</p></div><div class="pg-marker">19</div><figure class="pg-shot"><img src="assets/postgresql/image31.png" alt="Resumen de instalación" loading="lazy"><figcaption>Resumen de instalación</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 20 · Confirmación</p><h3>Preparar la instalación</h3><p>El asistente confirmó que todo estaba listo; solo faltaba iniciar el proceso de instalación.</p></div><div class="pg-marker">20</div><figure class="pg-shot"><img src="assets/postgresql/image33.png" alt="PostgreSQL listo para instalar" loading="lazy"><figcaption>Listo para instalar</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 21 · Proceso</p><h3>Instalar PostgreSQL</h3><p>Esperé a que el instalador copiara y configurara los archivos necesarios para el servidor.</p></div><div class="pg-marker">21</div><figure class="pg-shot"><img src="assets/postgresql/image35.png" alt="Instalación en progreso" loading="lazy"><figcaption>Instalación en progreso</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 22 · Acceso</p><h3>Buscar pgAdmin 4</h3><p>Después de instalar, abrí el menú Inicio y busqué pgAdmin 4 para administrar la base de datos gráficamente.</p></div><div class="pg-marker">22</div><figure class="pg-shot"><img src="assets/postgresql/image37.png" alt="Búsqueda de pgAdmin" loading="lazy"><figcaption>Acceso a pgAdmin 4</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 23 · Inicio</p><h3>Cargar pgAdmin</h3><p>Esperé la pantalla de inicio mientras pgAdmin preparaba su entorno de administración.</p></div><div class="pg-marker">23</div><figure class="pg-shot"><img src="assets/postgresql/image38.png" alt="Inicio de pgAdmin" loading="lazy"><figcaption>Carga de pgAdmin</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 24 · Panel</p><h3>Conocer la interfaz</h3><p>Al abrir pgAdmin se muestra el panel principal, desde donde se gestionan servidores y bases de datos.</p></div><div class="pg-marker">24</div><figure class="pg-shot"><img src="assets/postgresql/image39.png" alt="Panel de pgAdmin" loading="lazy"><figcaption>Panel principal de pgAdmin</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 25 · Configuración</p><h3>Usar pgAdmin en español</h3><p>Verifiqué la interfaz ya configurada para continuar cómodamente con la creación de la base de datos.</p></div><div class="pg-marker">25</div><figure class="pg-shot"><img src="assets/postgresql/image47.png" alt="pgAdmin en español" loading="lazy"><figcaption>Interfaz de pgAdmin configurada</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 26 · Nueva base</p><h3>Abrir la opción Crear</h3><p>Desde el explorador de objetos seleccioné la opción para crear una base de datos nueva.</p></div><div class="pg-marker">26</div><figure class="pg-shot"><img src="assets/postgresql/image48.jpeg" alt="Menú crear base de datos" loading="lazy"><figcaption>Opción Crear base de datos</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 27 · Proyecto</p><h3>Crear rica_colegio</h3><p>Escribí el nombre <code>rica_colegio</code>, asigné el propietario y guardé la nueva base de datos.</p></div><div class="pg-marker">27</div><figure class="pg-shot"><img src="assets/postgresql/image49.jpeg" alt="Creación de base rica colegio" loading="lazy"><figcaption>Base de datos rica_colegio</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 28 · Comprobación final</p><h3>Verificar los datos en Excel</h3><p>Como evidencia final, comprobé en Excel los estudiantes registrados, sus notas y el estado calculado de aprobación.</p></div><div class="pg-marker">28</div><figure class="pg-shot"><img src="assets/postgresql/image56.png" alt="Comprobación final de datos en Excel" loading="lazy"><figcaption>Comprobación final en Excel</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Detalle · pgAdmin</p><h3>Confirmar la herramienta de administración</h3><p>También documenté la interfaz de pgAdmin funcionando correctamente antes de continuar con el proyecto.</p></div><div class="pg-marker">+</div><figure class="pg-shot"><img src="assets/postgresql/image41.jpeg" alt="Verificación de pgAdmin" loading="lazy"><figcaption>Comprobación visual de pgAdmin</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Detalle · Preferencias</p><h3>Revisar la configuración visual</h3><p>Accedí a las preferencias de pgAdmin para revisar la interfaz y dejar listo el espacio de trabajo.</p></div><div class="pg-marker">+</div><figure class="pg-shot"><img src="assets/postgresql/image45.png" alt="Preferencias de pgAdmin" loading="lazy"><figcaption>Preferencias de pgAdmin</figcaption></figure></article>
-        <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Detalle · Actualización</p><h3>Aplicar los cambios de configuración</h3><p>Luego de ajustar las preferencias, confirmé la actualización para que los cambios quedaran activos.</p></div><div class="pg-marker">+</div><figure class="pg-shot"><img src="assets/postgresql/image46.png" alt="Confirmación de actualización de pgAdmin" loading="lazy"><figcaption>Actualización de configuración</figcaption></figure></article>
-      </div>
     </section>
+
     <section class="wrap pg-ordered-wrap">
       <div class="pg-timeline">
         <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 01 · Sitio oficial</p><h3>Conocer PostgreSQL</h3><p>Ingresé al sitio oficial para iniciar el proceso desde una fuente confiable.</p></div><div class="pg-marker">01</div><figure class="pg-shot"><img src="assets/postgresql/image3.png" alt="Sitio oficial PostgreSQL" loading="lazy"><figcaption>Página principal de PostgreSQL</figcaption></figure></article>
@@ -1165,44 +1108,6 @@
         <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 26 · SQL</p><h3>Crear la tabla y registros</h3><p>Ejecuté <code>CREATE TABLE</code> e <code>INSERT INTO</code> para registrar a los estudiantes.</p></div><div class="pg-marker">26</div><figure class="pg-shot"><img src="assets/postgresql/image55.png" alt="SQL crear tabla" loading="lazy"><figcaption>Tabla e inserción de datos</figcaption></figure></article>
         <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 27 · Consulta</p><h3>Comprobar los registros</h3><p>Ejecuté una consulta para visualizar la tabla <code>estudiantes</code> y sus datos guardados.</p></div><div class="pg-marker">27</div><figure class="pg-shot"><img src="assets/postgresql/image53.png" alt="Consulta estudiantes" loading="lazy"><figcaption>Datos consultados en PostgreSQL</figcaption></figure></article>
         <article class="pg-step reveal"><div class="pg-copy"><p class="pg-step-label">Paso 28 · Excel</p><h3>Comprobación final</h3><p>Finalmente validé los estudiantes, las notas y el estado de aprobación desde Excel.</p></div><div class="pg-marker">28</div><figure class="pg-shot"><img src="assets/postgresql/image56.png" alt="Comprobación final Excel" loading="lazy"><figcaption>Resultado final en Excel</figcaption></figure></article>
-      </div>
-    </section>
-    <section class="wrap pg-gallery-wrap" style="display:none">
-      <div class="pg-gallery-head reveal">
-        <p class="s-lbl-top">Evidencia completa</p>
-        <h2 class="s-title">Galería de todo el proceso</h2>
-        <div class="s-line" style="margin:0 auto 1.4rem"></div>
-        <p>Registro completo de las capturas del manual, desde la descarga hasta la comprobación final de los datos en Excel.</p>
-      </div>
-      <div class="pg-gallery">
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image3.png" alt="Página principal de PostgreSQL" loading="lazy"><figcaption>01 · Página oficial de PostgreSQL</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image4.png" alt="Página de descargas de PostgreSQL" loading="lazy"><figcaption>02 · Selección de descarga</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image7.png" alt="Instaladores de PostgreSQL para Windows" loading="lazy"><figcaption>03 · Instalador para Windows</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image9.png" alt="Descarga desde EDB PostgreSQL" loading="lazy"><figcaption>04 · Descarga del instalador</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image11.png" alt="Archivo de PostgreSQL descargándose" loading="lazy"><figcaption>05 · Progreso de descarga</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image13.png" alt="Archivo instalador de PostgreSQL" loading="lazy"><figcaption>06 · Instalador descargado</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image15.png" alt="Bienvenida al instalador PostgreSQL" loading="lazy"><figcaption>07 · Inicio del asistente</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image17.png" alt="Directorio de instalación de PostgreSQL" loading="lazy"><figcaption>08 · Directorio de instalación</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image19.png" alt="Componentes de PostgreSQL" loading="lazy"><figcaption>09 · Componentes a instalar</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image21.png" alt="Directorio de datos de PostgreSQL" loading="lazy"><figcaption>10 · Directorio de datos</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image25.png" alt="Contraseña del superusuario PostgreSQL" loading="lazy"><figcaption>11 · Contraseña del superusuario</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image27.png" alt="Configuración de puerto PostgreSQL" loading="lazy"><figcaption>12 · Puerto del servidor</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image29.png" alt="Configuración regional de PostgreSQL" loading="lazy"><figcaption>13 · Configuración regional</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image31.png" alt="Resumen de instalación PostgreSQL" loading="lazy"><figcaption>14 · Resumen antes de instalar</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image33.png" alt="PostgreSQL listo para instalar" loading="lazy"><figcaption>15 · Confirmación de instalación</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image35.png" alt="Instalación de PostgreSQL en progreso" loading="lazy"><figcaption>16 · Instalación en progreso</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image37.png" alt="Búsqueda de pgAdmin 4" loading="lazy"><figcaption>17 · Apertura de pgAdmin 4</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image38.png" alt="Pantalla de inicio de pgAdmin" loading="lazy"><figcaption>18 · Inicio de pgAdmin</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image39.png" alt="Panel de pgAdmin" loading="lazy"><figcaption>19 · Panel de administración</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image41.jpeg" alt="Vista de pgAdmin en pantalla" loading="lazy"><figcaption>20 · Verificación de pgAdmin</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image45.png" alt="Configuración de pgAdmin" loading="lazy"><figcaption>21 · Preferencias de pgAdmin</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image46.png" alt="Actualización de pgAdmin" loading="lazy"><figcaption>22 · Actualización de configuración</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image47.png" alt="Panel de pgAdmin en español" loading="lazy"><figcaption>23 · pgAdmin configurado</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image48.jpeg" alt="Menú para crear base de datos" loading="lazy"><figcaption>24 · Crear una nueva base de datos</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image49.jpeg" alt="Formulario de creación de base de datos rica colegio" loading="lazy"><figcaption>25 · Creación de la base rica_colegio</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image53.png" alt="Consulta de estudiantes en PostgreSQL" loading="lazy"><figcaption>26 · Consulta de los registros</figcaption></figure>
-        <figure class="pg-gallery-card reveal"><img src="assets/postgresql/image55.png" alt="Código SQL para crear tabla e insertar datos" loading="lazy"><figcaption>27 · Tabla e inserción de datos con SQL</figcaption></figure>
-        <figure class="pg-gallery-card final-proof reveal"><img src="assets/postgresql/image56.png" alt="Comprobación final de los datos en Excel" loading="lazy"><figcaption>28 · Comprobación final en Excel: datos y estado de aprobación</figcaption></figure>
       </div>
     </section>
     <section class="pg-end"><div class="pg-end-inner"><h2>Resultado: una base de datos lista para consultar</h2><p>El proyecto demuestra el manejo básico de PostgreSQL y pgAdmin, desde la instalación del motor hasta la creación y consulta de datos mediante SQL.</p></div></section>

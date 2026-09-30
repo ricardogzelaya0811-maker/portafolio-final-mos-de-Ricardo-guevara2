@@ -1,0 +1,13 @@
+@baseUrl = http://localhost:5080
+
+### Confirmar conexión con la base Access
+GET {{baseUrl}}/api/health
+
+### Promedio y faltas de un alumno por nombre completo
+GET {{baseUrl}}/api/alumnos/estadisticas?nombre=Ana%20Lopez
+
+### Nombre ambiguo: devuelve coincidencias, no estadísticas de un alumno incorrecto
+GET {{baseUrl}}/api/alumnos/estadisticas?nombre=Ana
+
+### Validación de nombre insuficiente
+GET {{baseUrl}}/api/alumnos/estadisticas?nombre=Al
