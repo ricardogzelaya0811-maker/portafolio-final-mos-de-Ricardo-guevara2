@@ -14,7 +14,6 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="assistant.css"/>
-  <link rel="stylesheet" href="academic-portal.css"/>
 
   <style>
     /* ══════════════════════════════════════
@@ -763,7 +762,6 @@
       <button class="nav-link" onclick="showPage('subir',this)">Subir</button>
       <button class="nav-link" onclick="showPage('postgresql',this)">🐘 PostgreSQL</button>
       <button class="nav-link" onclick="showPage('windows-office',this)">🪟 Windows + Office</button>
-      <button class="nav-link" onclick="showPage('academico',this)">🎓 Sistema académico</button>
       <button class="nav-link" onclick="showPage('mosbot',this)">🤖 MOSBOT Access</button>
       <button class="nav-link" onclick="showPage('podcast',this)">🎙️ CTR+Z Podcast</button>
       <button class="nav-logout" onclick="doLogout()">Salir 🚪</button>
@@ -879,76 +877,6 @@
     <footer><p>© 2026 <strong>Ricardo Zelaya</strong> · Portafolio MOS con IA · Hecho con Claude AI · El Salvador</p></footer>
   </div>
 
-  <!-- ══ SISTEMA ACADÉMICO ══ -->
-  <div id="page-academico" class="page">
-    <section class="academic-hero">
-      <div class="academic-hero-inner">
-        <div>
-          <p class="academic-eyebrow">Administración escolar · Access</p>
-          <h1>Expediente <span>académico</span></h1>
-          <p>Consulta el historial de calificaciones y registra notas por alumno, materia y período.</p>
-        </div>
-        <div class="academic-hero-mark" aria-hidden="true">A</div>
-      </div>
-    </section>
-    <main class="academic-main">
-      <div class="academic-status" id="academicStatus" role="status" aria-live="polite">Comprobando conexión con el sistema académico...</div>
-      <section class="academic-section" aria-labelledby="academicSearchTitle">
-        <div class="academic-section-heading">
-          <div><p class="academic-kicker">Consulta</p><h2 id="academicSearchTitle">Historial de notas</h2></div>
-          <span class="academic-result-count" id="academicResultCount">0 registros</span>
-        </div>
-        <form id="academicSearchForm" class="academic-filters">
-          <label>Alumno
-            <input id="academicStudentSearch" type="search" placeholder="Nombre o apellido" autocomplete="off">
-          </label>
-          <label>Grado
-            <select id="academicGradeFilter"><option value="">Todos los grados</option></select>
-          </label>
-          <label>Materia
-            <select id="academicSubjectFilter"><option value="">Todas las materias</option></select>
-          </label>
-          <label>Período
-            <select id="academicPeriodFilter"><option value="">Todos los períodos</option></select>
-          </label>
-          <button class="academic-button" type="submit">Buscar</button>
-        </form>
-        <div class="academic-table-wrap">
-          <table class="academic-table">
-            <thead><tr><th>Alumno</th><th>Grado</th><th>Materia</th><th>Período</th><th>Nota</th><th>Fecha</th><th>Acción</th></tr></thead>
-            <tbody id="academicResults"><tr><td colspan="7" class="academic-empty">Conecta la API para consultar registros.</td></tr></tbody>
-          </table>
-        </div>
-      </section>
-      <section class="academic-section" aria-labelledby="academicEntryTitle">
-        <div class="academic-section-heading">
-          <div><p class="academic-kicker">Registro</p><h2 id="academicEntryTitle">Ingresar o actualizar una nota</h2></div>
-        </div>
-        <form id="academicGradeForm" class="academic-entry-form">
-          <label>Alumno
-            <select id="academicStudentSelect" required><option value="">Selecciona un alumno</option></select>
-          </label>
-          <label>Materia
-            <select id="academicSubjectSelect" required><option value="">Selecciona una materia</option></select>
-          </label>
-          <label>Período
-            <select id="academicPeriodSelect" required><option value="">Selecciona un período</option></select>
-          </label>
-          <label>Nota
-            <input id="academicGradeValue" type="number" min="0" max="100" step="0.01" required placeholder="0.00">
-          </label>
-          <label>Fecha de registro
-            <input id="academicGradeDate" type="date" required>
-          </label>
-          <button class="academic-button" type="submit">Guardar nota</button>
-        </form>
-        <p class="academic-form-message" id="academicFormMessage" role="status" aria-live="polite"></p>
-        <p class="academic-note">El registro se guarda en la base de datos conectada al servidor. No se almacenan notas en este navegador.</p>
-      </section>
-    </main>
-    <footer><p>© 2026 <strong>Ricardo Zelaya</strong> · Sistema académico</p></footer>
-  </div>
-
   <!-- ══ DESCARGAS ══ -->
   <div id="page-descargas" class="page">
     <div class="dl-hero">
@@ -1021,7 +949,7 @@
         <div>
           <p class="assistant-eyebrow">Asistente de conocimiento · sisMos2.accdb</p>
           <h1>MOSBOT <em>Access</em></h1>
-          <p>Pregunta sobre las tablas, consultas, relaciones y formularios del sistema académico.</p>
+          <p>Pregunta sobre las tablas, consultas, relaciones y formularios de la base de datos Access.</p>
         </div>
         <div class="assistant-db-stamp" aria-hidden="true">ACCDB</div>
       </div>
@@ -1054,7 +982,7 @@
         <p class="assistant-footnote">Conceptos desde la guía local; faltas y promedios desde la API conectada a sisMos2.accdb.</p>
       </section>
     </main>
-    <footer><p>© 2026 <strong>Ricardo Zelaya</strong> · MOSBOT Access · Sistema académico</p></footer>
+    <footer><p>© 2026 <strong>Ricardo Zelaya</strong> · MOSBOT Access · Base de datos</p></footer>
   </div>
 
   <!-- ══ CTR+Z PODCAST ══ -->
@@ -2000,7 +1928,6 @@ const _origShowPage = showPage;
 showPage = function(id, btn) {
   _origShowPage(id, btn);
   if (id === 'mosbot') initAssistantChat();
-  if (id === 'academico') initAcademicModule();
 };
 </script>
 <!-- Firebase (v8.10.0) - Inicialización automática -->
@@ -2040,7 +1967,6 @@ showPage = function(id, btn) {
 </script>
 
 <script src="asistente.js"></script>
-<script src="academic-portal.js"></script>
 </body>
 </html>
 
