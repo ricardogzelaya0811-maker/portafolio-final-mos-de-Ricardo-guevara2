@@ -552,12 +552,13 @@
     .doc-thumb.word{background:linear-gradient(135deg,#1B5EAB,#2B7CD3)}
     .doc-thumb.excel{background:linear-gradient(135deg,#1A6B37,#217346)}
     .doc-thumb.powerpoint{background:linear-gradient(135deg,#a32618,#e85d04)}
+    .doc-thumb.access{background:linear-gradient(135deg,#8b1e3f,#c6475b)}
     .doc-thumb-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:var(--ease);font-size:.8rem;color:#fff;font-weight:600;gap:.3rem}
     .doc-thumb:hover .doc-thumb-overlay{opacity:1}
     .doc-num{position:absolute;bottom:6px;right:8px;font-size:.62rem;color:rgba(255,255,255,.38);font-weight:700}
     .doc-body{padding:1rem 1.1rem;flex:1;display:flex;flex-direction:column}
     .doc-tag{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;display:block}
-    .doc-tag.word{color:#60a5fa} .doc-tag.excel{color:#4ade80} .doc-tag.powerpoint{color:#fb923c}
+    .doc-tag.word{color:#60a5fa} .doc-tag.excel{color:#4ade80} .doc-tag.powerpoint{color:#fb923c} .doc-tag.access{color:#fb7185}
     .doc-title{font-weight:600;font-size:.88rem;color:var(--text);margin-bottom:.3rem;line-height:1.3}
     .doc-desc{font-size:.78rem;color:var(--muted);line-height:1.5;flex:1}
     .doc-author{font-size:.7rem;color:var(--gold-lt);margin-top:.5rem}
@@ -881,7 +882,7 @@
   <div id="page-descargas" class="page">
     <div class="dl-hero">
       <h1>Mis Documentos</h1>
-      <p>Colección de proyectos técnicos desarrollados con Microsoft Word, Excel y PowerPoint.</p>
+      <p>Documentos y proyectos desarrollados con Microsoft Office y Access.</p>
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
         <input type="text" id="searchInput" placeholder="Buscar documento…" oninput="searchDocs()"/>
@@ -893,6 +894,7 @@
         <button class="dl-tab" onclick="filterDl('word',this)"><img class="office-logo-mini" src="assets/office-logos/word_2-removebg-preview.png" alt="">Word (<span id="dlWord">0</span>)</button>
         <button class="dl-tab" onclick="filterDl('excel',this)"><img class="office-logo-mini" src="assets/office-logos/excel-removebg-preview.png" alt="">Excel (<span id="dlExcel">0</span>)</button>
         <button class="dl-tab" onclick="filterDl('powerpoint',this)"><img class="office-logo-mini" src="assets/office-logos/powerpoint-removebg-preview.png" alt="">PowerPoint (<span id="dlPowerpoint">0</span>)</button>
+        <button class="dl-tab" onclick="filterDl('access',this)">🗃️ Access (<span id="dlAccess">0</span>)</button>
       </div>
       <div class="dl-grid" id="dlGrid">
         <div class="dl-empty"><div class="big">📂</div><p>Aún no hay documentos.<br>¡Sube el primero!</p><button onclick="showPage('subir',null)">Subir archivo →</button></div>
@@ -1332,6 +1334,16 @@ document.addEventListener('click', e => {
 
 /* ── DOCUMENTOS ── */
 const DEFAULT_DOCS = [
+  {
+    id: "d_a1",
+    type: "access",
+    emoji: "🗃️",
+    titulo: "Gestión de Proyectos",
+    desc: "Base de datos de Microsoft Access para organizar y gestionar proyectos.",
+    autor: "Ricardo Zelaya",
+    file: "Gestion_de_Proyectos.accdb",
+    url: "Gestion_de_Proyectos.accdb"
+  },
   // Excel Files
   {
     id: "d_e1",
@@ -1601,10 +1613,12 @@ async function renderDocs(refetch = true) {
   const w = docs.filter(d=>d.type==='word').length;
   const e = docs.filter(d=>d.type==='excel').length;
   const p = docs.filter(d=>d.type==='powerpoint').length;
+  const a = docs.filter(d=>d.type==='access').length;
   document.getElementById('dlAll').textContent   = docs.length;
   document.getElementById('dlWord').textContent  = w;
   document.getElementById('dlExcel').textContent = e;
   document.getElementById('dlPowerpoint').textContent = p;
+  document.getElementById('dlAccess').textContent = a;
 
   if (currentFilter !== 'all') docs = docs.filter(d=>d.type===currentFilter);
   if (searchQuery) docs = docs.filter(d =>
@@ -1628,10 +1642,10 @@ async function renderDocs(refetch = true) {
       <div class="doc-thumb ${d.type}" onclick="previewDoc('${d.id}','${escHtml(d.titulo)}','${d.type}')">
         <span>${d.type==='excel' ? '<img class="office-logo" src="assets/office-logos/excel-removebg-preview.png" alt="Microsoft Excel">' : d.type==='powerpoint' ? '<img class="office-logo" src="assets/office-logos/powerpoint-removebg-preview.png" alt="Microsoft PowerPoint">' : d.type==='word' ? '<img class="office-logo" src="assets/office-logos/word_2-removebg-preview.png" alt="Microsoft Word">' : d.emoji}</span>
         <div class="doc-thumb-overlay">👁️ Vista previa</div>
-        <span class="doc-num">${d.type==='word'?'W':d.type==='excel'?'E':'P'}${String(i+1).padStart(2,'0')}</span>
+        <span class="doc-num">${d.type==='word'?'W':d.type==='excel'?'E':d.type==='access'?'A':'P'}${String(i+1).padStart(2,'0')}</span>
       </div>
       <div class="doc-body">
-        <span class="doc-tag ${d.type}">${d.type==='word'?'● Microsoft Word':d.type==='excel'?'● Microsoft Excel':'● Microsoft PowerPoint'}</span>
+        <span class="doc-tag ${d.type}">${d.type==='word'?'● Microsoft Word':d.type==='excel'?'● Microsoft Excel':d.type==='access'?'● Microsoft Access':'● Microsoft PowerPoint'}</span>
         <p class="doc-title">${d.titulo}</p>
         <p class="doc-desc">${d.desc}</p>
         <div class="doc-author">👤 ${d.autor}</div>
