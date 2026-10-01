@@ -1,12 +1,15 @@
 using System.Data;
 using System.Data.OleDb;
 using System.Globalization;
+using AcademicApi.Contracts;
 using AcademicApi.Services;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 var builder = WebApplication.CreateBuilder(args);
 var frontendOrigin = builder.Configuration["FRONTEND_ORIGIN"] ?? "http://localhost:5500";
 var databasePath = builder.Configuration["ACCESS_DB_PATH"] ??
     Path.Combine(builder.Environment.ContentRootPath, "..", "sisMos2.accdb");
+builder.Configuration["ACCESS_DB_PATH"] = Path.GetFullPath(databasePath);
 var provider = builder.Configuration["ACCESS_PROVIDER"] ?? "Microsoft.ACE.OLEDB.16.0";
 var maximumGrade = decimal.TryParse(builder.Configuration["MAX_GRADE"], CultureInfo.InvariantCulture, out var configuredMaximum)
     ? configuredMaximum

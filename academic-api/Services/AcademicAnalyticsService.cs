@@ -122,7 +122,7 @@ internal sealed class AcademicAnalyticsService(IConfiguration configuration) : I
         if (!await reader.ReadAsync(cancellationToken)) return (null, 0);
 
         var count = Convert.ToInt32(reader["Total"], CultureInfo.InvariantCulture);
-        var average = reader["Promedio"] is DBNull
+        decimal? average = reader["Promedio"] is DBNull
             ? null
             : Math.Round(Convert.ToDecimal(reader["Promedio"], CultureInfo.InvariantCulture), 2);
         return (average, count);
