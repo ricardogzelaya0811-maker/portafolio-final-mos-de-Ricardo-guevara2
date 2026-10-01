@@ -224,6 +224,7 @@ const conocimiento = [
 ];
 
 const ASSISTANT_API_BASE = (window.ACADEMIC_API_BASE || "http://localhost:5080/api").replace(/\/$/, "");
+const LOCAL_ASSISTANT_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 
 function normalizarTexto(texto) {
   return texto
@@ -324,18 +325,39 @@ async function responderConsultaAlumno(consulta, mensaje) {
   }
 
   try {
-    const response = await fetch(`${ASSISTANT_API_BASE}/alumnos/estadisticas?nombre=${encodeURIComponent(consulta.nombre)}`);
-    const data = await response.json().catch(() => ({}));
-    if (response.status === 409 && data.coincidencias?.length) {
-      const options = data.coincidencias.map(student => `${student.nombreCompleto} (ID ${student.idAlumno})`).join('; ');
-      mensaje.querySelector('p').textContent = `Encontré varios alumnos con ese nombre. Indica el nombre completo o el ID: ${options}.`;
-      return;
+    let data;
+    if (LOCAL_ASSISTANT_HOSTS.has(window.location.hostname)) {
+      const response = await fetch(`${ASSISTANT_API_BASE}/alumnos/estadisticas?nombre=${encodeURIComponent(consulta.nombre)}`);
+      data = await response.json().catch(() => ({}));
+      if (response.status === 409 && data.coincidencias?.length) {
+        const options = data.coincidencias.map(student => `${student.nombreCompleto} (ID ${student.idAlumno})`).join('; ');
+        mensaje.querySelector('p').textContent = `Encontré varios alumnos con ese nombre. Indica el nombre completo o el ID: ${options}.`;
+        return;
+      }
+      if (response.status === 404) {
+        mensaje.querySelector('p').textContent = `No encontré un alumno llamado "${consulta.nombre}". Revisa el nombre e inténtalo otra vez.`;
+        return;
+      }
+      if (!response.ok) throw new Error(data.error || `Error HTTP ${response.status}`);
+    } else {
+      const snapshotResponse = await fetch(new URL('assets/sismos2-demo.json', window.location.href));
+      if (!snapshotResponse.ok) throw new Error('No se pudo cargar el archivo de datos de demostración.');
+      const students = await snapshotResponse.json();
+      const normalizedName = normalizarTexto(consulta.nombre);
+      const matchingStudents = students.filter(student => normalizarTexto(student.alumno).includes(normalizedName));
+      const exactMatches = matchingStudents.filter(student => normalizarTexto(student.alumno) === normalizedName);
+      const matches = exactMatches.length ? exactMatches : matchingStudents;
+
+      if (!matches.length) {
+        mensaje.querySelector('p').textContent = `No encontré "${consulta.nombre}" en los datos publicados. Actualiza el archivo de demostración desde sisMos2.accdb.`;
+        return;
+      }
+      if (matches.length > 1) {
+        mensaje.querySelector('p').textContent = `Encontré varios alumnos con ese nombre: ${matches.map(student => student.alumno).join('; ')}. Escribe el nombre completo.`;
+        return;
+      }
+      data = matches[0];
     }
-    if (response.status === 404) {
-      mensaje.querySelector('p').textContent = `No encontré un alumno llamado "${consulta.nombre}". Revisa el nombre e inténtalo otra vez.`;
-      return;
-    }
-    if (!response.ok) throw new Error(data.error || `Error HTTP ${response.status}`);
 
     const answer = [];
     if (consulta.consultaFaltas) {
@@ -355,7 +377,9 @@ async function responderConsultaAlumno(consulta, mensaje) {
     }
     mensaje.querySelector('p').textContent = answer.join(' ');
   } catch (error) {
-    mensaje.querySelector('p').textContent = `No pude consultar los datos reales. Verifica que la API local esté iniciada y conectada a sisMos2.accdb. (${error.message})`;
+    mensaje.querySelector('p').textContent = LOCAL_ASSISTANT_HOSTS.has(window.location.hostname)
+      ? `No pude consultar los datos reales. Verifica que la API local esté iniciada y conectada a sisMos2.accdb. (${error.message})`
+      : `No pude cargar los datos de demostración. Inicia la API local, ejecuta academic-api/Export-DemoData.ps1 y publica de nuevo el archivo assets/sismos2-demo.json. (${error.message})`;
   }
 }
 

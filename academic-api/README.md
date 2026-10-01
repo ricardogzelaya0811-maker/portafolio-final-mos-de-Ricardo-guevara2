@@ -1,6 +1,6 @@
 # Academic Access API
 
-API local para conectar la vista del portafolio con una base Microsoft Access. El servidor solo escucha en `localhost:5080`; no publiques este API en Internet. Para producción se necesita autenticación y una política de autorización real antes de habilitar escrituras.
+API local para conectar la vista del portafolio con una base Microsoft Access. El servidor solo escucha en `localhost:5080`; no publiques este API en Internet sin autenticación y una política de autorización real.
 
 ## Requisitos
 
@@ -18,7 +18,17 @@ dotnet run
 
 Para usar otra ubicación, define `$env:ACCESS_DB_PATH` antes de `dotnet run`. Se requiere Microsoft Access Database Engine ACE con la misma arquitectura (x64/x86) que el proceso .NET.
 
-El `FRONTEND_ORIGIN` debe coincidir con el origen del servidor estático (por ejemplo, Live Server). No abras el HTML con `file://` para usar la API. La vista web tiene como URL base `http://localhost:5080/api`; puede cambiarse antes de cargar `academic-portal.js` mediante `window.ACADEMIC_API_BASE`.
+El `FRONTEND_ORIGIN` predeterminado es `http://localhost:5500`; CORS también permite orígenes loopback como Live Server en otro puerto. No abras el HTML con `file://` para usar el API.
+
+## Publicar datos de demostración en GitHub Pages
+
+GitHub Pages no puede conectarse al archivo Access de tu computadora. Para la demo, inicia el API local y ejecuta desde PowerShell, en la raíz del proyecto:
+
+```powershell
+.\academic-api\Export-DemoData.ps1
+```
+
+El script genera `assets/sismos2-demo.json` con promedios y estadísticas de asistencia, no copia el archivo `.accdb`. Publica ese JSON junto con los archivos del sitio. GitHub Pages responderá usando esa copia; si cambian los datos de Access, vuelve a exportar y publicar el JSON. No es una conexión en tiempo real.
 
 ## Endpoints
 
@@ -26,7 +36,7 @@ El `FRONTEND_ORIGIN` debe coincidir con el origen del servidor estático (por ej
 - `GET /api/catalogos`: devuelve grados, materias y períodos.
 - `GET /api/alumnos`: devuelve `IDAlumno`, `Nombres` y `Apellidos`.
 - `GET /api/alumnos/estadisticas?nombre=Ana%20Lopez`: devuelve promedio y faltas registradas para una coincidencia única. Ante nombres ambiguos devuelve las coincidencias para que se pueda precisar el alumno.
-- `GET /api/calificaciones?alumno=&gradoId=&materiaId=&periodoId=`: consulta `qryHistorialNotas`.
+- `GET /api/calificaciones?alumno=&gradoId=&materiaId=&periodoId=`: consulta el historial de notas.
 - `POST /api/notas`: inserta en `tblCalificaciones`.
 - `PUT /api/notas/{id}`: actualiza una fila por `IDCalificacion`.
 

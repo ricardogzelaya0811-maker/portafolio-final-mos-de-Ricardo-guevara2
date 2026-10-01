@@ -16,7 +16,9 @@ var maximumGrade = decimal.TryParse(builder.Configuration["MAX_GRADE"], CultureI
     : 100m;
 
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
-    policy.WithOrigins(frontendOrigin).AllowAnyHeader().AllowAnyMethod()));
+    policy.SetIsOriginAllowed(origin => origin == frontendOrigin ||
+        (Uri.TryCreate(origin, UriKind.Absolute, out var originUri) && originUri.IsLoopback))
+        .AllowAnyHeader().AllowAnyMethod()));
 builder.Services.AddScoped<IAcademicAnalyticsService, AcademicAnalyticsService>();
 
 var app = builder.Build();
