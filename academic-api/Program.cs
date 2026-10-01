@@ -5,7 +5,8 @@ using AcademicApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var frontendOrigin = builder.Configuration["FRONTEND_ORIGIN"] ?? "http://localhost:5500";
-var databasePath = builder.Configuration["ACCESS_DB_PATH"];
+var databasePath = builder.Configuration["ACCESS_DB_PATH"] ??
+    Path.Combine(builder.Environment.ContentRootPath, "..", "sisMos2.accdb");
 var provider = builder.Configuration["ACCESS_PROVIDER"] ?? "Microsoft.ACE.OLEDB.16.0";
 var maximumGrade = decimal.TryParse(builder.Configuration["MAX_GRADE"], CultureInfo.InvariantCulture, out var configuredMaximum)
     ? configuredMaximum

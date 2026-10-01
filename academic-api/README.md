@@ -10,16 +10,13 @@ API local para conectar la vista del portafolio con una base Microsoft Access. E
 
 ## Configuración e inicio
 
-Desde PowerShell, en la carpeta `academic-api`:
+Desde PowerShell, en la carpeta `academic-api`. Si `sisMos2.accdb` está en la raíz del proyecto, el API lo detecta automáticamente:
 
 ```powershell
-$env:ACCESS_DB_PATH = 'C:\ruta\sistema-escolar.accdb'
-$env:ACCESS_PROVIDER = 'Microsoft.ACE.OLEDB.16.0'
-$env:FRONTEND_ORIGIN = 'http://localhost:5500'
-$env:MAX_GRADE = '100'
-$env:ABSENCE_STATES = 'FALTA,AUSENTE,INASISTENCIA,INASISTENTE,NO ASISTIO'
 dotnet run
 ```
+
+Para usar otra ubicación, define `$env:ACCESS_DB_PATH` antes de `dotnet run`. Se requiere Microsoft Access Database Engine ACE con la misma arquitectura (x64/x86) que el proceso .NET.
 
 El `FRONTEND_ORIGIN` debe coincidir con el origen del servidor estático (por ejemplo, Live Server). No abras el HTML con `file://` para usar la API. La vista web tiene como URL base `http://localhost:5080/api`; puede cambiarse antes de cargar `academic-portal.js` mediante `window.ACADEMIC_API_BASE`.
 
