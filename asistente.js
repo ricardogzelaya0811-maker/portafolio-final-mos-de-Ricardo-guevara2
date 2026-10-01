@@ -383,8 +383,53 @@ async function responderConsultaAlumno(consulta, mensaje) {
   }
 }
 
+function esConsultaMejorPromedio(pregunta) {
+  const texto = normalizarTexto(pregunta);
+  return /\b(promedio|media)\b/.test(texto) && /\b(mas alto|mayor|mejor|maximo)\b/.test(texto);
+}
+
+async function responderMejorPromedio(mensaje) {
+  try {
+    let students;
+    if (LOCAL_ASSISTANT_HOSTS.has(window.location.hostname)) {
+      const rosterResponse = await fetch(`${ASSISTANT_API_BASE}/alumnos`);
+      if (!rosterResponse.ok) throw new Error(`Error HTTP ${rosterResponse.status}`);
+      const roster = await rosterResponse.json();
+      students = await Promise.all(roster.map(async student => {
+        const name = `${student.nombres} ${student.apellidos}`.trim();
+        const response = await fetch(`${ASSISTANT_API_BASE}/alumnos/estadisticas?nombre=${encodeURIComponent(name)}`);
+        if (!response.ok) throw new Error(`No se pudieron consultar las notas de ${name}`);
+        return response.json();
+      }));
+    } else {
+      const response = await fetch(new URL('assets/sismos2-demo.json', window.location.href));
+      if (!response.ok) throw new Error('No se pudo cargar el archivo de datos publicado.');
+      students = await response.json();
+    }
+
+    const gradedStudents = students.filter(student => typeof student.promedio === 'number');
+    if (!gradedStudents.length) {
+      mensaje.querySelector('p').textContent = 'No hay promedios registrados para comparar.';
+      return;
+    }
+
+    const highestAverage = Math.max(...gradedStudents.map(student => student.promedio));
+    const leaders = gradedStudents.filter(student => student.promedio === highestAverage);
+    const average = new Intl.NumberFormat('es-SV', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(highestAverage);
+    const names = leaders.map(student => `${student.alumno} (${student.calificaciones} ${student.calificaciones === 1 ? 'calificación' : 'calificaciones'})`).join('; ');
+    mensaje.querySelector('p').textContent = `El promedio más alto es ${average}: ${names}.`;
+  } catch (error) {
+    mensaje.querySelector('p').textContent = `No pude comparar los promedios. Verifica la conexión a los datos. (${error.message})`;
+  }
+}
+
 async function responderPregunta(pregunta) {
   agregarMensaje(pregunta, 'user');
+  if (esConsultaMejorPromedio(pregunta)) {
+    const mensaje = agregarMensaje('Comparando los promedios registrados...', 'bot');
+    await responderMejorPromedio(mensaje);
+    return;
+  }
   const consulta = detectarConsultaAlumno(pregunta);
   if (!consulta) {
     agregarMensaje(procesarPregunta(pregunta), 'bot');
