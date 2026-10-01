@@ -1,1 +1,65 @@
-[]
+[
+	{
+		"idAlumno": 2,
+		"alumno": "Ricardo Guevara",
+		"faltas": null,
+		"totalAsistencias": 2,
+		"promedio": 9,
+		"calificaciones": 3,
+		"estadoAsistencia": "sin-clasificar"
+	},
+	{
+		"idAlumno": 5,
+		"alumno": "Ernesto Savala",
+		"faltas": 0,
+		"totalAsistencias": 0,
+		"promedio": null,
+		"calificaciones": 0,
+		"estadoAsistencia": "sin-registros"
+	},
+	{
+		"idAlumno": 6,
+		"alumno": "Oscar Savala",
+		"faltas": null,
+		"totalAsistencias": 1,
+		"promedio": null,
+		"calificaciones": 0,
+		"estadoAsistencia": "sin-clasificar"
+	},
+	{
+		"idAlumno": 4,
+		"alumno": "Rosa Savala",
+		"faltas": 0,
+		"totalAsistencias": 0,
+		"promedio": null,
+		"calificaciones": 0,
+		"estadoAsistencia": "sin-registros"
+	},
+	{
+		"idAlumno": 3,
+		"alumno": "Alexis Torres",
+		"faltas": 0,
+		"totalAsistencias": 0,
+		"promedio": null,
+		"calificaciones": 0,
+		"estadoAsistencia": "sin-registros"
+	},
+	{
+		"idAlumno": 1,
+		"alumno": "Rosa Zavala",
+		"faltas": 0,
+		"totalAsistencias": 2,
+		"promedio": 6.38,
+		"calificaciones": 4,
+		"estadoAsistencia": "ok"
+	},
+	{
+		"idAlumno": 7,
+		"alumno": "Fabricio Zelaya",
+		"faltas": 0,
+		"totalAsistencias": 0,
+		"promedio": null,
+		"calificaciones": 0,
+		"estadoAsistencia": "sin-registros"
+	}
+]
